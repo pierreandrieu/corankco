@@ -6,6 +6,7 @@ from corankcolight.scoringscheme import ScoringScheme
 from corankcolight.consensus import Consensus
 from corankcolight.kemeny_computation import KemenyScoreFactory
 from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
+import bioconsertcimpl
 
 
 class BioConsert(MedianRanking):

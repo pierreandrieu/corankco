@@ -5,10 +5,10 @@ from corankcolight.scoringscheme import ScoringScheme
 
 
 class Consensus:
-    def __init__(self,  r: List[List[List or Set[int or str]]], d: Dataset, sc: ScoringScheme):
+    def __init__(self,  r: List[List[List or Set[int or str]]], d: Dataset, sc: ScoringScheme, score=-1):
         self.__set_consensus(r)
         self.__necessarily_optimal = False
-        self.__score = -1.
+        self.__score = score
         self.__dataset = d
         self.__scoring_scheme = sc
 
@@ -59,5 +59,5 @@ class Consensus:
         return "Consensus description:" \
                "\n\tnecessarily optimal:"+str(self.necessarily_optimal)\
                + "\n\tkemeny score:"+str(self.score) \
-               + "\n\tconsensus:\n" \
+               + "\n\tconsensus:" \
                + "".join("\n\t\tc"+str(i+1)+" = "+str(self.consensus[i]) for i in range(len(self.consensus)))

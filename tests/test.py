@@ -11,6 +11,6 @@ sc = ScoringScheme()
 #consensus = KemRankAgg.compute_with_heuristic(d, sc, Algorithm.BioConsert)
 #print(consensus.description())
 print("\n### Consensus computation ###\n")
-consensus = KemRankAgg.compute_with_heuristic(d, sc, Algorithm.BioConsertC)
+consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.BioConsert)
 print(consensus.description())
 

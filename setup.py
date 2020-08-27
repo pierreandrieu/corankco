@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='corankcolight',
-      version='1.0.0',
+      version='1.0.1',
       description='Kemeny-Youg method for rank aggregation of incomplete rankings with ties',
       long_description=readme(),
       url='https://github.com/pierreandrieu/corankcolight',

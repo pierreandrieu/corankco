@@ -60,4 +60,4 @@ class Consensus:
                "\n\tnecessarily optimal:"+str(self.necessarily_optimal)\
                + "\n\tkemeny score:"+str(self.score) \
                + "\n\tconsensus:\n" \
-               + "".join("\t\nc"+str(i+1)+" = "+str(self.consensus[i]) for i in range(len(self.consensus)))
+               + "".join("\n\t\tc"+str(i+1)+" = "+str(self.consensus[i]) for i in range(len(self.consensus)))

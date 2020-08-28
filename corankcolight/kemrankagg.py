@@ -9,6 +9,9 @@ class KemRankAgg:
         pass
 
     @staticmethod
-    def compute_consensus(dataset: Dataset, scoring_scheme: ScoringScheme, algorithm: Algorithm) -> Consensus:
+    def compute_consensus(dataset: Dataset,
+                          scoring_scheme: ScoringScheme,
+                          algorithm: Algorithm,
+                          single_consensus=False) -> Consensus:
         alg = AlgorithmEnumeration.median_ranking_algorithms[algorithm.value]
-        return alg().compute_consensus_rankings(dataset, scoring_scheme, False)
+        return alg().compute_consensus_rankings(dataset, scoring_scheme, single_consensus)

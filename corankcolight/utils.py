@@ -51,19 +51,43 @@ def parse_ranking_with_ties_of_int(ranking: str) -> List[List[int]]:
     )
 
 
-def get_rankings_from_file(file: str) -> List[List[List[int]]]:
+def get_rankings_from_file(file: str) -> List[List[List[int or str]]]:
     rankings = []
+    rankings_int = []
     file_rankings = open(file, "r")
-
+    only_ints = True
     # to manage the "step" datasets of java rank-n-ties
     ignore_lines = ["%"]
     lignes = file_rankings.read().replace("\\\n", "")
     for ligne in lignes.split("\n"):
         if len(ligne) > 2 and ligne[0] not in ignore_lines:
-            rankings.append(parse_ranking_with_ties_of_str(ligne))
+            ranking = parse_ranking_with_ties_of_str(ligne)
+            if only_ints:
+                if is_ranking_of_int(ranking):
+                    rankings_int.append(parse_ranking_with_ties_of_int(ligne))
+                else:
+                    only_ints = False
+            rankings.append(ranking)
     file_rankings.close()
+    if only_ints:
+        return rankings_int
     return rankings
 
 
 def dump_ranking_with_ties_to_str(ranking: List[List[int or str]]) -> str:
     return '[' + ','.join(['[' + ','.join([str(e) for e in b]) + ']' for b in ranking]) + ']'
+
+
+def is_ranking_of_int(ranking: List[List[str]]) -> bool:
+    for bucket in ranking:
+        for elem in bucket:
+            if not elem.isdigit():
+                return False
+    return True
+
+
+def rankings_from_str_to_int(ranking: List[List[int or str]])->List[List[int]]:
+    res = []
+    for bucket in ranking:
+        res.append([int(elem) for elem in bucket])
+    return res

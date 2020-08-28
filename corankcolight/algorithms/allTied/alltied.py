@@ -38,10 +38,10 @@ class AllTied(MedianRanking):
 
         for element in elements:
             all_elements.append(element)
-        return Consensus([consensus], dataset, scoring_scheme)
+        return Consensus([consensus])
 
     def get_full_name(self) -> str:
-        return "Schulze method"
+        return "AllTied"
 
     def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
         return True

@@ -1,8 +1,10 @@
 from corankcolight.algorithms.median_ranking import MedianRanking
 from corankcolight.dataset import Dataset
 from corankcolight.scoringscheme import ScoringScheme
-from corankcolight.consensus import Consensus
+from corankcolight.consensus import Consensus, ConsensusFeature
 from corankcolight.algorithms.bioconsert.bioconsert import BioConsert
+from corankcolight.algorithms.exact.exactalgorithm import ExactAlgorithm
+from corankcolight.algorithms.exact.exactalgorithm2 import ExactAlgorithm2
 from typing import List, Dict, Tuple
 from itertools import combinations
 from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray
@@ -10,7 +12,7 @@ from igraph import Graph
 
 
 class ParCons(MedianRanking):
-    def __init__(self, algorithm_to_complete=None, bound_for_exact=0):
+    def __init__(self, algorithm_to_complete=None, bound_for_exact=80):
         if isinstance(algorithm_to_complete, MedianRanking):
             self.alg = algorithm_to_complete
         else:
@@ -37,16 +39,13 @@ class ParCons(MedianRanking):
         :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
         implementation of the algorithm does not fit with the scoring scheme
         """
-
+        optimal = True
         sc = asarray(scoring_scheme.penalty_vectors_str)
         rankings = dataset.rankings
-        # if scoring_scheme[1][0] != scoring_scheme[1][1] or scoring_scheme[1][3] != scoring_scheme[1][4]:
-        #    raise DistanceNotHandledException
         res = []
         elem_id = {}
         id_elements = {}
         id_elem = 0
-        # print("Debut hash")
         for ranking in rankings:
             for bucket in ranking:
                 for element in bucket:
@@ -90,14 +89,25 @@ class ParCons(MedianRanking):
                     if len(scc_i) > self.bound_for_exact:
                         cons_ext = self.alg.compute_consensus_rankings(Dataset(project_rankings),
                                                                        scoring_scheme,
-                                                                       True).consensus[0]
+                                                                       True).consensus_rankings[0]
                         res.extend(cons_ext)
+                        optimal = False
                     else:
-                        cons_ext = self.alg.compute_consensus_rankings(Dataset(project_rankings),
-                                                                       scoring_scheme,
-                                                                       True).consensus[0]
+                        try:
+                            cons_ext = ExactAlgorithm().compute_consensus_rankings(Dataset(project_rankings),
+                                                                                   scoring_scheme,
+                                                                                   True).consensus_rankings[0]
+                        except:
+                            cons_ext = ExactAlgorithm2().compute_consensus_rankings(Dataset(project_rankings),
+                                                                                    scoring_scheme,
+                                                                                    True).consensus_rankings[0]
                         res.extend(cons_ext)
-        return Consensus([res], dataset, scoring_scheme)
+        return Consensus(consensus_rankings=[res],
+                         dataset=dataset,
+                         scoring_scheme=scoring_scheme,
+                         att={ConsensusFeature.IsNecessarilyOptimal: optimal,
+                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                              })
 
     @staticmethod
     def __graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray]:
@@ -138,7 +148,6 @@ class ParCons(MedianRanking):
     def __positions(rankings: List[List[List[int]]], elements_id: Dict) -> ndarray:
         positions = zeros((len(elements_id), len(rankings)), dtype=int) - 1
         id_ranking = 0
-        # print("debut positions")
         for ranking in rankings:
             id_bucket = 0
             for bucket in ranking:
@@ -146,7 +155,6 @@ class ParCons(MedianRanking):
                     positions[elements_id.get(element)][id_ranking] = id_bucket
                 id_bucket += 1
             id_ranking += 1
-        # print("fin positions")
 
         return positions
 

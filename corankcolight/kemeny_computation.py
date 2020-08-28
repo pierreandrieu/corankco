@@ -8,7 +8,8 @@ from numpy import zeros, vdot, ndarray, sort, count_nonzero, asarray
 class KemenyScoreFactory:
 
     @staticmethod
-    def get_kemeny_score(scoring_scheme: ScoringScheme, consensus: List[List[int]], dataset: Dataset) -> float:
+    def get_kemeny_score(scoring_scheme: ScoringScheme, consensus: List[List or Set[int or str]], dataset: Dataset) \
+            -> float:
         elements_r1 = {}
         size_buckets = {}
         id_bucket = 1

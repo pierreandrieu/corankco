@@ -3,10 +3,9 @@ import collections
 from corankcolight.algorithms.median_ranking import MedianRanking
 from corankcolight.dataset import Dataset
 from corankcolight.scoringscheme import ScoringScheme
-from corankcolight.consensus import Consensus
+from corankcolight.consensus import Consensus, ConsensusFeature
 from corankcolight.kemeny_computation import KemenyScoreFactory
 from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
-import bioconsertcimpl
 
 
 class BioConsert(MedianRanking):
@@ -96,7 +95,13 @@ class BioConsert(MedianRanking):
                     ranking_list.append(ranking_dict.get(id_bucket))
                 res.append(ranking_list)
 
-        return Consensus(res, dataset, scoring_scheme, score=lowest_distance)
+        return Consensus(consensus_rankings=res,
+                         dataset=dataset,
+                         scoring_scheme=scoring_scheme,
+                         att={ConsensusFeature.KemenyScore: lowest_distance,
+                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                              }
+                         )
 
     @staticmethod
     def __get_positions(rankings: List[List[List or Set[int or str]]], elements_id: Dict[int or str, int]) -> ndarray:

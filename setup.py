@@ -8,7 +8,7 @@ def readme():
 
 
 setup(name='corankcolight',
-      version='1.0.6',
+      version='1.1.0',
       description='Kemeny-Young method for rank aggregation of incomplete rankings with ties',
       long_description=readme(),
       url='https://github.com/pierreandrieu/corankcolight',
@@ -19,6 +19,6 @@ setup(name='corankcolight',
       ext_modules=[Extension("bioconsertcimpl", ["bioconsertcimpl.c"])],
       python_requires='>=3',
       zip_safe=False,
-      install_requires=['numpy==1.18.5', 'python-igraph==0.8.2', 'cplex==12.8.0.1'],
+      install_requires=['numpy==1.18.5', 'python-igraph==0.8.2', 'pulp==2.3'],
       )
 

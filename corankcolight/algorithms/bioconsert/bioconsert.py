@@ -161,7 +161,7 @@ class BioConsert(MedianRanking):
         return departure, array(dst_ini, dtype=float64)
 
     def get_full_name(self) -> str:
-        return "BioConsertC"
+        return "BioConsert"
 
     def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
         return True

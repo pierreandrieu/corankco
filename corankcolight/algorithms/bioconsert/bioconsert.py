@@ -6,6 +6,7 @@ from corankcolight.scoringscheme import ScoringScheme
 from corankcolight.consensus import Consensus, ConsensusFeature
 from corankcolight.kemeny_computation import KemenyScoreFactory
 from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
+import bioconsertinc
 
 
 class BioConsert(MedianRanking):
@@ -65,7 +66,8 @@ class BioConsert(MedianRanking):
 
         departure_c = departure.flatten()
 
-        bioconsertcimpl.bioconsertcimpl(positions.flatten(), departure_c, sc[0], sc[1], nb_elements, nb_rankings, int32(len(departure)), dst_res)
+        bioconsertinc.bioconsertinc(positions.flatten(),
+                                    departure_c, sc[0], sc[1], nb_elements, nb_rankings, int32(len(departure)), dst_res)
 
         departure = departure_c.reshape(-1, nb_elements)
 

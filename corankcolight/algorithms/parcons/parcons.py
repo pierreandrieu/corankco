@@ -24,6 +24,7 @@ class ParCons(MedianRanking):
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
             return_at_most_one_ranking: bool=False,
+            bench_mode: bool = False
     ) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
@@ -32,6 +33,8 @@ class ParCons(MedianRanking):
         :type scoring_scheme: ScoringScheme (class ScoringScheme in package 'distances')
         :param return_at_most_one_ranking: the algorithm should not return more than one ranking
         :type return_at_most_one_ranking: bool
+        :param bench_mode: is bench mode activated. If False, the algorithm may return more information
+        :type bench_mode: bool
         :return one or more rankings if the underlying algorithm can find several equivalent consensus rankings
         If the algorithm is not able to provide multiple consensus, or if return_at_most_one_ranking is True then, it
         should return a list made of the only / the first consensus found.
@@ -55,7 +58,6 @@ class ParCons(MedianRanking):
                         id_elem += 1
 
         positions = ParCons.__positions(rankings, elem_id)
-
         gr1, mat_score = self.__graph_of_elements(positions, sc)
         scc = gr1.components()
         for scc_i in scc:
@@ -102,12 +104,22 @@ class ParCons(MedianRanking):
                                                                                     scoring_scheme,
                                                                                     True).consensus_rankings[0]
                         res.extend(cons_ext)
+        hash_information = {ConsensusFeature.IsNecessarilyOptimal: optimal,
+                            ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                            }
+        if not bench_mode:
+            cfc_name = []
+            for scc_i in scc:
+                group = set()
+                for elem in scc_i:
+                    group.add(id_elements[elem])
+                cfc_name.append(group)
+            hash_information[ConsensusFeature.WeakPartitioning] = str(cfc_name)
+
         return Consensus(consensus_rankings=[res],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.IsNecessarilyOptimal: optimal,
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
-                              })
+                         att=hash_information)
 
     @staticmethod
     def __graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray]:

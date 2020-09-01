@@ -12,6 +12,8 @@ class ConsensusFeature(Enum):
     AssociatedAlgorithm = "computed by:"
     IsNecessarilyOptimal = "necessarily optimal:"
     KemenyScore = "kemeny score:"
+    WeakPartitioning = "weak partitioning (one optimal solution)"
+    StrongPartitioning = "strong partitioning (all optimal solution)"
 
 
 class Consensus:

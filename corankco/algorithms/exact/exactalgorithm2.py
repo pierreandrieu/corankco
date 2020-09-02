@@ -151,16 +151,13 @@ class ExactAlgorithm2(MedianRanking):
         prob += pulp.lpSum(my_vars[cpt] * my_values[cpt] for cpt in range(len(my_vars)))
 
         try:
-            prob.solve(pulp.PULP_CBC_CMD(msg=False))
+            prob.solve(pulp.CPLEX(msg=False))
         except:
-            prob.solve(pulp.CPLEX_CMD(msg=False))
+            prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
         h_def = {i: 0 for i in range(nb_elem)}
 
-        print(id_elements)
         for var in my_vars:
-            if abs(var.value() - 1) < 0.01:
-                print(var.name, var.value())
             if abs(var.value() - 1) < 0.01 and var.name[0] == "x":
                 h_def[int(var.name.split("_")[2])] += 1
 

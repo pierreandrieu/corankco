@@ -171,7 +171,7 @@ class ParCons(MedianRanking):
         return positions
 
     def get_full_name(self) -> str:
-        return "ParCons, uses "+ self.alg.get_full_name()+" "
+        return "ParCons, uses " + self.alg.get_full_name()+" on groups of size >  " + str(self.bound_for_exact)
 
     def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
         return True

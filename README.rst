@@ -1,4 +1,4 @@
-corankcolight
+corankco
 ===============
 
 This package implements methods for rank aggregation of incomplete rankings with ties 
@@ -8,35 +8,61 @@ Installation
 
 Install from PyPI:
 
-``pip3 install --user corankcolight``
+``pip3 install --user corankco``
 
 
 Example usage
 -------------
 
->>> from corankcolight.dataset import Dataset
->>> from corankcolight.scoringscheme import ScoringScheme
->>> from corankcolight.kemrankagg import KemRankAgg
->>> from corankcolight.algorithms.enumeration import Algorithm
+>>> from corankco.dataset import Dataset
+>>> from corankco.scoringscheme import ScoringScheme
+>>> from corankco.kemrankagg import KemRankAgg
+>>> from corankco.algorithms.enumeration import Algorithm
 >>>
->>> d = Dataset([[[1], [2]], [[1, 3]]])
+>>> d = Dataset([
+...               [[1], [2, 3]],
+...               [[3, 1], [4]],
+...               [[1], [5], [3, 2]]
+...              ])
 >>> print(d.description())
 Dataset description:
-	elements:3
-	rankings:2
+	elements:5
+	rankings:3
 	complete:False
 	with ties: True
 	rankings:
-		r1 = [[1], [2]]
-		r2 = [[1, 3]]
->>>
->>> sc = ScoringScheme([[0., 1., 1., 0., 0., 0.], [1., 1., 0., 0., 0., 0.]])
->>>
->>> consensus = KemRankAgg.compute_with_heuristic(dataset=d, scoring_scheme=sc, algorithm=Algorithm.AllTied)
->>>
+		r1 = [[1], [2, 3]]
+		r2 = [[3, 1], [4]]
+		r3 = [[1], [5], [3, 2]]
+
+>>> # Generates default scoring scheme
+>>> sc = ScoringScheme()
+
+>>> # Consensus computation with an exact algorithm
+>>> consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.Exact)
+
+
 >>> print(consensus.description())
 Consensus description:
-	necessarily optimal:False
-	kemeny score:-1.0
+	computed by:Exact algorithm ILP Cplex
+	necessarily optimal:True
+	kemeny score:6.0
 	consensus:
-		c1 = [[1, 2, 3]]
+		c1 = [[1], [2, 3], [4], [5]]
+		c2 = [[1], [2, 3], [5], [4]]
+
+>>> # Consensus computation with an heuristic
+consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.ParCons)
+
+
+>>> print(consensus.description())
+Consensus description:
+	weak partitioning (one optimal solution)[{1}, {2, 3}, {5}, {4}]
+	kemeny score:6.0
+	necessarily optimal:True
+	computed by:ParCons, uses BioConsert on groups of size >  80
+	consensus:
+		c1 = [[1], [2, 3], [5], [4]]
+
+
+

@@ -9,7 +9,7 @@ import pulp
 from igraph import Graph
 
 
-class ExactAlgorithm2(MedianRanking):
+class ExactAlgorithmGeneric(MedianRanking):
     def __init__(self, limit_time_sec=0, scoring_scheme=None):
         if limit_time_sec > 0:
             self.__limit_time_sec = limit_time_sec
@@ -53,7 +53,7 @@ class ExactAlgorithm2(MedianRanking):
                         id_elem += 1
         nb_elem = len(elem_id)
 
-        positions = ExactAlgorithm2.__positions(rankings, elem_id)
+        positions = ExactAlgorithmGeneric.__positions(rankings, elem_id)
 
         sc = asarray(scoring_scheme.penalty_vectors_str)
 

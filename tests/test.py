@@ -18,5 +18,5 @@ sc = ScoringScheme()
 
 print("\n### Consensus computation ###\n")
 
-consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.BioConsert)
+consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.Exact)
 print(consensus.description())

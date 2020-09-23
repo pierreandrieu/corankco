@@ -4,7 +4,6 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
-from corankco.algorithms.exact.exactalgorithm2 import ExactAlgorithm2
 from typing import List, Dict, Tuple
 from itertools import combinations
 from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray

@@ -23,5 +23,5 @@ setup(name='corankco',
                         'python-igraph',
                         'pulp==2.3',
                         'bioconsertinc==0.0.2',
-                        'cplex==12.8.0.1']
+                        'cplex>=12.8.0.1']
       )

@@ -5,6 +5,10 @@ from corankco.dataset import Dataset
 from numpy import zeros, vdot, ndarray, sort, count_nonzero, asarray
 
 
+class DistanceRankingsError(Exception):
+    pass
+
+
 class KemenyScoreFactory:
 
     @staticmethod
@@ -189,3 +193,33 @@ class KemenyScoreFactory:
             vect_before[2] += length_bucket_r1 * total
             vect_tied[2] += length_bucket_r1 * (length_bucket_r1 - 1) / 2
         return sort(asarray(list(bucket)), kind='mergesort')
+
+    @staticmethod
+    def score_between_rankings(r1: List[List or Set[int or str]], r2: List[List or Set[int or str]], sc: ScoringScheme) \
+            -> float:
+        r1_complete = True
+        r2_complete = True
+        elem_r1 = set()
+        elem_r2 = set()
+        for bucket in r1:
+            for elem in bucket:
+                elem_r1.add(elem)
+        for bucket in r2:
+            for elem in bucket:
+                elem_r2.add(elem)
+                if elem not in elem_r1:
+                    r1_complete = False
+
+        for elem1 in elem_r1:
+            if elem1 not in elem_r2:
+                r2_complete = False
+                break
+        if r1_complete is True:
+            return KemenyScoreFactory.get_kemeny_score(sc, r1, Dataset([r2]))
+        elif r2_complete is True:
+            return KemenyScoreFactory.get_kemeny_score(sc, r2, Dataset([r1]))
+        else:
+            raise DistanceRankingsError("The domain of one ranking must be included in the domain of the other one")
+
+
+

@@ -67,11 +67,18 @@ class BioConsert(MedianRanking):
         positions = BioConsert.__get_positions(rankings, elem_id)
         (departure, dst_res) = self.__departure_rankings(dataset, positions, elem_id, scoring_scheme)
 
-        departure_c = departure.flatten()
+        departure_c = array(departure.flatten(), dtype=int32)
 
-        bioconsertinc.bioconsertinc(positions.flatten(),
-                                    departure_c, sc[0], sc[1], nb_elements, nb_rankings, int32(len(departure)), dst_res)
-
+        bioconsertinc.bioconsertinc(
+                                    positions.flatten(),
+                                    departure_c,
+                                    array(sc[0], dtype=float64),
+                                    array(sc[1], dtype=float64),
+                                    int32(nb_elements),
+                                    int32(nb_rankings),
+                                    int32(len(departure)),
+                                    dst_res,
+                                    )
         departure = departure_c.reshape(-1, nb_elements)
 
         ranking_dict = {}

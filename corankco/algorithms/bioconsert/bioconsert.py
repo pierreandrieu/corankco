@@ -70,7 +70,7 @@ class BioConsert(MedianRanking):
         departure_c = array(departure.flatten(), dtype=int32)
 
         bioconsertinc.bioconsertinc(
-                                    positions.flatten(),
+                                    array(positions.flatten(), dtype=int32),
                                     departure_c,
                                     array(sc[0], dtype=float64),
                                     array(sc[1], dtype=float64),

@@ -57,12 +57,16 @@ consensus = KemRankAgg.compute_consensus(d, sc, Algorithm.ParCons)
 
 >>> print(consensus.description())
 Consensus description:
-	weak partitioning (one optimal solution)[{1}, {2, 3}, {5}, {4}]
-	kemeny score:6.0
 	necessarily optimal:True
-	computed by:ParCons, uses BioConsert on groups of size >  80
+	computed by:ParCons, uses  "BioConsert with input rankings as starters" on groups of size >  80
+	weak partitioning (at least one optimal solution)[{1}, {2, 3}, {5}, {4}]
+	kemeny score:8.0
 	consensus:
 		c1 = [[1], [2, 3], [5], [4]]
 
-
+>>> # example of computing score ('distance') between two ranking
+>>> r1 = [[1], [2], [3, 4]]
+>>> r2 = [[3], [2]]
+>>> print(KemenyScoreFactory.score_between_rankings(r1, r2, sc))
+5.
 

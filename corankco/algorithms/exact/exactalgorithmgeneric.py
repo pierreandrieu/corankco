@@ -21,8 +21,8 @@ class ExactAlgorithmGeneric(MedianRanking):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking: bool=False,
-            bench_mode: bool = False
+            return_at_most_one_ranking=False,
+            bench_mode=False
     ) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
@@ -55,7 +55,7 @@ class ExactAlgorithmGeneric(MedianRanking):
 
         positions = ExactAlgorithmGeneric.__positions(rankings, elem_id)
 
-        sc = asarray(scoring_scheme.penalty_vectors_str)
+        sc = asarray(scoring_scheme.penalty_vectors)
 
         graph, mat_score, ties_must_be_checked = self.__graph_of_elements(positions, sc)
 
@@ -236,5 +236,5 @@ class ExactAlgorithmGeneric(MedianRanking):
     def get_full_name(self) -> str:
         return "Exact algorithm ILP pulp"
 
-    def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

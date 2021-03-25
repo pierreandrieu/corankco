@@ -17,7 +17,7 @@ class KemenyScoreFactory:
         elements_r1 = {}
         size_buckets = {}
         id_bucket = 1
-        sc = asarray(scoring_scheme.penalty_vectors_str)
+        sc = asarray(scoring_scheme.penalty_vectors)
         for bucket in consensus:
             size_buckets[id_bucket] = len(bucket)
             for element in bucket:

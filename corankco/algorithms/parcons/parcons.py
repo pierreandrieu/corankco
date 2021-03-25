@@ -4,7 +4,7 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
-from typing import List, Dict, Tuple
+from typing import Tuple
 from itertools import combinations
 from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray
 from igraph import Graph
@@ -22,8 +22,8 @@ class ParCons(MedianRanking):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking: bool=False,
-            bench_mode: bool = False
+            return_at_most_one_ranking=False,
+            bench_mode=False
     ) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
@@ -42,7 +42,7 @@ class ParCons(MedianRanking):
         implementation of the algorithm does not fit with the scoring scheme
         """
         optimal = True
-        sc = asarray(scoring_scheme.penalty_vectors_str)
+        sc = asarray(scoring_scheme.penalty_vectors)
         rankings = dataset.rankings
         res = []
         elem_id = {}
@@ -56,7 +56,7 @@ class ParCons(MedianRanking):
                         id_elements[id_elem] = element
                         id_elem += 1
 
-        positions = ParCons.__positions(rankings, elem_id)
+        positions = dataset.get_positions(elem_id)
         gr1, mat_score = self.__graph_of_elements(positions, sc)
         scc = gr1.components()
         for scc_i in scc:
@@ -94,14 +94,9 @@ class ParCons(MedianRanking):
                         res.extend(cons_ext)
                         optimal = False
                     else:
-                        try:
-                            cons_ext = ExactAlgorithm().compute_consensus_rankings(Dataset(project_rankings),
-                                                                                   scoring_scheme,
-                                                                                   True).consensus_rankings[0]
-                        except:
-                            cons_ext = ExactAlgorithm2().compute_consensus_rankings(Dataset(project_rankings),
-                                                                                    scoring_scheme,
-                                                                                    True).consensus_rankings[0]
+                        cons_ext = ExactAlgorithm().compute_consensus_rankings(Dataset(project_rankings),
+                                                                               scoring_scheme,
+                                                                               True).consensus_rankings[0]
                         res.extend(cons_ext)
         hash_information = {ConsensusFeature.IsNecessarilyOptimal: optimal,
                             ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
@@ -155,22 +150,8 @@ class ParCons(MedianRanking):
         graph_of_elements.add_edges(edges)
         return graph_of_elements, matrix
 
-    @staticmethod
-    def __positions(rankings: List[List[List[int]]], elements_id: Dict) -> ndarray:
-        positions = zeros((len(elements_id), len(rankings)), dtype=int) - 1
-        id_ranking = 0
-        for ranking in rankings:
-            id_bucket = 0
-            for bucket in ranking:
-                for element in bucket:
-                    positions[elements_id.get(element)][id_ranking] = id_bucket
-                id_bucket += 1
-            id_ranking += 1
-
-        return positions
-
     def get_full_name(self) -> str:
-        return "ParCons, uses " + self.alg.get_full_name()+" on groups of size >  " + str(self.bound_for_exact)
+        return "ParCons, uses  \"" + self.alg.get_full_name() + "\" on groups of size >  " + str(self.bound_for_exact)
 
-    def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

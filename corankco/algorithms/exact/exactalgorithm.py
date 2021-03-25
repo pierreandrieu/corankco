@@ -17,8 +17,8 @@ class ExactAlgorithm(MedianRanking):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking: bool=False,
-            bench_mode: bool = False
+            return_at_most_one_ranking=False,
+            bench_mode=False
     ) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
@@ -53,5 +53,5 @@ class ExactAlgorithm(MedianRanking):
     def get_full_name(self) -> str:
         return "Exact algorithm"
 
-    def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

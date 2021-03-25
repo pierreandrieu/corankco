@@ -12,7 +12,7 @@ class ConsensusFeature(Enum):
     AssociatedAlgorithm = "computed by:"
     IsNecessarilyOptimal = "necessarily optimal:"
     KemenyScore = "kemeny score:"
-    WeakPartitioning = "weak partitioning (one optimal solution)"
+    WeakPartitioning = "weak partitioning (at least one optimal solution)"
     StrongPartitioning = "strong partitioning (all optimal solution)"
 
 
@@ -83,7 +83,7 @@ class Consensus:
     associated_scoring_scheme = property(__get_associated_scoring_scheme)
     att = property(__get_att)
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.consensus_rankings)
 
     def description(self) -> str:

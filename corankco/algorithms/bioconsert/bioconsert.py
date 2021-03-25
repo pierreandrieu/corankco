@@ -1,5 +1,4 @@
-from typing import List, Dict, Tuple, Set
-import collections
+from typing import List, Dict, Tuple, Set, Collection
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
@@ -10,25 +9,18 @@ import bioconsertinc
 
 
 class BioConsert(MedianRanking):
-    def __init__(self, starting_algorithms=None):
-        is_valid = True
-        if isinstance(starting_algorithms, collections.Iterable):
-            for obj in starting_algorithms:
-                if not isinstance(obj, MedianRanking):
-                    is_valid = False
-            if is_valid:
-                self.starting_algorithms = starting_algorithms
-            else:
-                self.starting_algorithms = []
+    def __init__(self, starting_algorithms: Collection[MedianRanking] = None):
+        if starting_algorithms is None:
+            self.__starting_algorithms = []
         else:
-            self.starting_algorithms = []
+            self.__starting_algorithms = starting_algorithms
 
     def compute_consensus_rankings(
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking: bool=False,
-            bench_mode: bool = False
+            return_at_most_one_ranking=False,
+            bench_mode=False
     ) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
@@ -47,7 +39,7 @@ class BioConsert(MedianRanking):
         implementation of the algorithm does not fit with the scoring scheme
         """
 
-        sc = asarray(scoring_scheme.penalty_vectors_str)
+        sc = asarray(scoring_scheme.penalty_vectors)
         rankings = dataset.rankings
 
         res = []
@@ -137,7 +129,7 @@ class BioConsert(MedianRanking):
         dataset_unified = dataset.unified_dataset()
         rankings_unified = dataset_unified.rankings
 
-        if len(self.starting_algorithms) == 0:
+        if len(self.__starting_algorithms) == 0:
             real_pos = array(positions).transpose()
             distinct_rankings = set()
             list_distinct_id_rankings = []
@@ -161,12 +153,12 @@ class BioConsert(MedianRanking):
             departure = zeros((len(list_distinct_id_rankings)+1, len(elements_id)), dtype=int32)
             departure[:-1] = real_pos[asarray(list_distinct_id_rankings)]
         else:
-            m = len(self.starting_algorithms)
+            m = len(self.__starting_algorithms)
             n = len(elements_id)
             departure = zeros((m, n), dtype=int32) - 1
             id_ranking = 0
-            for algo in self.starting_algorithms:
-                cons = algo.compute_median_rankings(dataset_unified, scoring_scheme, True)[0]
+            for algo in self.__starting_algorithms:
+                cons = algo.compute_consensus_rankings(dataset, scoring_scheme, True).consensus_rankings[0]
                 dst_ini.append(KemenyScoreFactory.get_kemeny_score(scoring_scheme, cons, dataset))
                 id_bucket = 0
                 for bucket in cons:
@@ -178,7 +170,17 @@ class BioConsert(MedianRanking):
         return departure, array(dst_ini, dtype=float64)
 
     def get_full_name(self) -> str:
-        return "BioConsert"
+        list_alg = list(self.__starting_algorithms)
+        res = "BioConsert with "
+        if len(list_alg) == 0:
+            res += "input rankings as starters"
+        else:
+            res += "["
+            for alg in list_alg[:-1]:
+                res += alg.get_full_name() + ", "
+            res += list_alg[-1].get_full_name() + "] as starter algorithms"
 
-    def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
+        return res
+
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

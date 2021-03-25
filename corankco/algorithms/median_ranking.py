@@ -35,7 +35,7 @@ class MedianRanking:
     def get_full_name(self) -> str:
         raise NotImplementedError("The method not implemented")
 
-    def is_scoring_scheme_relevant(self, scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         """
         :return: a list of distances from distance_enumeration
         """

@@ -135,7 +135,7 @@ class Dataset:
 
         return matrix
 
-    def unified_dataset(self):
+    def unified_rankings(self):
         copy_rankings = []
         elements = set()
         for ranking in self.rankings:
@@ -153,4 +153,7 @@ class Dataset:
                     elem_ranking.remove(element)
             if len(elem_ranking) > 0:
                 ranking.append(list(elem_ranking))
-        return Dataset(copy_rankings)
+        return copy_rankings
+
+    def unified_dataset(self):
+        return Dataset(self.unified_rankings())

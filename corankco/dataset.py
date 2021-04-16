@@ -55,8 +55,7 @@ class Dataset:
     is_complete = property(__get_is_complete, __set_is_complete)
     with_ties = property(__get_with_ties, __set_with_ties)
 
-    def __str__(self)->str:
-        print("ok")
+    def __str__(self) -> str:
         return str(self.rankings)
 
     def description(self)->str:

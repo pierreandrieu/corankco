@@ -58,7 +58,7 @@ class Dataset:
     def __str__(self) -> str:
         return str(self.rankings)
 
-    def description(self)->str:
+    def description(self) -> str:
         return "Dataset description:\n\telements:"+str(self.n)+"\n\trankings:"+str(self.m)+"\n\tcomplete:"\
                + str(self.is_complete) + "\n\twith ties: "+str(self.with_ties) + "\n\t"+"rankings:\n"\
                + "\n".join("\t\tr"+str(i+1)+" = "+str(self.rankings[i]) for i in range(len(self.rankings)))

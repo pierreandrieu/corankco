@@ -1,40 +1,36 @@
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List
 from collections import deque
-from corankco.scoringscheme import ScoringScheme
-from corankco.dataset import Dataset
+from mediane.distances.ScoringScheme import ScoringScheme
 from numpy import zeros, vdot, ndarray, sort, count_nonzero, asarray
 
 
-class DistanceRankingsError(Exception):
-    pass
+class KemenyComputingFactory:
+    def __init__(self, scoring_scheme: ScoringScheme):
+        self.__set_scoring_scheme(scoring_scheme)
 
+    def __get_scoring_scheme(self):
+        return self.__scoring_scheme
 
-class KemenyScoreFactory:
+    def __set_scoring_scheme(self, scoring_scheme: ScoringScheme):
+        self.__scoring_scheme = scoring_scheme
 
-    @staticmethod
-    def get_kemeny_score(scoring_scheme: ScoringScheme, consensus: List[List or Set[int or str]], dataset: Dataset) \
-            -> float:
+    scoring_scheme = property(__get_scoring_scheme, __set_scoring_scheme)
+
+    def get_distance_to_an_other_ranking(self, ranking1: List[List[int]], ranking2: List[List[int]],) -> float:
+        cost_matrix = self.scoring_scheme.matrix
         elements_r1 = {}
         size_buckets = {}
         id_bucket = 1
-        sc = asarray(scoring_scheme.penalty_vectors)
-        for bucket in consensus:
+        for bucket in ranking1:
             size_buckets[id_bucket] = len(bucket)
             for element in bucket:
                 elements_r1[element] = id_bucket
             id_bucket += 1
-        before = zeros(6, dtype=int)
-        tied = zeros(6, dtype=int)
-        for ranking in dataset.rankings:
-            tple = KemenyScoreFactory.__get_before_tied_counting(elements_r1, size_buckets, ranking, id_bucket)
-            for i in range(6):
-                before[i] += tple[0][i]
-                tied[i] += tple[1][i]
-        return abs(vdot(before, sc[0])) + abs(vdot(tied, sc[1]))
+        relative_pos = KemenyComputingFactory.get_before_tied_counting(elements_r1, size_buckets, ranking2, id_bucket)
+        return abs(vdot(relative_pos[0], cost_matrix[0])) + abs(vdot(relative_pos[1], cost_matrix[1]))
 
     @staticmethod
-    def __get_before_tied_counting(r1: Dict, size_buckets: Dict, ranking: List[List or Set[int or str]], id_max: int) \
-            -> Tuple[ndarray, ndarray]:
+    def get_before_tied_counting(r1: Dict, size_buckets: Dict, ranking: List[List[int]], id_max: int) -> tuple:
         vect_before = zeros(6, dtype=int)
         vect_tied = zeros(6, dtype=int)
         not_in_r2 = {}
@@ -89,22 +85,40 @@ class KemenyScoreFactory:
             vect_tied[5] += size_ties_r1_both_missing_in_r2 * (size_ties_r1_both_missing_in_r2 - 1) / 2
             vect_before[5] += size_ties_r1_both_missing_in_r2 * tot_missing_r2
             vect_tied[3] += (size_buckets[id_ties] - size_ties_r1_both_missing_in_r2)*size_ties_r1_both_missing_in_r2
+        KemenyComputingFactory.__inversions(ranking2, 1, len(ranking2), vect_before, vect_tied, id_max)
+        res = (vect_before, vect_tied)
+        return res
 
-        KemenyScoreFactory.__inversions(ranking2, 1, len(ranking2), vect_before, vect_tied, id_max)
-        return vect_before, vect_tied
+    def get_distance_to_a_set_of_rankings(self, c: List[List[int]], rankings: List[List[List[int]]]) -> float:
+        elements_r1 = {}
+        size_buckets = {}
+        id_bucket = 1
+        scoring_scheme = self.scoring_scheme.matrix
+        for bucket in c:
+            size_buckets[id_bucket] = len(bucket)
+            for element in bucket:
+                elements_r1[element] = id_bucket
+            id_bucket += 1
+        before = zeros(6, dtype=int)
+        tied = zeros(6, dtype=int)
+        for ranking in rankings:
+            tple = self.get_before_tied_counting(elements_r1, size_buckets, ranking, id_bucket)
+            for i in range(6):
+                before[i] += tple[0][i]
+                tied[i] += tple[1][i]
+        return abs(vdot(before, scoring_scheme[0])) + abs(vdot(tied, scoring_scheme[1]))
 
     @staticmethod
     def __inversions(ranking: Dict, left: int, right: int, vect1: ndarray, vect2: ndarray, id_max: int):
-        if right == left:
-            return KemenyScoreFactory.__manage_bucket(ranking.get(right), vect1, vect2, id_max)
+        if right <= left:
+            return KemenyComputingFactory.__manage_bucket(ranking.get(right), vect1, vect2, id_max)
         else:
             middle = (right - left) // 2
-            return KemenyScoreFactory.__merge(
-                KemenyScoreFactory.__inversions(ranking, left, middle + left, vect1, vect2, id_max),
-                KemenyScoreFactory.__inversions(ranking, middle + left + 1, right, vect1, vect2, id_max),
-                vect1,
-                vect2,
-                id_max)
+            return KemenyComputingFactory.__merge(KemenyComputingFactory.__inversions(ranking, left, middle + left,
+                                                                                      vect1, vect2, id_max),
+                                                  KemenyComputingFactory.__inversions(ranking, middle + left + 1, right,
+                                                                                      vect1, vect2, id_max),
+                                                  vect1, vect2, id_max)
 
     @staticmethod
     def __merge(left: ndarray, right: ndarray, vect_before: ndarray, vect_tied: ndarray, id_max: int):
@@ -168,10 +182,9 @@ class KemenyScoreFactory:
         return res
 
     @staticmethod
-    def __manage_bucket(bucket: List or Set[int or str],
-                        vect_before: ndarray,
-                        vect_tied: ndarray,
-                        id_max: int) -> ndarray:
+    def __manage_bucket(bucket: List[int], vect_before: ndarray, vect_tied: ndarray, id_max: int) -> ndarray:
+        if bucket == None:
+            return asarray([])
         h = {}
         n = 0
         not_in_r1 = 0
@@ -192,34 +205,4 @@ class KemenyScoreFactory:
 
             vect_before[2] += length_bucket_r1 * total
             vect_tied[2] += length_bucket_r1 * (length_bucket_r1 - 1) / 2
-        return sort(asarray(list(bucket)), kind='mergesort')
-
-    @staticmethod
-    def score_between_rankings(r1: List[List or Set[int or str]], r2: List[List or Set[int or str]], sc: ScoringScheme) \
-            -> float:
-        r1_complete = True
-        r2_complete = True
-        elem_r1 = set()
-        elem_r2 = set()
-        for bucket in r1:
-            for elem in bucket:
-                elem_r1.add(elem)
-        for bucket in r2:
-            for elem in bucket:
-                elem_r2.add(elem)
-                if elem not in elem_r1:
-                    r1_complete = False
-
-        for elem1 in elem_r1:
-            if elem1 not in elem_r2:
-                r2_complete = False
-                break
-        if r1_complete is True:
-            return KemenyScoreFactory.get_kemeny_score(sc, r1, Dataset([r2]))
-        elif r2_complete is True:
-            return KemenyScoreFactory.get_kemeny_score(sc, r2, Dataset([r1]))
-        else:
-            raise DistanceRankingsError("The domain of one ranking must be included in the domain of the other one")
-
-
-
+        return sort(asarray(bucket), kind='mergesort')

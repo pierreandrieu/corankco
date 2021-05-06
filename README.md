@@ -14,146 +14,247 @@ Install from PyPI:
 Example usage
 -------------
 
-# profile-readme
+.. code-block:: python
 
-[![Build Status](https://travis-ci.org/Robert-96/profile-readme.svg?branch=master)](https://travis-ci.org/Robert-96/profile-readme)
-[![Documentation Status](https://readthedocs.org/projects/profile-readme/badge/?version=latest)](https://profile-readme.readthedocs.io/en/latest/?badge=latest)
+    from corankco.dataset import Dataset
+    from corankco.scoringscheme import ScoringScheme
+    from corankco.algorithms.algorithmChoice import get_algorithm
+    from corankco.algorithms.algorithmChoice import Algorithm
+    from corankco.kemeny_computation import KemenyComputingFactory
+    
+    dataset = Dataset([
+                  [[1], [2, 3]],
+                  [[3, 1], [4]],
+                  [[1], [5], [3, 2]]
+                 ])
+    # or d = Dataset(file_path), where file_path is a string
+    
+    # print information about the dataset
+    print(dataset.description())
+    
+    # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
+    sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+    
+    print("scoring scheme : " + str(sc))
+    # scoring scheme description
+    print(sc.description())
+    
+    print("\n### Consensus computation ###\n")
+    
 
-A CLI tool for generating a GitHub profile README using the [Jinja2](https://jinja.palletsprojects.com/) template engine.
-
-It lets you use all features provide by [Jinja2](https://jinja.palletsprojects.com/) to help you customize your GitHub profile README and it provides data from the GitHub API to your template.
-
-Read the documentation on https://profile-readme.rtfd.io/.
-
-## Installation
-
-Use the following command to install `profile-readme`:
-
-```
-$ python3 -m pip install profile-readme
-```
-
-### Living on the edge
-
-If you want to work with the latest code before it’s released, install or update the code from the `master` branch:
-
-```
-$ python3 -m pip install -U git+https://github.com/Robert-96/profile-readme.git
-```
-
-## Quickstart
-
-Use the `init` command to generate a new project with an example template:
-
-```
-$ profile-readme init
-```
-
-Use the `render` command to update your `README.md` file:
-
-```
-$ profile-readme render
-```
-
-## Advanced Usage
-
-### Using Custom Build Scripts
-
-The command line shortcut is convenient, but sometimes your project needs something different than the defaults. To change them, you can use a build script.
-
-A minimal build script looks something like this:
-
-```python
-from profile_readme import get_github_context, ProfileGenerator
-
-
-context = {}
-
-# If you don't need the GitHub data you can remove the next line
-context.update(**get_github_context('octocat'))
-
-
-if __name__ == "__main__":
-    ProfileGenerator.render(
-        template_path="README-TEMPLATE.md",
-        output_path="README.md",
-        context=context
-    )
-
-```
-
-Finally, just save the script as `build.py` (or something similar) and run it with your Python interpreter.
-
-```
-$ python build.py
-```
-
-> Note: Don't forgot to also update `.github/workflows/readme.yml`.
-> Replace `python3 -m profile_readme render` with `python3 build.py`.
-
-### Loading Data
-
-The simplest way to supply data to the template is to pass `ProfileGenerator.render` a mapping from variable names to their values (a “context”) as the `context` keyword argument.
-
-```python
-from profile_readme import get_github_context, ProfileGenerator
+    
+    # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom, 
+    # RepeatChoice, PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
+   
+    algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
+                             get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
+                             get_algorithm(alg=Algorithm.ParCons, 
+                                           parameters={"bound_for_exact": 90,
+                                                   "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
+                             get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
+                             ]
+    for alg in algorithms_to_execute:
+        print(alg.get_full_name())
+        consensus = alg.compute_consensus_rankings(dataset=dataset, 
+                                                   scoring_scheme=sc, 
+                                                   return_at_most_one_ranking=False)
+        # to get the consensus rankings : consensus.consensus_rankings
+        print(consensus.description())
+        # if you want the consensus ranking only : print(consensus)
+    
+    # compute score ('distance') between two rankings
+    kemeny = KemenyComputingFactory(sc)
+    
+    r1 = [[1], [2], [3, 4]]
+    r2 = [[3], [2]]
+    
+    print(kemeny.score_between_rankings(r1, r2))
+    
 
 
-context = {
-    greeting='Hello, world!'
-}
+API
+---
 
-# If you don't need the GitHub data you can remove the next line
-context.update(**get_github_context('octocat'))
+class holidays.HolidayBase(years=[], expand=True, observed=True, prov=None, state=None)
+    The base class used to create holiday country classes.
+
+Parameters:
+
+years
+    An iterable list of integers specifying the years that the Holiday object
+    should pre-generate. This would generally only be used if setting *expand*
+    to False. (Default: [])
+
+expand
+    A boolean value which specifies whether or not to append holidays in new
+    years to the holidays object. (Default: True)
+
+observed
+    A boolean value which when set to True will include the observed day of a
+    holiday that falls on a weekend, when appropriate. (Default: True)
+
+prov
+    A string specifying a province that has unique statutory holidays.
+    (Default: Australia='ACT', Canada='ON', NewZealand=None)
+
+state
+    A string specifying a state that has unique statutory holidays.
+    (Default: UnitedStates=None)
+
+Methods:
+
+get(key, default=None)
+    Returns a string containing the name of the holiday(s) in date ``key``, which
+    can be of date, datetime, string, unicode, bytes, integer or float type. If
+    multiple holidays fall on the same date the names will be separated by
+    commas
+
+get(key, default=None)
+    Returns a string containing the name of the holiday(s) in date ``key``, which
+    can be of date, datetime, string, unicode, bytes, integer or float type. If
+    multiple holidays fall on the same date the names will be separated by
+    commas
+
+get_list(key)
+    Same as ``get`` except returns a ``list`` of holiday names instead of a comma
+    separated string
+
+get_named(name)
+    Returns a ``list`` of holidays matching (even partially) the provided name
+    (case insensitive check)
+
+pop(key, default=None)
+    Same as ``get`` except the key is removed from the holiday object
+
+pop_named(name)
+    Same as ``pop`` but takes the name of the holiday (or part of it) rather than
+    the date
+
+update/append
+    Accepts dictionary of {date: name} pairs, a list of dates, or even singular
+    date/string/timestamp objects and adds them to the list of holidays
 
 
-if __name__ == "__main__":
-    ProfileGenerator.render(
-        template_path="README-TEMPLATE.md",
-        output_path="README.md",
-        context=context
-    )
+More Examples
+-------------
 
-```
+.. code-block:: python
 
-Anything added to this dictionary will be available in the template:
+    >>> from corankco.dataset import Dataset
+    >>> from corankco.scoringscheme import ScoringScheme
+    >>> from corankco.algorithms.algorithmChoice import get_algorithm
+    >>> from corankco.algorithms.algorithmChoice import Algorithm
+    >>> from corankco.kemeny_computation import KemenyComputingFactory
+    
+    >>> dataset = Dataset([
+    >>>               [[1], [2, 3]],
+    >>>               [[3, 1], [4]],
+    >>>               [[1], [5], [3, 2]]
+    >>>              ])
+    >>> # or d = Dataset(file_path), where file_path is a string
+    
+    >>> # print information about the dataset
+    >>> print(dataset.description())
+    Dataset description:
+        elements:5
+        rankings:3
+        complete:False
+        with ties: True
+        rankings:
+            r1 = [[1], [2, 3]]
+            r2 = [[3, 1], [4]]
+            r3 = [[1], [5], [3, 2]]
+              
+    >>> # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
+    >>> sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+    
+    >>> print("scoring scheme : " + str(sc))
+    scoring scheme : [[0.0, 1.0, 1.0, 0.0, 1.0, 1.0], [1.0, 1.0, 0.0, 1.0, 1.0, 0.0]]
 
-```md
-# Title
+    >>> # scoring scheme description
+    >>> print(sc.description())
+    Scoring scheme description
+	x before y in consensus
+		x before y in input ranking: 0.0
+		y before x in input ranking: 1.0
+		x and y tied in input ranking: 1.0
+		x present y missing in input ranking: 0.0
+		x missing y present ranking: 1.0
+		x and y missing in input ranking: 1.0
+	x and y tied in consensus
+		x before y in input ranking: 1.0
+		y before x in input ranking: 1.0
+		x and y tied in input ranking: 0.0
+		x present y missing in input ranking: 1.0
+		x missing y present ranking: 1.0
+		x and y missing in input ranking: 0.0
 
-{{ greeting }}
-```
+    
+    >>> print("\n### Consensus computation ###\n")
+    
+       
+    # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom, 
+    # RepeatChoice, PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
+   
+    algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
+                             get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
+                             get_algorithm(alg=Algorithm.ParCons, 
+                                           parameters={"bound_for_exact": 90,
+                                                   "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
+                             get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
+                             ]
+    >>> for alg in algorithms_to_execute:
+    >>>     print(alg.get_full_name())
+    >>>     consensus = alg.compute_consensus_rankings(dataset=dataset, 
+                                                       scoring_scheme=sc, 
+                                                       return_at_most_one_ranking=False)
+    >>>     print(consensus.description())
+    
 
-### Filters
-
-Variables can be modified by [filters](https://jinja.palletsprojects.com/en/2.11.x/templates/#filters). All the standard Jinja2 filters are supported (you can found the full list [here](https://jinja.palletsprojects.com/en/2.11.x/templates/#builtin-filters)).  To add your own filters, simply pass filters as an argument to `ProfileGenerator`.
-
-```python
-from profile_readme import get_github_context, ProfileGenerator
-
-
-context = get_github_context('octocat')
-filters = {
-    'hello': lambda x: 'Hello, {}!',
-}
-
-
-if __name__ == "__main__":
-    ProfileGenerator.render(
-        template_path="README-TEMPLATE.md",
-        output_path="README.md",
-        context=context,
-        filters=filters
-    )
-
-```
-
-Then you can use them in your template as you would expect:
-
-```md
-{{ 'World'|hello }}
-```
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
+    KwikSortRandom
+    Consensus description:
+        computed by:KwikSortRandom
+        kemeny score:8.0
+        necessarily optimal:False
+        consensus:
+            c1 = [[1], [3, 2], [5, 4]]
+            
+    BioConsert with input rankings as starters
+    Consensus description:
+        kemeny score:8.0
+        computed by:BioConsert with input rankings as starters
+        necessarily optimal:False
+        consensus:
+            c1 = [[1], [2, 3], [4, 5]]
+            c2 = [[1], [2, 3], [4], [5]]
+            c3 = [[1], [2, 3], [5], [4]]
+            
+    ParCons, uses  "KwikSortRandom" on groups of size >  90
+    Consensus description:
+        necessarily optimal:True
+        computed by:ParCons, uses  "KwikSortRandom" on groups of size >  90
+        weak partitioning (at least one optimal solution)[{1}, {2, 3}, {5}, {4}]
+        kemeny score:8.0
+        consensus:
+            c1 = [[1], [2, 3], [5], [4]]
+            
+    Exact algorithm
+    Consensus description:
+        necessarily optimal:True
+        kemeny score:8.0
+        computed by:Exact algorithm ILP Cplex
+        consensus:
+            c1 = [[1], [2, 3], [4], [5]]
+            c2 = [[1], [2, 3], [4, 5]]
+            c3 = [[1], [2, 3], [5], [4]]
+            
+    # compute score ('distance') between two rankings
+    kemeny = KemenyComputingFactory(sc)
+    
+    r1 = [[1], [2], [3, 4]]
+    r2 = [[3], [2]]
+    
+    print(kemeny.score_between_rankings(r1, r2))
+    5.0
+    
+    

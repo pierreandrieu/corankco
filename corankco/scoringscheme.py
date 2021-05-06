@@ -14,7 +14,7 @@ class ScoringScheme:
 
     def __init__(self, penalties=None):
         if penalties is None:
-            self._penalties = [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]
+            self.__penalty_vectors = [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]
         else:
             if type(penalties) is not list or len(penalties) != 2 or len(penalties[0]) != 6 or len(penalties[1]) != 6:
                 raise InvalidScoringScheme
@@ -26,29 +26,29 @@ class ScoringScheme:
 
             if penalties_copy[1][0] != penalties_copy[1][1] or penalties_copy[1][3] != penalties_copy[1][4]:
                 raise NotRelevantScoringScheme
-            self._penalties = penalties_copy
+            self.__penalty_vectors = penalties_copy
 
     @property
     def penalty_vectors(self) -> List[List[float]]:
-        return self._penalties
+        return self.__penalty_vectors
 
     def __str__(self) -> str:
-        return str(self._penalties)
+        return str(self.__penalty_vectors)
 
     def description(self):
         return "\nScoring scheme description\n\tx before y in consensus\n\t\tx before y in input ranking: "\
-               + str(self._penalties[0][0])\
-               + "\n\t\ty before x in input ranking: "+str(self._penalties[0][1])\
-               + "\n\t\tx and y tied in input ranking: " + str(self._penalties[0][2])\
-               + "\n\t\tx present y missing in input ranking: " + str(self._penalties[0][3])\
-               + "\n\t\tx missing y present ranking: " + str(self._penalties[0][4]) \
-               + "\n\t\tx and y missing in input ranking: " + str(self._penalties[0][5]) \
-               + "\n\tx and y tied in consensus\n\t\tx before y in input ranking: " + str(self._penalties[1][0]) \
-                + "\n\t\ty before x in input ranking: " + str(self._penalties[1][1]) \
-                + "\n\t\tx and y tied in input ranking: " + str(self._penalties[1][2]) \
-                + "\n\t\tx present y missing in input ranking: " + str(self._penalties[1][3]) \
-                + "\n\t\tx missing y present ranking: " + str(self._penalties[1][4]) \
-                + "\n\t\tx and y missing in input ranking: " + str(self._penalties[1][5])
+               + str(self.__penalty_vectors[0][0])\
+               + "\n\t\ty before x in input ranking: "+str(self.__penalty_vectors[0][1])\
+               + "\n\t\tx and y tied in input ranking: " + str(self.__penalty_vectors[0][2])\
+               + "\n\t\tx present y missing in input ranking: " + str(self.__penalty_vectors[0][3])\
+               + "\n\t\tx missing y present ranking: " + str(self.__penalty_vectors[0][4]) \
+               + "\n\t\tx and y missing in input ranking: " + str(self.__penalty_vectors[0][5]) \
+               + "\n\tx and y tied in consensus\n\t\tx before y in input ranking: " + str(self.__penalty_vectors[1][0]) \
+                + "\n\t\ty before x in input ranking: " + str(self.__penalty_vectors[1][1]) \
+                + "\n\t\tx and y tied in input ranking: " + str(self.__penalty_vectors[1][2]) \
+                + "\n\t\tx present y missing in input ranking: " + str(self.__penalty_vectors[1][3]) \
+                + "\n\t\tx missing y present ranking: " + str(self.__penalty_vectors[1][4]) \
+                + "\n\t\tx and y missing in input ranking: " + str(self.__penalty_vectors[1][5])
 
     @staticmethod
     def get_pseudodistance_scoring_scheme():
@@ -86,8 +86,8 @@ class ScoringScheme:
 
     def __is_equivalent_to_generic(self, sc2: List[List[float or int]], stop: int) -> bool:
         second_scoring_scheme = ScoringScheme(sc2)
-        pen2 = second_scoring_scheme._penalties
-        pen1 = self._penalties
+        pen2 = second_scoring_scheme.__penalty_vectors
+        pen1 = self.__penalty_vectors
         coefficient = float("nan")
         for i in range(stop):
             if pen1[0][i] == 0:

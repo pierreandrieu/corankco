@@ -1,5 +1,5 @@
 from typing import List, Set, Dict
-from corankco.kemeny_computation import KemenyScoreFactory
+from corankco.kemeny_computation import KemenyComputingFactory
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from enum import Enum, unique
@@ -25,7 +25,7 @@ class Consensus:
         if self.__att is None:
             self.__att = {}
 
-        self.__set_consensus(consensus_rankings)
+        self.__consensus = consensus_rankings
 
         self.__dataset = dataset
         self.__scoring_scheme = scoring_scheme
@@ -48,9 +48,8 @@ class Consensus:
         if self.__att[ConsensusFeature.KemenyScore] == -1 and \
                 self.__dataset is not None and \
                 self.__scoring_scheme is not None:
-            self.score = KemenyScoreFactory.get_kemeny_score(self.__scoring_scheme,
-                                                             self.consensus_rankings[0],
-                                                             self.__dataset)
+            self.score = KemenyComputingFactory(self.__scoring_scheme).get_kemeny_score(self.consensus_rankings[0],
+                                                                                        self.__dataset.rankings)
         return self.__att[ConsensusFeature.KemenyScore]
 
     def __get_associated_dataset(self) -> Dataset:
@@ -67,7 +66,7 @@ class Consensus:
 
     def __set_consensus(self, r: List[List[List or Set[int or str]]]):
         self.__consensus = r
-        self.__set_nb_consensus(len(r))
+        self.__nb_consensus = len(r)
 
     def __set_nb_consensus(self, nb_consensus: int):
         self.__nb_consensus = nb_consensus

@@ -1,21 +1,25 @@
 from typing import List, Dict, Set
 import numpy as np
-
+from corankco.utils import get_rankings_from_file
 
 class EmptyDatasetException(Exception):
     pass
 
 
 class Dataset:
-    def __init__(self,  r: List[List[List or Set[int or str]]]):
-        self.__set_nb_rankings(-1)
-        self.__set_nb_elements(-1)
-        self.__set_is_complete(None)
-        self.__set_with_ties(None)
-        if len(r) == 0:
+    def __init__(self, rankings: str or List[List[List or Set[int or str]]]):
+        self.__nb_rankings = -1
+        self.__nb_elements = -1
+        self.__is_complete = None
+        self.__with_ties = None
+        if type(rankings) == str:
+            rankings_list = get_rankings_from_file(rankings)
+        else:
+            rankings_list = rankings
+        if len(rankings_list) == 0:
             raise EmptyDatasetException
         # updates previous values with right values for n, m and complete
-        self.__set_rankings_and_update_properties(r)
+        self.__set_rankings_and_update_properties(rankings=rankings_list)
 
     def __get_rankings(self) -> List[List[List or Set[int or str]]]:
         return self.__rankings
@@ -32,11 +36,6 @@ class Dataset:
     def __get_with_ties(self) -> bool:
         return self.__with_ties
 
-    def __set_rankings_and_update_properties(self, rankings: List[List[List or Set[int or str]]]):
-        self.__rankings = rankings
-        self.__set_nb_rankings(len(rankings))
-        self.__set_is_complete(self.__check_if_rankings_complete_and_update_n())
-
     def __set_nb_elements(self, n: int):
         self.__nb_elements = n
 
@@ -48,6 +47,11 @@ class Dataset:
 
     def __set_with_ties(self, with_ties: bool):
         self.__with_ties = with_ties
+
+    def __set_rankings_and_update_properties(self, rankings: List[List[List or Set[int or str]]]):
+        self.__rankings = rankings
+        self.__nb_rankings = len(rankings)
+        self.__is_complete = self.__check_if_rankings_complete_and_update_n()
 
     n = property(__get_nb_elements, __set_nb_elements)
     m = property(__get_nb_rankings, __set_nb_rankings)

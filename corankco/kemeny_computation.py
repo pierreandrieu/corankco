@@ -1,12 +1,16 @@
-from typing import Dict, List
+from typing import Dict, List, Set
 from collections import deque
-from mediane.distances.ScoringScheme import ScoringScheme
+from corankco.scoringscheme import ScoringScheme
 from numpy import zeros, vdot, ndarray, sort, count_nonzero, asarray
+
+
+class InvalidRankingsForComputingDistance(Exception):
+    pass
 
 
 class KemenyComputingFactory:
     def __init__(self, scoring_scheme: ScoringScheme):
-        self.__set_scoring_scheme(scoring_scheme)
+        self.__scoring_scheme = scoring_scheme
 
     def __get_scoring_scheme(self):
         return self.__scoring_scheme
@@ -15,19 +19,6 @@ class KemenyComputingFactory:
         self.__scoring_scheme = scoring_scheme
 
     scoring_scheme = property(__get_scoring_scheme, __set_scoring_scheme)
-
-    def get_distance_to_an_other_ranking(self, ranking1: List[List[int]], ranking2: List[List[int]],) -> float:
-        cost_matrix = self.scoring_scheme.matrix
-        elements_r1 = {}
-        size_buckets = {}
-        id_bucket = 1
-        for bucket in ranking1:
-            size_buckets[id_bucket] = len(bucket)
-            for element in bucket:
-                elements_r1[element] = id_bucket
-            id_bucket += 1
-        relative_pos = KemenyComputingFactory.get_before_tied_counting(elements_r1, size_buckets, ranking2, id_bucket)
-        return abs(vdot(relative_pos[0], cost_matrix[0])) + abs(vdot(relative_pos[1], cost_matrix[1]))
 
     @staticmethod
     def get_before_tied_counting(r1: Dict, size_buckets: Dict, ranking: List[List[int]], id_max: int) -> tuple:
@@ -89,11 +80,11 @@ class KemenyComputingFactory:
         res = (vect_before, vect_tied)
         return res
 
-    def get_distance_to_a_set_of_rankings(self, c: List[List[int]], rankings: List[List[List[int]]]) -> float:
+    def get_kemeny_score(self, c: List[List[int]], rankings: List[List[List[int]]]) -> float:
         elements_r1 = {}
         size_buckets = {}
         id_bucket = 1
-        scoring_scheme = self.scoring_scheme.matrix
+        scoring_scheme = self.scoring_scheme.penalty_vectors
         for bucket in c:
             size_buckets[id_bucket] = len(bucket)
             for element in bucket:
@@ -206,3 +197,20 @@ class KemenyComputingFactory:
             vect_before[2] += length_bucket_r1 * total
             vect_tied[2] += length_bucket_r1 * (length_bucket_r1 - 1) / 2
         return sort(asarray(bucket), kind='mergesort')
+
+    def score_between_rankings(self, r1: List[List or Set[int or str]], r2: List[List or Set[int or str]]) -> float:
+        set1 = set()
+        set2 = set()
+        for bucket in r1:
+            for element in bucket:
+                set1.add(element)
+        for bucket in r2:
+            for element in bucket:
+                set2.add(element)
+        if set2.issubset(set1):
+            return self.get_kemeny_score(r1, [r2])
+        elif set1.issubset(set2):
+            return self.get_kemeny_score(r2, [r1])
+        else:
+            raise InvalidRankingsForComputingDistance("At least one ranking must contain all the elements of "
+                                                      "the other one")

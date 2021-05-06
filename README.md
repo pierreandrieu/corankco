@@ -74,67 +74,80 @@ Example usage
 
 API
 ---
-
-class holidays.HolidayBase(years=[], expand=True, observed=True, prov=None, state=None)
-    The base class used to create holiday country classes.
+################################
+class Dataset(rankings: str or List[List[List or Set[int or str]]])
+    The class used to create datasets. A dataset can be seen as a list of rankings, a ranking is a list of buckets,
+    a bucket is a collection of integers or strings. The rankings can also be written within a file 
 
 Parameters:
 
-years
-    An iterable list of integers specifying the years that the Holiday object
-    should pre-generate. This would generally only be used if setting *expand*
-    to False. (Default: [])
+rankings
+    A list of list of list/set of str/int OR a string which must be the path to a file where the rankings are written
 
-expand
-    A boolean value which specifies whether or not to append holidays in new
-    years to the holidays object. (Default: True)
+################################
 
-observed
-    A boolean value which when set to True will include the observed day of a
-    holiday that falls on a weekend, when appropriate. (Default: True)
+class ScoringScheme(penalties=None)
+    The class to create ScoringSchemes. A scoring scheme is a list of two lists of six real positive or null numbers.
 
-prov
-    A string specifying a province that has unique statutory holidays.
-    (Default: Australia='ACT', Canada='ON', NewZealand=None)
+Parameters:
 
-state
-    A string specifying a state that has unique statutory holidays.
-    (Default: UnitedStates=None)
+   penalties
+        list of list, where len(penalties) = 2, len(penalties[0]) = len(penalties[1]) = 6)     
+        last conditions : penalties[1][0] = penalties[1][1] and penalties[1][3] = penalties[1][4]
 
-Methods:
+################################
 
-get(key, default=None)
-    Returns a string containing the name of the holiday(s) in date ``key``, which
-    can be of date, datetime, string, unicode, bytes, integer or float type. If
-    multiple holidays fall on the same date the names will be separated by
-    commas
+class Consensus
+   the following attributes can be accessed by a getter : 
+    
+   consensus_rankings : the consensus rankings (list of list of list of str/int)
+   nb_consensus : number of consensus rankings
+   necessarily_optimal : true if the consensus rankings are necessarily optimal
+   score : the associated Kemeny score (float)
+   associated_dataset : the dataset used for the computation
+   associated_scoring_scheme : the scoring scheme used for the computation
+   att : a hash containing information about the consensus, including partitioning for ParCons algorithm
 
-get(key, default=None)
-    Returns a string containing the name of the holiday(s) in date ``key``, which
-    can be of date, datetime, string, unicode, bytes, integer or float type. If
-    multiple holidays fall on the same date the names will be separated by
-    commas
-
-get_list(key)
-    Same as ``get`` except returns a ``list`` of holiday names instead of a comma
-    separated string
-
-get_named(name)
-    Returns a ``list`` of holidays matching (even partially) the provided name
-    (case insensitive check)
-
-pop(key, default=None)
-    Same as ``get`` except the key is removed from the holiday object
-
-pop_named(name)
-    Same as ``pop`` but takes the name of the holiday (or part of it) rather than
-    the date
-
-update/append
-    Accepts dictionary of {date: name} pairs, a list of dates, or even singular
-    date/string/timestamp objects and adds them to the list of holidays
+################################
 
 
+interface MedianRanking
+    all the rmedian ranking algorithm implement this interface
+
+Methods     
+compute_consensus_rankings(dataset: Dataset, scoring_scheme: ScoringScheme, return_at_most_one_ranking: bool = False,
+            bench_mode: bool = False) -> Consensus
+Parameters
+    bench_mode : if True, then the algorithm do not lose time by computing complementary information
+    
+################################
+class ParCons(auxiliary_algorithm=None, bound_for_exact=80)
+    implements MedianRanking
+
+Parameters
+    auxiliary_algorithm : must be an instance of MedianRanking. The algorithm to be used for the big sub-problems
+    bound_for_exact : the maximum size allowed for a sub-problem to call the exact algorithm
+   
+################################
+    
+class Borda(use_bucket_id=False)
+    implements MedianRanking
+
+Parameters
+   use_bucket_id: if False, the score for an element is the sum of its positions within the rankings
+                  if True, the score for an element is the sum of the position of its buckets within the rankings
+
+################################
+class BioConsert(starting_algorithms: Collection[MedianRanking] = None)
+   implements MedianRanking, one of the most efficient heuristics
+   
+Parameters
+   starting_algorithms: must be None or a collection of instances of MedianRanking.
+                        if None, the departure rankings are the rankings of the datasets + the ranking 
+                           with all the elements tied
+                        if collection of instances of MedianRanking, the departure rankings are the consensus rankings 
+                           obtained by the median ranking algorithms 
+ 
 More Examples
 -------------
 

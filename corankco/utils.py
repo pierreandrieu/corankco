@@ -9,7 +9,7 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], T]) -> List
     # to manage the "syn" datasets of java rank-n-ties
     # if ranking[-1] == ":":
     #    ranking = ranking[:-1]
-    if ranking[ranking.find('['):ranking.rfind(']')+1] == "[]":
+    if len(ranking[ranking.find('[')+1:ranking.rfind(']')].strip()) == 0:
         return []
     ret = []
     st = ranking.find('[', ranking.find('[') + 1)

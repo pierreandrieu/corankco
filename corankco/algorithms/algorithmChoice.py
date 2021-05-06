@@ -1,4 +1,6 @@
 from enum import Enum, unique
+from typing import Dict
+from corankco.algorithms.median_ranking import MedianRanking
 from corankco.algorithms.allTied.alltied import AllTied
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.parcons.parcons import ParCons
@@ -47,9 +49,22 @@ class Algorithm(Enum):
         return [Algorithm.AllTied, Algorithm.BioConsert, Algorithm.ParCons,
                 Algorithm.Exact, Algorithm.KwikSortRandom, Algorithm.RepeatChoice, Algorithm.PickAPerm,
                 Algorithm.MedRank, Algorithm.BordaCount, Algorithm.BioCo, Algorithm.CopelandMethod]
+
     @staticmethod
     def get_all_compatible_with_any_scoring_scheme():
         return [Algorithm.BioConsert, Algorithm.ParCons, Algorithm.Exact,
                 Algorithm.KwikSortRandom, Algorithm.CopelandMethod]
+
+
+class AlgorithmChoice:
+    @staticmethod
+    def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
+        if parameters is None:
+            parameters = {}
+        return AlgorithmEnumeration.median_ranking_algorithms[alg.value](**parameters)
+
+
+
+
 
 

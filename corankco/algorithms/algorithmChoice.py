@@ -56,12 +56,11 @@ class Algorithm(Enum):
                 Algorithm.KwikSortRandom, Algorithm.CopelandMethod]
 
 
-class AlgorithmChoice:
-    @staticmethod
-    def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
-        if parameters is None:
-            parameters = {}
-        return AlgorithmEnumeration.median_ranking_algorithms[alg.value](**parameters)
+def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
+    if parameters is None:
+        parameters = {}
+    res = (AlgorithmEnumeration.median_ranking_algorithms[alg.value])(**parameters)
+    return res
 
 
 

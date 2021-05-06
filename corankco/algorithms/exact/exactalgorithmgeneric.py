@@ -10,12 +10,8 @@ from igraph import Graph
 
 
 class ExactAlgorithmGeneric(MedianRanking):
-    def __init__(self, limit_time_sec=0, scoring_scheme=None):
-        if limit_time_sec > 0:
-            self.__limit_time_sec = limit_time_sec
-        else:
-            self.__limit_time_sec = 0
-        self.__scoring_scheme = scoring_scheme
+    def __init__(self):
+        pass
 
     def compute_consensus_rankings(
             self,

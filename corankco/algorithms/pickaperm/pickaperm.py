@@ -1,11 +1,8 @@
-from abc import ABC
-from typing import List
-
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
-from corankco.kemeny_computation import KemenyScoreFactory
+from corankco.kemeny_computation import KemenyComputingFactory
 
 
 class InompleteRankingsIncompatibleWithScoringSchemeException(Exception):
@@ -46,11 +43,11 @@ class PickAPerm(MedianRanking):
         else:
             rankings_to_use = dataset.rankings
 
-        k = KemenyScoreFactory()
+        k = KemenyComputingFactory(scoring_scheme)
         dst_min = float('inf')
         consensus = [[]]
         for ranking in rankings_to_use:
-            dist = k.get_kemeny_score(scoring_scheme, ranking, dataset)
+            dist = k.get_kemeny_score(ranking, dataset.rankings)
             if dist < dst_min:
                 dst_min = dist
                 consensus.clear()

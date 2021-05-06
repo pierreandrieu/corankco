@@ -52,6 +52,5 @@ class AllTied(MedianRanking):
     def get_full_name(self) -> str:
         return "AllTied"
 
-    @staticmethod
-    def is_scoring_scheme_relevant_when_incomplete_rankings(scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

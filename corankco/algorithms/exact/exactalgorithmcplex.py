@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, Set
+from typing import List, Dict, Set
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
@@ -57,19 +57,20 @@ class ExactAlgorithmCplex(MedianRanking):
 
         sc = asarray(scoring_scheme.penalty_vectors)
 
-        mat_score, ties_must_be_checked = self.__cost_matrix(positions, asarray(sc))
+        mat_score = self.__cost_matrix(positions, asarray(sc))
         map_elements_cplex = {}
         my_prob = cplex.Cplex()  # initiate
         my_prob.set_results_stream(None)  # mute
         my_prob.parameters.mip.tolerances.mipgap.set(0.0)
         my_prob.parameters.mip.pool.absgap.set(0.0)
         if self.__limit_time_sec > 0:
-            my_prob.parameters.tuning.timelimit.set(self.__limit_time_sec)
+            my_prob.parameters.timelimit = self.__limit_time_sec
+        #   my_prob.parameters.tuning.timelimit.set(self.__limit_time_sec)
+
         my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
         if not return_at_most_one_ranking:
             my_prob.parameters.mip.pool.intensity.set(4)
             my_prob.parameters.mip.limits.populate.set(10000000)
-
         my_obj = []
         my_ub = []
         my_lb = []
@@ -157,19 +158,6 @@ class ExactAlgorithmCplex(MedianRanking):
                             count += 1
                             rows.append([[i_tie_j, j_tie_k, i_tie_k], [2.0, 2.0, -1.0]])
 
-        # if tie is not the single best choice for any pair x,y, then there is a permutation median
-        if not ties_must_be_checked:
-            my_sense += "E" * int(nb_elem*(nb_elem-1)/2)
-            for i in range(0, nb_elem - 1):
-                for j in range(i + 1, nb_elem):
-                    if not i == j:
-                        s = "c%s" % count
-                        count += 1
-                        my_rhs.append(0)
-                        my_rownames.append(s)
-                        row = [["t_%s_%s" % (i, j)], [1]]
-                        rows.append(row)
-
         my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
         medianes = []
 
@@ -218,7 +206,7 @@ class ExactAlgorithmCplex(MedianRanking):
         return ranking
 
     @staticmethod
-    def __cost_matrix(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[ndarray, bool]:
+    def __cost_matrix(positions: ndarray, matrix_scoring_scheme: ndarray) -> ndarray:
         cost_before = matrix_scoring_scheme[0]
         cost_tied = matrix_scoring_scheme[1]
         cost_after = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
@@ -227,7 +215,6 @@ class ExactAlgorithmCplex(MedianRanking):
         m = shape(positions)[1]
 
         matrix = zeros((n, n, 3))
-        ties_must_be_checked = False
         for e1 in range(n):
             mem = positions[e1]
             d = count_nonzero(mem == -1)
@@ -242,10 +229,8 @@ class ExactAlgorithmCplex(MedianRanking):
                 put_tied = vdot(relative_positions, cost_tied)
                 matrix[e1][e2] = [put_before, put_after, put_tied]
                 matrix[e2][e1] = [put_after, put_before, put_tied]
-                if put_tied <= put_after and put_tied <= put_before:
-                    ties_must_be_checked = True
 
-        return matrix, ties_must_be_checked
+        return matrix
 
     @staticmethod
     def __positions(rankings: List[List[List or Set[int or str]]], elements_id: Dict) -> ndarray:

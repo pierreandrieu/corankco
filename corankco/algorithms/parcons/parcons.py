@@ -11,9 +11,9 @@ from igraph import Graph
 
 
 class ParCons(MedianRanking):
-    def __init__(self, algorithm_to_complete=None, bound_for_exact=80):
-        if isinstance(algorithm_to_complete, MedianRanking):
-            self.alg = algorithm_to_complete
+    def __init__(self, auxiliary_algorithm=None, bound_for_exact=80):
+        if isinstance(auxiliary_algorithm, MedianRanking):
+            self.alg = auxiliary_algorithm
         else:
             self.alg = BioConsert(starting_algorithms=None)
         self.bound_for_exact = bound_for_exact

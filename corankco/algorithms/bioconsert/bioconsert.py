@@ -3,7 +3,7 @@ from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
-from corankco.kemeny_computation import KemenyScoreFactory
+from corankco.kemeny_computation import KemenyComputingFactory
 from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
 import bioconsertinc
 
@@ -144,11 +144,11 @@ class BioConsert(MedianRanking):
                     list_distinct_id_rankings.append(i)
 
                     dst_ini.append(
-                        KemenyScoreFactory.get_kemeny_score(scoring_scheme, ranking, dataset))
+                        KemenyComputingFactory(scoring_scheme).get_kemeny_score(ranking, dataset.rankings))
 
                 i += 1
 
-            dst_ini.append(KemenyScoreFactory.get_kemeny_score(scoring_scheme, [[*elements_id]], dataset))
+            dst_ini.append(KemenyComputingFactory(scoring_scheme).get_kemeny_score([[*elements_id]], dataset.rankings))
 
             departure = zeros((len(list_distinct_id_rankings)+1, len(elements_id)), dtype=int32)
             departure[:-1] = real_pos[asarray(list_distinct_id_rankings)]
@@ -159,7 +159,7 @@ class BioConsert(MedianRanking):
             id_ranking = 0
             for algo in self.__starting_algorithms:
                 cons = algo.compute_consensus_rankings(dataset, scoring_scheme, True).consensus_rankings[0]
-                dst_ini.append(KemenyScoreFactory.get_kemeny_score(scoring_scheme, cons, dataset))
+                dst_ini.append(KemenyComputingFactory(scoring_scheme).get_kemeny_score(cons, dataset.rankings))
                 id_bucket = 0
                 for bucket in cons:
                     for element in bucket:

@@ -12,7 +12,7 @@ class MedRank(MedianRanking):
             h = 0
         elif h > 1:
             h = 1
-        self.h = h
+        self.__h = h
 
     # Complexity : 0 (2 * n) with adaptation for induced measure
     def compute_consensus_rankings(
@@ -56,9 +56,9 @@ class MedRank(MedianRanking):
             for bucket in ranking:
                 for element in bucket:
                     if element not in nb_rankings_needed:
-                        nb_rankings_needed[element] = self.h
+                        nb_rankings_needed[element] = self.__h
                     else:
-                        nb_rankings_needed[element] += self.h
+                        nb_rankings_needed[element] += self.__h
 
         bucket_res = []
         ranking_res = []

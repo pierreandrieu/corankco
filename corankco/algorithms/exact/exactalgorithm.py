@@ -6,12 +6,11 @@ from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneri
 
 
 class ExactAlgorithm(MedianRanking):
-    def __init__(self, limit_time_sec=0, scoring_scheme=None):
+    def __init__(self, limit_time_sec=0):
         if limit_time_sec > 0:
             self.__limit_time_sec = limit_time_sec
         else:
             self.__limit_time_sec = 0
-        self.__scoring_scheme = scoring_scheme
 
     def compute_consensus_rankings(
             self,
@@ -40,15 +39,15 @@ class ExactAlgorithm(MedianRanking):
         try:
             import cplex
             from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
-            return ExactAlgorithmCplex().compute_consensus_rankings(dataset,
-                                                                    scoring_scheme,
-                                                                    return_at_most_one_ranking,
-                                                                    bench_mode)
-        except:
-            return ExactAlgorithmGeneric().compute_consensus_rankings(dataset,
-                                                                      scoring_scheme,
-                                                                      return_at_most_one_ranking,
-                                                                      bench_mode)
+            return ExactAlgorithmCplex(self.__limit_time_sec).compute_consensus_rankings(dataset,
+                                                                                         scoring_scheme,
+                                                                                         return_at_most_one_ranking,
+                                                                                         bench_mode)
+        except ImportError:
+            return ExactAlgorithmGeneric(self.__limit_time_sec).compute_consensus_rankings(dataset,
+                                                                                           scoring_scheme,
+                                                                                           return_at_most_one_ranking,
+                                                                                           bench_mode)
 
     def get_full_name(self) -> str:
         return "Exact algorithm"

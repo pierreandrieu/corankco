@@ -9,7 +9,7 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], T]) -> List
     # to manage the "syn" datasets of java rank-n-ties
     # if ranking[-1] == ":":
     #    ranking = ranking[:-1]
-    if len(ranking[ranking.find('[')+1:ranking.rfind(']')].strip()) == 0:
+    if len(ranking[ranking.find('[')+1:ranking.rfind(']')].strip()) == 0 or ranking.endswith("[[]]"):
         return []
     ret = []
     st = ranking.find('[', ranking.find('[') + 1)
@@ -23,6 +23,7 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], T]) -> List
         for s in ranking[st + 1:  en].split(","):
             elt_str = s.strip()
             if elt_str == "":
+                print("ranking bordel : " + ranking)
                 raise ValueError("Empty element in `%s` between chars %i and %i" % (ranking[st + 1:  en], st + 1, en))
             bucket.append(converter(elt_str))
         ret.append(bucket)

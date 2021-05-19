@@ -1,5 +1,6 @@
 from typing import List, Dict, Set
 import numpy as np
+from corankco import Dataset
 from corankco.utils import get_rankings_from_file
 
 class EmptyDatasetException(Exception):
@@ -160,3 +161,9 @@ class Dataset:
 
     def unified_dataset(self):
         return Dataset(self.unified_rankings())
+
+    @staticmethod
+    def import_biological_datasets() -> List[Dataset]:
+        # TODO
+        return []
+

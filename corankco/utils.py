@@ -1,4 +1,5 @@
 from typing import Callable, List, TypeVar
+from urllib.request import urlopen
 
 T = TypeVar('T')
 
@@ -73,3 +74,16 @@ def dump_ranking_with_ties_to_str(ranking: List[List[int or str]]) -> str:
         return "[]"
     else:
         return '[' + ','.join(['[' + ','.join([str(e) for e in b]) + ']' for b in ranking]) + ']'
+
+
+def import_rankings_from_url(url_path: str) -> List[List[List[int or str]]]:
+    data = urlopen(url_path)  # read only 20 000 chars
+
+    rankings = []
+    # to manage the "step" datasets of java rank-n-ties
+    ignore_lines = ["%"]
+    for ligne in data:
+        ligne_str = ligne.decode('utf-8')
+        if len(ligne_str) > 2 and ligne_str[0] not in ignore_lines:
+            rankings.append(parse_ranking_with_ties_of_int(ligne_str))
+    return rankings

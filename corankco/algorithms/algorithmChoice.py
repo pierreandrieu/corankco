@@ -1,7 +1,6 @@
 from enum import Enum, unique
 from typing import Dict
 from corankco.algorithms.median_ranking import MedianRanking
-from corankco.algorithms.allTied.alltied import AllTied
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.parcons.parcons import ParCons
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
@@ -16,7 +15,6 @@ from corankco.algorithms.copeland.copeland import CopelandMethod
 
 class AlgorithmEnumeration:
     median_ranking_algorithms = [
-        AllTied,
         BioConsert,
         ParCons,
         ExactAlgorithm,
@@ -26,23 +24,22 @@ class AlgorithmEnumeration:
         MedRank,
         BordaCount,
         BioCo,
-        CopelandMethod
+        CopelandMethod,
     ]
 
 
 @unique
 class Algorithm(Enum):
-    AllTied = 0
-    BioConsert = 1
-    ParCons = 2
-    Exact = 3
-    KwikSortRandom = 4
-    RepeatChoice = 5
-    PickAPerm = 6
-    MedRank = 7
-    BordaCount = 8
-    BioCo = 9
-    CopelandMethod = 10
+    BioConsert = 0
+    ParCons = 1
+    Exact = 2
+    KwikSortRandom = 3
+    RepeatChoice = 4
+    PickAPerm = 5
+    MedRank = 6
+    BordaCount = 7
+    BioCo = 8
+    CopelandMethod = 9
 
     @staticmethod
     def get_all():
@@ -61,9 +58,3 @@ def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
         parameters = {}
     res = (AlgorithmEnumeration.median_ranking_algorithms[alg.value])(**parameters)
     return res
-
-
-
-
-
-

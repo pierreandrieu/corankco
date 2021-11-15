@@ -44,10 +44,8 @@ class ExactAlgorithm(MedianRanking):
                                                                                          return_at_most_one_ranking,
                                                                                          bench_mode)
         except ImportError:
-            return ExactAlgorithmGeneric(self.__limit_time_sec).compute_consensus_rankings(dataset,
-                                                                                           scoring_scheme,
-                                                                                           return_at_most_one_ranking,
-                                                                                           bench_mode)
+            ret = return_at_most_one_ranking
+            return ExactAlgorithmGeneric().compute_consensus_rankings(dataset, scoring_scheme, ret, bench_mode)
 
     def get_full_name(self) -> str:
         return "Exact algorithm"

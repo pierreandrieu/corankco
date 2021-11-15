@@ -250,3 +250,16 @@ class ExactAlgorithmCplex(MedianRanking):
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True
+
+# cartesian product
+""""
+import itertools
+
+somelists = [
+   [1, 2, 3],
+   ['a', 'b'],
+   [4, 5]
+]
+for element in itertools.product(*somelists):
+    print(element)
+"""

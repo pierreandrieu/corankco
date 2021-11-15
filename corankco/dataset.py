@@ -1,7 +1,8 @@
 from typing import List, Dict, Set
 import numpy as np
-from corankco import Dataset
-from corankco.utils import get_rankings_from_file
+from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings
+from corankco.rankingsgeneration.rankingsgenerate import create_rankings, uniform_permutation
+
 
 class EmptyDatasetException(Exception):
     pass
@@ -15,18 +16,62 @@ class Dataset:
         self.__with_ties = None
         if type(rankings) == str:
             rankings_list = get_rankings_from_file(rankings)
+            self.__path = rankings
         else:
             rankings_list = rankings
+            self.__path = "manual"
         if len(rankings_list) == 0:
             raise EmptyDatasetException
+
+        all_integers = True
+        id_ranking = 0
+        while id_ranking < len(rankings_list) and all_integers:
+            ranking_i = rankings_list[id_ranking]
+            id_bucket = 0
+            if len(ranking_i) > 0:
+                while id_bucket < len(ranking_i) and all_integers:
+                    bucket_i = ranking_i[id_bucket]
+                    for element in bucket_i:
+                        if not isinstance(element, int) and not element.isdigit():
+                            all_integers = False
+                            break
+                    id_bucket += 1
+            id_ranking += 1
+
+        if not all_integers:
+            rankings_final = rankings_list
+
+        else:
+            rankings_final = []
+            id_ranking = 0
+            while id_ranking < len(rankings_list) and all_integers:
+                ranking_i = rankings_list[id_ranking]
+                ranking_int = []
+                id_bucket = 0
+                while id_bucket < len(ranking_i) and all_integers:
+                    bucket_i = ranking_i[id_bucket]
+                    if isinstance(bucket_i, set):
+                        bucket_int = set(map(int, bucket_i))
+                    else:
+                        bucket_int = list(map(int, bucket_i))
+                    ranking_int.append(bucket_int)
+                    id_bucket += 1
+                rankings_final.append(ranking_int)
+                id_ranking += 1
+
         # updates previous values with right values for n, m and complete
-        self.__set_rankings_and_update_properties(rankings=rankings_list)
+        self.__set_rankings_and_update_properties(rankings=rankings_final)
+        if self.n == 0:
+            raise EmptyDatasetException
 
     def __get_rankings(self) -> List[List[List or Set[int or str]]]:
         return self.__rankings
 
     def __get_nb_elements(self) -> int:
         return self.__nb_elements
+
+    def __get_path(self) -> str:
+        return self.__path
 
     def __get_nb_rankings(self) -> int:
         return self.__nb_rankings
@@ -59,6 +104,7 @@ class Dataset:
     rankings = property(__get_rankings, __set_rankings_and_update_properties)
     is_complete = property(__get_is_complete, __set_is_complete)
     with_ties = property(__get_with_ties, __set_with_ties)
+    path = property(__get_path)
 
     def __str__(self) -> str:
         return str(self.rankings)
@@ -162,8 +208,43 @@ class Dataset:
     def unified_dataset(self):
         return Dataset(self.unified_rankings())
 
-    @staticmethod
-    def import_biological_datasets() -> List[Dataset]:
-        # TODO
-        return []
+    def write(self, path):
+        write_rankings(self.rankings, path)
 
+    @staticmethod
+    def get_uniform_dataset(nb_elem: int, nb_rankings: int):
+        return Dataset(uniform_permutation(nb_elem, nb_rankings))
+
+    @staticmethod
+    def get_random_dataset_markov(nb_elem: int, nb_rankings: int, step, complete: bool = False):
+        return Dataset(create_rankings(nb_elem, nb_rankings, step, complete))
+
+    @staticmethod
+    def get_datasets_from_folder(path_folder: str) -> List:
+        datasets = []
+        datasets_rankings = get_rankings_from_folder(path_folder)
+        for dataset_ranking in datasets_rankings:
+            datasets.append(Dataset(dataset_ranking))
+        return datasets
+
+    @staticmethod
+    def get_dataset_from_file(path_file: str):
+        return Dataset(path_file)
+
+    def __lt__(self, other):
+        return self.__path < other.path
+
+    def __le__(self, other):
+        return self.path <= other.path
+
+    def __eq__(self, other):
+        return str(self.rankings) == str(other.rankings)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __gt__(self, other):
+        return self.__path > other.path
+
+    def __ge__(self, other):
+        return self.__path >= other.path

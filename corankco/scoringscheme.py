@@ -1,5 +1,6 @@
 from typing import List
 from math import isnan
+from numpy import ndarray
 
 
 class InvalidScoringScheme(Exception):
@@ -16,7 +17,20 @@ class ScoringScheme:
         if penalties is None:
             self.__penalty_vectors = [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]
         else:
-            if type(penalties) is not list or len(penalties) != 2 or len(penalties[0]) != 6 or len(penalties[1]) != 6:
+            if type(penalties) is not list and type(penalties) is not tuple and type(penalties) is not ndarray:
+                print(type(penalties))
+                raise InvalidScoringScheme
+            elif len(penalties) != 2:
+                print("a " + str(len(penalties)))
+                raise InvalidScoringScheme
+            elif type(penalties[0]) is not list and type(penalties[0]) is not tuple and type(penalties[0]) is not ndarray:
+                print((type(penalties)[0]))
+                raise InvalidScoringScheme
+            elif type(penalties[1]) is not list and type(penalties[1]) is not tuple and type(penalties[1]) is not ndarray:
+                print("c  "+ str(type(penalties[1])))
+                raise InvalidScoringScheme
+            elif len(penalties[0]) != 6 or len(penalties[1]) != 6:
+                print("d " + str(len(penalties[0])))
                 raise InvalidScoringScheme
             penalties_copy = [[], []]
             for pen in penalties[0]:

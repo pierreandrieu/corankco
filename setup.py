@@ -16,11 +16,12 @@ setup(name='corankco',
       license='MIT',
       packages=find_packages(include=['corankco', 'corankco.*']),
       package_data={'corankco': ['data/*']},
-      python_requires='>=3',
+      python_requires='>=3.6',
       zip_safe=False,
-      install_requires=['numpy',
+      install_requires=['numpy~=1.21.2',
                         'python-igraph',
-                        'pulp==2.3',
-                        'bioconsertinc>=0.0.9',
+                        'pulp~=2.3',
+                        'bioconsertinc>=1.0.0',
+                        'biopython~=1.79'
                         ]
       )

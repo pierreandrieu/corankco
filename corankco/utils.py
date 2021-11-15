@@ -1,11 +1,11 @@
 from typing import Callable, List, TypeVar
 from urllib.request import urlopen
-
+import os
 T = TypeVar('T')
 
 
 def parse_ranking_with_ties(ranking: str, converter: Callable[[str], T]) -> List[List[T]]:
-    ranking = ranking.strip()
+    ranking = ranking.strip().split(":")[-1].strip()
 
     # to manage the "syn" datasets of java rank-n-ties
     # if ranking[-1] == ":":
@@ -24,7 +24,7 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], T]) -> List
         for s in ranking[st + 1:  en].split(","):
             elt_str = s.strip()
             if elt_str == "":
-                print("ranking bordel : " + ranking)
+                print("ranking with problem : " + ranking)
                 raise ValueError("Empty element in `%s` between chars %i and %i" % (ranking[st + 1:  en], st + 1, en))
             bucket.append(converter(elt_str))
         ret.append(bucket)
@@ -55,7 +55,7 @@ def parse_ranking_with_ties_of_int(ranking: str) -> List[List[int]]:
     )
 
 
-def get_rankings_from_file(file: str) -> List[List[List[int]]]:
+def get_rankings_from_file(file: str) -> List[List[List[int or str]]]:
     rankings = []
     file_rankings = open(file, "r")
 
@@ -64,9 +64,18 @@ def get_rankings_from_file(file: str) -> List[List[List[int]]]:
     lignes = file_rankings.read().replace("\\\n", "")
     for ligne in lignes.split("\n"):
         if len(ligne) > 2 and ligne[0] not in ignore_lines:
-            rankings.append(parse_ranking_with_ties_of_int(ligne))
+            rankings.append(parse_ranking_with_ties_of_str(ligne))
     file_rankings.close()
     return rankings
+
+
+def get_rankings_from_folder(folder: str) -> List[List[List[List[int or str]]]]:
+    res = []
+    if not folder.endswith(os.path.sep):
+        folder += os.path.sep
+    for file_path in os.listdir(folder):
+        res.append(get_rankings_from_file(folder+file_path))
+    return res
 
 
 def dump_ranking_with_ties_to_str(ranking: List[List[int or str]]) -> str:
@@ -87,3 +96,13 @@ def import_rankings_from_url(url_path: str) -> List[List[List[int or str]]]:
         if len(ligne_str) > 2 and ligne_str[0] not in ignore_lines:
             rankings.append(parse_ranking_with_ties_of_int(ligne_str))
     return rankings
+
+
+def write_rankings(rankings: List[List[List[int or str]]], path: str):
+    if not os.path.isdir(path) and not os.path.isfile(path):
+        if os.path.isdir(os.path.abspath(os.path.join(path, os.pardir))):
+            file = open(path, "w")
+            for ranking in rankings:
+                file.write(str(ranking))
+                file.write("\n")
+            file.close()

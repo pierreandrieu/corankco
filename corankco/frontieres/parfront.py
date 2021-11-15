@@ -70,7 +70,6 @@ class ParFront:
                 g.add(id_elements[elem])
         return res
 
-
     @staticmethod
     def __graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray, Set[Tuple]]:
         graph_of_elements = Graph(directed=True)
@@ -110,5 +109,3 @@ class ParFront:
                 matrix[e2][e1] = [put_after, put_before, put_tied]
         graph_of_elements.add_edges(edges)
         return graph_of_elements, matrix, robust_arcs
-
-

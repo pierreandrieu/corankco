@@ -1,4 +1,4 @@
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Iterable, Tuple
 from corankco.kemeny_computation import KemenyComputingFactory
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
@@ -12,8 +12,8 @@ class ConsensusFeature(Enum):
     AssociatedAlgorithm = "computed by:"
     IsNecessarilyOptimal = "necessarily optimal:"
     KemenyScore = "kemeny score:"
-    WeakPartitioning = "weak partitioning (at least one optimal solution)"
-    StrongPartitioning = "strong partitioning (all optimal solution)"
+    WeakPartitioning = "weak partitioning (at least one optimal consensus)"
+    StrongPartitioning = "strong partitioning (all optimal consensus)"
 
 
 class Consensus:
@@ -91,3 +91,38 @@ class Consensus:
                + "\n\tconsensus:" + "".join("\n\t\tc"+str(i+1)+" = "
                                                      + str(self.consensus_rankings[i])
                                             for i in range(len(self.consensus_rankings)))
+
+    def evaluate_topk_ranking(self, goldstandard: Iterable, top_k: int = 20) -> Tuple[int, int]:
+        """
+
+            Parameters:
+                    goldstandard: Iterable, the elements of the goldstandard
+                    top_k (int = 20): the value of k, number of first elements to consider in the consensus
+
+            Returns:
+                    a Tuple[int][int] containing the number of elements that are both in the goldstandard and in
+                    the top-k of the consensus. More precisely,
+                    - the first integer is
+                    -the second one is
+        """
+        cpt1 = 0
+        cpt2 = 0
+        gs_set = set()
+        for elem in goldstandard:
+            gs_set.add(elem)
+
+        nb_elements_seen = 0
+        id_bucket = 0
+        consensus = self.consensus_rankings[0]
+        while nb_elements_seen <= top_k and id_bucket < len(consensus):
+            nb_common = len(set(consensus[id_bucket]).intersection(gs_set))
+            cpt2 += nb_common
+            nb_elements_seen += len(consensus[id_bucket])
+            if nb_elements_seen <= top_k:
+                cpt1 += nb_common
+            id_bucket += 1
+        return cpt1, cpt2
+
+    @staticmethod
+    def get_consensus_from_file(path: str):
+        return Consensus(Dataset(path).rankings)

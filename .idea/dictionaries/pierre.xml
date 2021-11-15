@@ -3,6 +3,9 @@
     <words>
       <w>bioconsertcimpl</w>
       <w>igraph</w>
+      <w>orpha</w>
+      <w>orphanet</w>
+      <w>vldb</w>
     </words>
   </dictionary>
 </component>

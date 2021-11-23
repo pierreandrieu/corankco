@@ -108,7 +108,7 @@ class ParCons(MedianRanking):
                 for elem in scc_i:
                     group.add(id_elements[elem])
                 cfc_name.append(group)
-            hash_information[ConsensusFeature.WeakPartitioning] = str(cfc_name)
+            hash_information[ConsensusFeature.WeakPartitioning] = cfc_name
 
         return Consensus(consensus_rankings=[res],
                          dataset=dataset,

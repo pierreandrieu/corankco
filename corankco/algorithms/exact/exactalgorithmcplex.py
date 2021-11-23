@@ -1,20 +1,22 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Tuple
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from numpy import ndarray, array, shape, zeros, count_nonzero, vdot, asarray
 from operator import itemgetter
+from igraph import Graph
 import cplex
 
 
 class ExactAlgorithmCplex(MedianRanking):
-    def __init__(self, limit_time_sec=0, scoring_scheme=None):
+    def __init__(self, limit_time_sec=0, optimize=True, preprocess=True):
         if limit_time_sec > 0:
             self.__limit_time_sec = limit_time_sec
         else:
             self.__limit_time_sec = 0
-        self.__scoring_scheme = scoring_scheme
+        self.__optimize = optimize
+        self.__preprocess = preprocess
 
     def compute_consensus_rankings(
             self,
@@ -56,13 +58,17 @@ class ExactAlgorithmCplex(MedianRanking):
         positions = ExactAlgorithmCplex.__positions(rankings, elem_id)
 
         sc = asarray(scoring_scheme.penalty_vectors)
+        graph_elements = Graph()
+        if self.__preprocess:
+            graph_elements, mat_score = self.__graph_of_elements(positions, asarray(sc))
+        else:
+            mat_score = self.__cost_matrix(positions, asarray(sc))
 
-        mat_score = self.__cost_matrix(positions, asarray(sc))
         map_elements_cplex = {}
         my_prob = cplex.Cplex()  # initiate
         my_prob.set_results_stream(None)  # mute
-        my_prob.parameters.mip.tolerances.mipgap.set(0.0)
-        my_prob.parameters.mip.pool.absgap.set(0.0)
+        my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
+        my_prob.parameters.mip.pool.absgap.set(0.000001)
         if self.__limit_time_sec > 0:
             my_prob.parameters.timelimit = self.__limit_time_sec
         #   my_prob.parameters.tuning.timelimit.set(self.__limit_time_sec)
@@ -77,9 +83,12 @@ class ExactAlgorithmCplex(MedianRanking):
         my_names = []
 
         cpt = 0
+        should_consider_ties = False
         for i in range(nb_elem):
             for j in range(nb_elem):
                 if not i == j:
+                    if not should_consider_ties and mat_score[i][j][0] + mat_score[i][j][1] > 2 * mat_score[i][j][2]:
+                        should_consider_ties = True
                     s = "x_%s_%s" % (i, j)
                     my_obj.append(mat_score[i][j][0])
                     my_ub.append(1.0)
@@ -157,6 +166,34 @@ class ExactAlgorithmCplex(MedianRanking):
                             my_rhs.append(3)
                             count += 1
                             rows.append([[i_tie_j, j_tie_k, i_tie_k], [2.0, 2.0, -1.0]])
+
+        if self.__optimize and not should_consider_ties:
+            my_sense += "E"*int(nb_elem * (nb_elem-1)/2)
+            for i in range(0, nb_elem-1):
+                for j in range(i+1, nb_elem):
+                    if j != i:
+                        my_rownames.append("c%s" % count)
+                        my_rhs.append(0)
+                        count += 1
+                        i_tie_j = "t_%s_%s" % (i, j)
+                        rows.append([[i_tie_j], [1.]])
+
+        if self.__preprocess:
+            cpt = 0
+            scc = graph_elements.components()
+            for i in range(len(scc)-1):
+                elems_scc_i = scc[i]
+                for j in range(i+1, len(scc)):
+                    elems_scc_j = scc[j]
+                    cpt += len(scc[i]) * len(scc[j])
+                    for elem1 in elems_scc_i:
+                        for elem2 in elems_scc_j:
+                            my_rownames.append("c%s" % count)
+                            my_rhs.append(1)
+                            count += 1
+                            i_bef_j = "x_%s_%s" % (i, j)
+                            rows.append([[i_bef_j], [1.]])
+            my_sense += "E"*cpt
 
         my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
         medianes = []
@@ -250,6 +287,41 @@ class ExactAlgorithmCplex(MedianRanking):
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True
+
+    @staticmethod
+    def __graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray]:
+        graph_of_elements = Graph(directed=True)
+        cost_before = matrix_scoring_scheme[0]
+        cost_tied = matrix_scoring_scheme[1]
+        cost_after = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
+                            cost_before[5]])
+        n = shape(positions)[0]
+        m = shape(positions)[1]
+        for i in range(n):
+            graph_of_elements.add_vertex(name=str(i))
+
+        matrix = zeros((n, n, 3))
+        edges = []
+        for e1 in range(n):
+            mem = positions[e1]
+            d = count_nonzero(mem == -1)
+            for e2 in range(e1 + 1, n):
+                a = count_nonzero(mem + positions[e2] == -2)
+                b = count_nonzero(mem == positions[e2])
+                c = count_nonzero(positions[e2] == -1)
+                e = count_nonzero(mem < positions[e2])
+                relative_positions = array([e - d + a, m - e - b - c + a, b - a, c - a, d - a, a])
+                put_before = vdot(relative_positions, cost_before)
+                put_after = vdot(relative_positions, cost_after)
+                put_tied = vdot(relative_positions, cost_tied)
+                if put_before > put_after or put_before > put_tied:
+                    edges.append((e2, e1))
+                if put_after > put_before or put_after > put_tied:
+                    edges.append((e1, e2))
+                matrix[e1][e2] = [put_before, put_after, put_tied]
+                matrix[e2][e1] = [put_after, put_before, put_tied]
+        graph_of_elements.add_edges(edges)
+        return graph_of_elements, matrix
 
 # cartesian product
 """"

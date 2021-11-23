@@ -1,4 +1,4 @@
-from typing import Callable, List, TypeVar
+from typing import Callable, List, TypeVar, Tuple
 from urllib.request import urlopen
 import os
 T = TypeVar('T')
@@ -61,20 +61,21 @@ def get_rankings_from_file(file: str) -> List[List[List[int or str]]]:
 
     # to manage the "step" datasets of java rank-n-ties
     ignore_lines = ["%"]
-    lignes = file_rankings.read().replace("\\\n", "")
-    for ligne in lignes.split("\n"):
-        if len(ligne) > 2 and ligne[0] not in ignore_lines:
-            rankings.append(parse_ranking_with_ties_of_str(ligne))
+    lines = file_rankings.read().replace("\\\n", "")
+    for line in lines.split("\n"):
+        if len(line) > 2 and line[0] not in ignore_lines:
+            rankings.append(parse_ranking_with_ties_of_str(line))
     file_rankings.close()
     return rankings
 
 
-def get_rankings_from_folder(folder: str) -> List[List[List[List[int or str]]]]:
+def get_rankings_from_folder(folder: str) -> List[Tuple[List[List[List[int or str]]], str]]:
     res = []
     if not folder.endswith(os.path.sep):
         folder += os.path.sep
-    for file_path in os.listdir(folder):
-        res.append(get_rankings_from_file(folder+file_path))
+    for file_path in sorted(os.listdir(folder)):
+        rankings = get_rankings_from_file(folder+file_path)
+        res.append((rankings, file_path))
     return res
 
 
@@ -106,3 +107,26 @@ def write_rankings(rankings: List[List[List[int or str]]], path: str):
                 file.write(str(ranking))
                 file.write("\n")
             file.close()
+
+
+def write_file(path_file: str, text: str):
+    f = open(path_file, "a")
+    f.write(text)
+    f.close()
+
+
+def get_os_sep() -> str:
+    return os.path.sep
+
+
+def get_parent_path(path: str) -> str:
+    return os.path.abspath(os.path.join(path, os.pardir))
+
+
+def can_be_created(path_to_check) -> bool:
+    return not os.path.isdir(path_to_check) and not os.path.isfile(path_to_check)
+
+
+def create_dir(path):
+    if can_be_created(path):
+        os.mkdir(path)

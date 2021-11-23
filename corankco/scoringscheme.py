@@ -42,6 +42,47 @@ class ScoringScheme:
                 raise NotRelevantScoringScheme
             self.__penalty_vectors = penalties_copy
 
+    def __get_b1(self) -> float:
+        return self.__penalty_vectors[0][0]
+
+    def __get_b2(self) -> float:
+        return self.__penalty_vectors[0][1]
+
+    def __get_b3(self) -> float:
+        return self.__penalty_vectors[0][2]
+
+    def __get_b4(self) -> float:
+        return self.__penalty_vectors[0][3]
+
+    def __get_b5(self) -> float:
+        return self.__penalty_vectors[0][4]
+
+    def __get_b6(self) -> float:
+        return self.__penalty_vectors[0][5]
+
+    def __get_t1_and_t2(self) -> float:
+        return self.__penalty_vectors[1][0]
+
+    def __get_t3(self) -> float:
+        return self.__penalty_vectors[1][2]
+
+    def __get_t4_and_t5(self) -> float:
+        return self.__penalty_vectors[1][3]
+
+    def __get_t6(self) -> float:
+        return self.__penalty_vectors[1][5]
+
+    b1 = property(__get_b1)
+    b2 = property(__get_b2)
+    b3 = property(__get_b3)
+    b4 = property(__get_b4)
+    b5 = property(__get_b5)
+    b6 = property(__get_b6)
+    t1_t2 = property(__get_t1_and_t2)
+    t3 = property(__get_t3)
+    t4_t5 = property(__get_t4_and_t5)
+    t6 = property(__get_t6)
+
     @property
     def penalty_vectors(self) -> List[List[float]]:
         return self.__penalty_vectors

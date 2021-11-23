@@ -94,6 +94,9 @@ class Dataset:
     def __set_with_ties(self, with_ties: bool):
         self.__with_ties = with_ties
 
+    def __set_path(self, path: str):
+        self.__path = path
+
     def __set_rankings_and_update_properties(self, rankings: List[List[List or Set[int or str]]]):
         self.__rankings = rankings
         self.__nb_rankings = len(rankings)
@@ -104,7 +107,7 @@ class Dataset:
     rankings = property(__get_rankings, __set_rankings_and_update_properties)
     is_complete = property(__get_is_complete, __set_is_complete)
     with_ties = property(__get_with_ties, __set_with_ties)
-    path = property(__get_path)
+    path = property(__get_path, __set_path)
 
     def __str__(self) -> str:
         return str(self.rankings)
@@ -223,8 +226,10 @@ class Dataset:
     def get_datasets_from_folder(path_folder: str) -> List:
         datasets = []
         datasets_rankings = get_rankings_from_folder(path_folder)
-        for dataset_ranking in datasets_rankings:
-            datasets.append(Dataset(dataset_ranking))
+        for dataset_ranking, file_path in datasets_rankings:
+            dataset = Dataset(dataset_ranking)
+            dataset.path = file_path
+            datasets.append(dataset)
         return datasets
 
     @staticmethod
@@ -232,19 +237,68 @@ class Dataset:
         return Dataset(path_file)
 
     def __lt__(self, other):
-        return self.__path < other.path
+        return self.n < other.n or (self.n == other.n and self.m < other.m)
 
     def __le__(self, other):
-        return self.path <= other.path
+        return self.n <= other.n or (self.n == other.n and self.m <= other.m)
 
     def __eq__(self, other):
-        return str(self.rankings) == str(other.rankings)
+        return self.n == other.n and self.m == other.m
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __gt__(self, other):
-        return self.__path > other.path
+        return self.n > other.n or (self.n == other.n and self.m > other.m)
 
     def __ge__(self, other):
-        return self.__path >= other.path
+        return self.n >= other.n or (self.n == other.n and self.m >= other.m)
+
+    def __repr__(self):
+        return self.path
+
+    def is_element_in_dataset(self, element: str or int) -> bool:
+        to_check = str(element)
+        for ranking in self.rankings:
+            for bucket in ranking:
+                for elem in bucket:
+                    if str(element) == to_check:
+                        return True
+        return False
+
+
+class DatasetSelector:
+    def __init__(self,
+                 nb_elem_min: int = 0,
+                 nb_elem_max: float = float('inf'),
+                 nb_rankings_min: int = 0,
+                 nb_rankings_max: float = float('inf')):
+        self.__nb_elem_min = nb_elem_min
+        self.__nb_elem_max = nb_elem_max
+        self.__nb_rankings_min = nb_rankings_min
+        self.__nb_rankings_max = nb_rankings_max
+
+    def __get_nb_elem_min(self) -> int:
+        return self.__nb_elem_min
+
+    def __get_nb_rankings_min(self) -> int:
+        return self.__nb_rankings_min
+
+    def __get_nb_elem_max(self) -> int or float:
+        return self.__nb_elem_max
+
+    def __get_nb_rankings_max(self) -> int or float:
+        return self.__nb_rankings_max
+
+    nb_elem_max = property(__get_nb_elem_max)
+    nb_elem_min = property(__get_nb_elem_min)
+    nb_rankings_max = property(__get_nb_rankings_max)
+    nb_rankings_min = property(__get_nb_rankings_min)
+
+    def select_datasets(self, list_datasets: List) -> List:
+        res = []
+        for dataset in list_datasets:
+            if self.__nb_elem_min <= dataset.n <= self.__nb_elem_max:
+                if self.__nb_rankings_min <= dataset.m <= self.__nb_rankings_max:
+                    res.append(dataset)
+        return res

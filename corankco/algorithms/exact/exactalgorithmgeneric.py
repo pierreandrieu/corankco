@@ -122,7 +122,7 @@ class ExactAlgorithmGeneric(MedianRanking):
                                 + 2 * my_vars[h_vars[j_tie_k]] \
                                 - my_vars[h_vars[i_tie_k]] <= 3
 
-        # if tie is not the single best choice for any pair x,y, then there is a permutation median
+        # optimization
         if not ties_must_be_checked:
             for i in range(0, nb_elem - 1):
                 for j in range(i + 1, nb_elem):
@@ -209,7 +209,7 @@ class ExactAlgorithmGeneric(MedianRanking):
                     edges.append((e2, e1))
                 if put_after > put_before or put_after > put_tied:
                     edges.append((e1, e2))
-                if put_tied < put_after and put_tied < put_before:
+                if 2 * put_tied <= (put_after + put_before):
                     ties_must_be_checked = True
                 matrix[e1][e2] = [put_before, put_after, put_tied]
                 matrix[e2][e1] = [put_after, put_before, put_tied]

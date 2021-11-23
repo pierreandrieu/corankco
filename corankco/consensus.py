@@ -20,7 +20,7 @@ class Consensus:
     def __init__(self, consensus_rankings: List[List[List or Set[int or str]]],
                  dataset: Dataset = None,
                  scoring_scheme: ScoringScheme = None,
-                 att: Dict[ConsensusFeature, str or int or float or bool] = None):
+                 att: Dict[ConsensusFeature, str or int or float or bool or List] = None):
         self.__att = att
         if self.__att is None:
             self.__att = {}
@@ -58,7 +58,7 @@ class Consensus:
     def __get_associated_scoring_scheme(self) -> ScoringScheme:
         return self.__scoring_scheme
 
-    def __get_att(self) -> Dict[ConsensusFeature, str or int or float or bool]:
+    def __get_att(self) -> Dict[ConsensusFeature, str or int or float or bool or List]:
         return self.__att
 
     def __set_necessarily_optimal(self, optimal: bool):

@@ -1,6 +1,7 @@
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
+from time import time
 
 
 class ScoringSchemeNotHandledException(Exception):
@@ -34,6 +35,21 @@ class MedianRanking:
 
     def get_full_name(self) -> str:
         raise NotImplementedError("The method not implemented")
+
+    def bench_time_consensus(self,
+                             dataset: Dataset,
+                             scoring_scheme: ScoringScheme,
+                             return_at_most_one_ranking: bool = False,
+                             lower_bound_time: int = 2) -> float:
+        sum_time = 0
+        nb_computation = 0
+        while sum_time <= lower_bound_time:
+            begin = time()
+            self.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, True)
+            end = time()
+            sum_time += end - begin
+            nb_computation += 1
+        return sum_time / nb_computation
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         """

@@ -23,9 +23,6 @@ class ConqurbioDataset(Dataset):
             real_path += os.path.sep
         print(real_path)
         for file in os.listdir(real_path):
-            try:
-                datasets.append(ConqurbioDataset(real_path + file, file.split("_")[-1]))
-            except EmptyDatasetException:
-                os.system("rm " + real_path + file.replace(" ", "\\ ").replace("'", "\'"))
+            datasets.append(ConqurbioDataset(real_path + file, file.split("_")[-1]))
         return datasets
 

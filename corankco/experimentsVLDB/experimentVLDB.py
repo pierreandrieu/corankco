@@ -1,4 +1,4 @@
-from corankco.experimentsVLDB.ConqurbioDataset import ConqurbioDataset
+from corankco.experimentsVLDB.conqurbio_dataset import ConqurbioDataset
 import os
 from typing import List
 

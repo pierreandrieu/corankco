@@ -1,5 +1,5 @@
-from corankco.experimentsVLDB.Gene import Gene
-from corankco.experimentsVLDB.DatabaseEnum import Database
+from corankco.experimentsVLDB.gene import Gene
+from corankco.experimentsVLDB.database_enum import Database
 from typing import Dict, Tuple, Set
 
 

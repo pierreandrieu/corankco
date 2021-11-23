@@ -1,4 +1,4 @@
-from corankco.experimentsVLDB.DatabaseEnum import Database
+from corankco.experimentsVLDB.database_enum import Database
 from typing import Tuple, Dict
 
 

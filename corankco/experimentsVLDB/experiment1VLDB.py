@@ -1,9 +1,9 @@
-from corankco.experimentsVLDB.ExperimentVLDB import ExperimentVLDB
-from corankco.experimentsVLDB.OrphanetParser import OrphanetParser
-from corankco.experimentsVLDB.Disease import Disease
+from corankco.experimentsVLDB.experimentVLDB import ExperimentVLDB
+from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
+from corankco.experimentsVLDB.disease import Disease
 from corankco.algorithms.algorithmChoice import Algorithm, get_algorithm
 from corankco.scoringscheme import ScoringScheme
-from corankco.experimentsVLDB.ConqurbioDataset import ConqurbioDataset
+from corankco.experimentsVLDB.conqurbio_dataset import ConqurbioDataset
 from corankco.consensus import Consensus
 from typing import List, Iterable
 import numpy as np

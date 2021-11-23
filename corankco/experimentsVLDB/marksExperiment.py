@@ -1,7 +1,7 @@
 from typing import List
 
 from corankco.dataset import Dataset
-from corankco.experimentsVLDB.ExperimentVLDB import ExperimentVLDB
+from corankco.experimentsVLDB.experimentVLDB import ExperimentVLDB
 
 
 class MarksExperiment(ExperimentVLDB):

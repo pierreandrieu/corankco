@@ -1,6 +1,6 @@
-from corankco.experimentsVLDB.OrphanetParser import OrphanetParser
-from corankco.experimentsVLDB.Gene import Gene
-from corankco.experimentsVLDB.GeneNcbiParser import GeneNcbiParser
+from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
+from corankco.experimentsVLDB.gene import Gene
+from corankco.experimentsVLDB.geneNcbiParser import GeneNcbiParser
 
 
 orphaParser = OrphanetParser("../../data/en_product6.xml")

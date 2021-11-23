@@ -1,6 +1,6 @@
-from corankco.experimentsVLDB.Gene import Gene
-from corankco.experimentsVLDB.DatabaseEnum import Database
-from corankco.experimentsVLDB.BiologicalDatabase import BiologicalDatabase
+from corankco.experimentsVLDB.gene import Gene
+from corankco.experimentsVLDB.database_enum import Database
+from corankco.experimentsVLDB.biological_database import BiologicalDatabase
 
 
 class GeneNcbiParser(BiologicalDatabase):

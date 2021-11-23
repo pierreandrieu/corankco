@@ -1,7 +1,7 @@
-from corankco.experimentsVLDB.DatabaseEnum import Database
-from corankco.experimentsVLDB.Disease import Disease
-from corankco.experimentsVLDB.Gene import Gene
-from corankco.experimentsVLDB.BiologicalDatabase import BiologicalDatabase
+from corankco.experimentsVLDB.database_enum import Database
+from corankco.experimentsVLDB.disease import Disease
+from corankco.experimentsVLDB.gene import Gene
+from corankco.experimentsVLDB.biological_database import BiologicalDatabase
 from typing import List
 
 
@@ -16,45 +16,45 @@ class OrphanetParser(BiologicalDatabase):
 
         with open(path_xml_data_en_product, encoding="ISO-8859-1") as fileOrphanet:
             text = fileOrphanet.read()
-            diseasesText = text.split("<Disorder id=")[1:]
-            for diseaseText in diseasesText:
-                diseaseId = diseaseText.split(">")[0][1:-1]
-                diseaseIdOrphanet = diseaseText.split("</OrphaCode>")[0].split(">")[-1].strip()
-                diseaseName = diseaseText.split("</Name>")[0].split(">")[-1]
-                disease = Disease(diseaseId, diseaseIdOrphanet, diseaseName)
+            diseases_text = text.split("<Disorder id=")[1:]
+            for diseaseText in diseases_text:
+                disease_id = diseaseText.split(">")[0][1:-1]
+                disease_id_orphanet = diseaseText.split("</OrphaCode>")[0].split(">")[-1].strip()
+                disease_name = diseaseText.split("</Name>")[0].split(">")[-1]
+                disease = Disease(disease_id, disease_id_orphanet, disease_name)
                 self.__diseaseList.append(disease)
-                self.__diseaseHash[diseaseIdOrphanet] = disease
-                genesText = diseaseText.split("<DisorderGeneAssociationList")[1]
+                self.__diseaseHash[disease_id_orphanet] = disease
+                genes_text = diseaseText.split("<DisorderGeneAssociationList")[1]
 
-                for geneText in genesText.split("<Gene id=")[1:]:
-                    geneId = geneText.split(">")[0].replace("\"", "")
-                    geneName = geneText.split("</Name>")[0].split(">")[-1]
-                    geneSymbol = geneText.split("</Symbol>")[0].split(">")[-1]
-                    crossReferencesText = geneText.split("<ExternalReferenceList")[-1]
-                    if geneId not in self.__genes_hashed:
-                        gene = Gene(geneId, geneName, geneSymbol, "Orphanet")
-                        self.__genes_hashed[geneId] = gene
+                for geneText in genes_text.split("<Gene id=")[1:]:
+                    gene_id = geneText.split(">")[0].replace("\"", "")
+                    gene_name = geneText.split("</Name>")[0].split(">")[-1]
+                    gene_symbol = geneText.split("</Symbol>")[0].split(">")[-1]
+                    cross_references_text = geneText.split("<ExternalReferenceList")[-1]
+                    if gene_id not in self.__genes_hashed:
+                        gene = Gene(gene_id, gene_name, gene_symbol, "Orphanet")
+                        self.__genes_hashed[gene_id] = gene
                         self._list_genes.append(gene)
                     else:
-                        gene = self.__genes_hashed[geneId]
-                    for crossRef in crossReferencesText.split("<ExternalReference id=")[1:]:
-                        crossRefSource = crossRef.split("</Source>")[0].split(">")[-1]
-                        crossRefId = crossRef.split("</Reference>")[0].split(">")[-1]
+                        gene = self.__genes_hashed[gene_id]
+                    for crossRef in cross_references_text.split("<ExternalReference id=")[1:]:
+                        cross_ref_source = crossRef.split("</Source>")[0].split(">")[-1]
+                        cross_ref_id = crossRef.split("</Reference>")[0].split(">")[-1]
 
-                        gene.add_crossref(self._mapping_db[crossRefSource], crossRefId)
+                        gene.add_crossref(self._mapping_db[cross_ref_source], cross_ref_id)
 
-                    disorderGeneAssociationTypeText = \
+                    disorder_gene_association_type_text = \
                         geneText.split("<DisorderGeneAssociationType id=")[1].split("</DisorderGeneAssociationType>")[0]
-                    disorderGeneAssociationStatusText = \
+                    disorder_gene_association_status_text = \
                         geneText.split("<DisorderGeneAssociationStatus id=")[1].split(
                             "</DisorderGeneAssociationStatus>")[0]
-                    # disorderGeneAssociationTypeId = disorderGeneAssociationTypeText.split(">")[0][1:-1]
-                    disorderGeneAssociationTypeName = disorderGeneAssociationTypeText.split("</Name>")[0].split(">")[-1]
+                    # disorderGeneAssociationTypeId = disorder_gene_association_type_text.split(">")[0][1:-1]
+                    disorder_gene_association_type_name = disorder_gene_association_type_text.split("</Name>")[0].split(">")[-1]
 
                     # disorderGeneAssociationStatusId = disorderGeneAssociationStatusText.split(">")[0][1:-1]
-                    disorderGeneAssoStatusName = disorderGeneAssociationStatusText.split("</Name>")[0].split(">")[-1]
+                    disorder_gene_asso_status_name = disorder_gene_association_status_text.split("</Name>")[0].split(">")[-1]
 
-                    disease.add_associated_gene(gene, disorderGeneAssociationTypeName, disorderGeneAssoStatusName)
+                    disease.add_associated_gene(gene, disorder_gene_association_type_name, disorder_gene_asso_status_name)
 
     def contains_mesh(self, mesh_term: str) -> bool:
         return mesh_term in self.__disease_from_mesh
@@ -125,10 +125,10 @@ class OrphanetParser(BiologicalDatabase):
 
     @staticmethod
     def get_orpha_base(file_xml_orphanet: str, data_gene_ncbi: str, file_mapping: str):
-        orphaParser = OrphanetParser(file_xml_orphanet)
-        orphaParser.add_genes_ncbi(data_gene_ncbi)
-        orphaParser.add_mesh_id(file_mapping)
-        return orphaParser
+        orpha_parser = OrphanetParser(file_xml_orphanet)
+        orpha_parser.add_genes_ncbi(data_gene_ncbi)
+        orpha_parser.add_mesh_id(file_mapping)
+        return orpha_parser
 
     @staticmethod
     def get_diseases_orphanet_for_vldb() -> List[Disease]:

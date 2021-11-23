@@ -21,7 +21,7 @@ class KemenyComputingFactory:
     scoring_scheme = property(__get_scoring_scheme, __set_scoring_scheme)
 
     @staticmethod
-    def get_before_tied_counting(r1: Dict, size_buckets: Dict, ranking: List[List[int]], id_max: int) -> tuple:
+    def get_before_tied_counting(r1: Dict, size_buckets: Dict, ranking: List[List or Set[int or str]], id_max: int) -> tuple:
         vect_before = zeros(6, dtype=int)
         vect_tied = zeros(6, dtype=int)
         not_in_r2 = {}
@@ -80,7 +80,7 @@ class KemenyComputingFactory:
         res = (vect_before, vect_tied)
         return res
 
-    def get_kemeny_score(self, c: List[List[int]], rankings: List[List[List[int]]]) -> float:
+    def get_kemeny_score(self, c: List[List or Set[int or str]], rankings: List[List[List or Set[int or str]]]) -> float:
         elements_r1 = {}
         size_buckets = {}
         id_bucket = 1
@@ -129,7 +129,7 @@ class KemenyComputingFactory:
             nb2 = right[j]
             if nb < nb2:
                 if nb < id_max:
-                    vect_before[0] += m - j - not_in_r1_right
+                    # vect_before[0] += m - j - not_in_r1_right
                     vect_before[3] += not_in_r1_right
                 res[k] = nb
                 k += 1
@@ -157,7 +157,7 @@ class KemenyComputingFactory:
                     cpt2 += 1
                 if nb < id_max:
                     vect_tied[0] += cpt1 * cpt2
-                    vect_before[0] += cpt1*(m - j - not_in_r1_right)
+                    # vect_before[0] += cpt1*(m - j - not_in_r1_right)
                     vect_before[1] += cpt2*(n - i - not_in_r1_left)
                     vect_before[3] += cpt1 * not_in_r1_right
                     vect_before[4] += cpt2 * not_in_r1_left
@@ -173,7 +173,7 @@ class KemenyComputingFactory:
         return res
 
     @staticmethod
-    def __manage_bucket(bucket: List[int], vect_before: ndarray, vect_tied: ndarray, id_max: int) -> ndarray:
+    def __manage_bucket(bucket: List or Set[int or str], vect_before: ndarray, vect_tied: ndarray, id_max: int) -> ndarray:
         if bucket == None:
             return asarray([])
         h = {}
@@ -195,7 +195,7 @@ class KemenyComputingFactory:
             total -= length_bucket_r1
 
             vect_before[2] += length_bucket_r1 * total
-            vect_tied[2] += length_bucket_r1 * (length_bucket_r1 - 1) / 2
+            # vect_tied[2] += length_bucket_r1 * (length_bucket_r1 - 1) / 2
         return sort(asarray(bucket), kind='mergesort')
 
     def score_between_rankings(self, r1: List[List or Set[int or str]], r2: List[List or Set[int or str]]) -> float:

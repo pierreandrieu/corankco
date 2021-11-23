@@ -6,11 +6,13 @@ from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneri
 
 
 class ExactAlgorithm(MedianRanking):
-    def __init__(self, limit_time_sec=0):
+    def __init__(self, limit_time_sec=0, optimize=True, preprocess=True):
         if limit_time_sec > 0:
             self.__limit_time_sec = limit_time_sec
         else:
             self.__limit_time_sec = 0
+        self.__optimize = optimize
+        self.__preprocess = preprocess
 
     def compute_consensus_rankings(
             self,
@@ -39,16 +41,22 @@ class ExactAlgorithm(MedianRanking):
         try:
             import cplex
             from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
-            return ExactAlgorithmCplex(self.__limit_time_sec).compute_consensus_rankings(dataset,
-                                                                                         scoring_scheme,
-                                                                                         return_at_most_one_ranking,
-                                                                                         bench_mode)
+            alg = ExactAlgorithmCplex(self.__limit_time_sec, self.__optimize, self.__preprocess)
+            return alg.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, bench_mode)
         except ImportError:
             ret = return_at_most_one_ranking
             return ExactAlgorithmGeneric().compute_consensus_rankings(dataset, scoring_scheme, ret, bench_mode)
 
     def get_full_name(self) -> str:
-        return "Exact algorithm"
+        res = "Exact algorithm"
+        if self.__preprocess:
+            res += ", preprocess=" + str(self.__preprocess)
+            if self.__optimize:
+                res += ", optimize=" + str(self.__optimize)
+        else:
+            if self.__optimize:
+                res += ", optimize=" + str(self.__optimize)
+        return res
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

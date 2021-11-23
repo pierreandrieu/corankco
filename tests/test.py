@@ -9,7 +9,8 @@ dataset = Dataset([
               [[3, 1], [4]],
               [[1], [5], [3, 2]]
              ])
-# or d = Dataset(file_path), with file_path is a string
+# or d = Dataset.get_rankings_from_file(file_path), with file_path is the path to fhe file
+# import a list of datasets in a same folder : Dataset.get_rankings_from_folder(path_folder)
 
 # print information about the dataset
 print(dataset.description())
@@ -41,6 +42,7 @@ algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
                                                                           "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
                          get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
                          ]
+
 for alg in algorithms_to_execute:
     print(alg.get_full_name())
     consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=sc, return_at_most_one_ranking=False)

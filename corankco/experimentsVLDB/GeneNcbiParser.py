@@ -32,4 +32,3 @@ class GeneNcbiParser(BiologicalDatabase):
 
     def get_gene(self, ncbi_id: str or int) -> Gene:
         return self.__gene_from_id[str(ncbi_id)]
-

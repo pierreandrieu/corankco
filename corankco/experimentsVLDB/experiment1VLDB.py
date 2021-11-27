@@ -1,125 +1,122 @@
-from corankco.experimentsVLDB.experimentVLDB import ExperimentVLDB
+from corankco.experimentsVLDB.experiment import Experiment
 from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
 from corankco.experimentsVLDB.disease import Disease
+from corankco.dataset import Dataset, DatasetSelector
 from corankco.algorithms.algorithmChoice import Algorithm, get_algorithm
 from corankco.scoringscheme import ScoringScheme
-from corankco.experimentsVLDB.conqurbio_dataset import ConqurbioDataset
 from corankco.consensus import Consensus
-from typing import List, Iterable
+from corankco.utils import parse_ranking_with_ties_of_int
+from typing import List, Iterable, Dict, Tuple
 import numpy as np
 
 
-class Experiment1VLDB(ExperimentVLDB):
+class ExperimentOrphanet(Experiment):
+
     def __init__(self,
+                 name_experiment: str,
                  path_datasets: str,
                  values_b5: Iterable[float],
-                 min_gs_size: int = 1,
-                 top_k: int = 20):
-        super().__init__(1, path_datasets)
+                 dataset_selector: DatasetSelector = None,
+                 ):
+        super().__init__(name_experiment, path_datasets, dataset_selector)
         self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb()
-        self.__algo = get_algorithm(Algorithm.ParCons)
-        self.__values_b5 = list(sorted(values_b5))
-        self.__min_gs_size = min_gs_size
-        self.__top_k = top_k
+        self.__algo = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
+        self.__remove_useless_datasets()
+        self.__scoring_schemes = []
+        self.__consensus = {}
+        for value_b5 in values_b5:
+            sc = ScoringScheme([[0., 1., 1., 0., value_b5, 0], [1., 1., 0., value_b5, value_b5, 0]])
+            self.__scoring_schemes.append(sc)
 
-    def contains_mesh(self, mesh_term: str) -> bool:
+    def __contains_mesh(self, mesh_term: str) -> bool:
         return self.__orphanetParser.contains_mesh(mesh_term)
 
     def get_disease_from_mesh(self, mesh_term: str) -> Disease:
         return self.__orphanetParser.get_disease_from_mesh(mesh_term)
 
-    def select_datasets(self) -> List[ConqurbioDataset]:
+    def __remove_useless_datasets(self):
         res = []
         for dataset in self._datasets:
-            if self.contains_mesh(dataset.mesh) :
-                goldstandard = self.get_disease_from_mesh(dataset.mesh).get_associated_genes_with_ncbi_gene_id()
-                if len(goldstandard) >= self.__min_gs_size:
+            mesh = dataset.name.split("_")[-1]
+            if self.__contains_mesh(mesh):
+                gdstandard = self.get_disease_from_mesh(mesh).get_assessed_associated_genes_with_ncbi_gene_id()
+                real_gs = set()
+                for gene_goldstandard in gdstandard:
+                    if dataset.contains_element(gene_goldstandard):
+                        real_gs.add(gene_goldstandard)
+                if len(real_gs) >= 1:
                     res.append(dataset)
+        self._datasets = res
+
+    def _run_raw_data(self) -> str:
+        # all_consensus = self.__compute_consensus()
+        h_disease_gs = {}
+        for dataset in self._datasets:
+            mesh = dataset.name.split("_")[-1]
+            initial_gs = self.get_disease_from_mesh(mesh).get_assessed_associated_genes_with_ncbi_gene_id()
+            real_gs = set()
+            for gene in initial_gs:
+                if dataset.contains_element(gene):
+                    real_gs.add(gene)
+            h_disease_gs[dataset.name] = real_gs
+        res = "b5-b4;dataset;nb_elements;goldstandard;size_goldstandard;consensus\n"
+        self.__get_consensus_from_files()
+        for sc in self.__scoring_schemes:
+            for dataset, consensus in self.__consensus[sc]:
+                gs = h_disease_gs[dataset.name]
+                res += str(sc.b5) + ";" + dataset.name + ";" + str(dataset.n) + ";" + str(gs) + ";" \
+                       + str(len(gs)) + ";" + str(consensus.consensus_rankings[0]) + "\n"
+
         return res
 
-    def run_from_scratch(self):
-        output = open("/home/pierre/Bureau/res_exp1.csv", "w")
-        self.create_dir_output()
-        dirs = []
-        for value_b5 in self.__values_b5:
-            dirs.append(self.create_subdir(["consensus", "b5=" + str(value_b5)]))
+    def __get_consensus_from_files(self):
+        for sc in self.__scoring_schemes:
+            self.__consensus[sc] = []
+            for dataset in self._datasets:
+                self.__consensus[sc].append((dataset, Consensus.get_consensus_from_file(self._folder_last_output + "consensus/" + str(sc.b5) + "/" + dataset.name.split("/")[-1])))
 
-        first_line = "dataset;nb_elements;nb_rankings;"
-        for value_b5 in self.__values_b5[:-1]:
-            first_line += str("b5-b4=") + str(value_b5) + ";"
-        first_line += "b5-b4=" + str(self.__values_b5[-1]) + "\n"
-        output.write(first_line)
-        datasets = self.select_datasets()
-        id_dataset = 0
-        raw_result = np.zeros((len(datasets), len(self.__values_b5)))
+    def _run_final_data(self, raw_data: str) -> str:
+        top_k_all = list(range(10, 301, 10))
+        res = ""
+        h_res = {}
+        for top_k in top_k_all:
+            h_res[top_k] = {}
+            for sc in self.__scoring_schemes:
+                h_res[top_k][sc.b5] = []
+        for top_k in top_k_all:
+            h_res_topk = h_res[top_k]
+            for line in raw_data.split("\n")[1:]:
+                if len(line) > 1:
+                    cols = line.split(";")
+                    b5 = float(cols[0])
+                    h_res_topk_sc = h_res_topk[b5]
+                    consensus = Consensus([parse_ranking_with_ties_of_int(cols[-1])])
+                    gs = set()
+                    gs_str = cols[3][1:-1]
+                    for elem in gs_str.split(", "):
+                        gs.add(int(elem))
+                    h_res_topk_sc.append(consensus.evaluate_topk_ranking(gs, top_k=top_k))
+        for top_k in top_k_all:
+            res += str(top_k)
+            h_topk = h_res[top_k]
+            for sc in self.__scoring_schemes:
+                res += ";" + str(np.sum(np.asarray(h_topk[sc.b5])))
+            res += "\n"
+        return res
 
-        for dataset in sorted(datasets):
-            mesh = dataset.path.split("_")[-1]
-            disease = self.get_disease_from_mesh(mesh)
-            genes_goldstandard = disease.get_associated_genes_with_ncbi_gene_id()
-            id_scoring_scheme = 0
-            line_to_print = str(dataset.path.split("_")[-1]) + ";" + str(dataset.n) + ";" + str(dataset.m) + ";"
-            for value_b5 in self.__values_b5:
-                sc = ScoringScheme([[0., 1., 1., 0., value_b5, 0.], [1., 1., 0., value_b5, value_b5, 0]])
+    def __compute_consensus(self):
+        self._create_dir_output()
+        for sc in self.__scoring_schemes:
+            self.__consensus[sc] = []
+            for dataset in self._datasets:
                 consensus = self.__algo.compute_consensus_rankings(dataset, sc, True)
-                f = open(dirs[id_scoring_scheme] + mesh, "w")
-                f.write(str(consensus.consensus_rankings[0]))
-                f.close()
-                cmp = consensus.evaluate_topk_ranking(genes_goldstandard, self.__top_k)
-                line_to_print += str(cmp[0])+";"
-                raw_result[id_dataset][id_scoring_scheme] = cmp[0]
-                id_scoring_scheme += 1
-            id_dataset += 1
-            line_to_print = line_to_print[:-1]+"\n"
-            print(line_to_print[:-1])
-            output.write(line_to_print)
-        output.close()
-        output = open("/home/pierre/Bureau/res_exp1_2.csv")
-        res = "b5-b4;nbGenesGsFound\n"
-        sum_genes_for_each_b5 = np.sum(raw_result, axis=0)
-        for n in range(len(self.__values_b5)):
-            res += str(self.__values_b5[n])+";"+str(sum_genes_for_each_b5[n]) + "\n"
-        print(res)
-        output.write(res)
-
-    def run_from_consensus_files(self) -> str:
-        res_0 = 0
-        res_1 = 1
-        som = 0
-        sep = self.get_sep_os()
-        first_line = "dataset;taille_gs"
-        for value_b5 in self.__values_b5[:-1]:
-            first_line += str("b5-b4=") + str(value_b5) + ";"
-        first_line += "b5-b4=" + str(self.__values_b5[-1]) + "\n"
-        csv = first_line
-        for dataset in sorted(self.select_datasets()):
-            mesh = dataset.mesh
-            line_to_print = dataset.mesh + ";" # + str(dataset.n) + ";" + str(dataset.m) + ";"
-            gs = self.get_disease_from_mesh(mesh).get_associated_genes_with_ncbi_gene_id()
-            line_to_print += str(len(gs)) + ";"
-            if len(gs) >= self.__top_k:
-                som += self.__top_k
-            else:
-                som += len(gs)
-            for value_b5 in self.__values_b5:
-                consensus = Consensus.get_consensus_from_file(self._folder_last_output+"consensus" + sep + "b5=" + str(value_b5) + sep + mesh)
-                cmp = consensus.evaluate_topk_ranking(gs, self.__top_k)
-                line_to_print += str(cmp[0])+";"
-                if value_b5 == 0:
-                    res_0 += cmp[0]
-                elif value_b5 == 1:
-                    res_1 += cmp[1]
-            line_to_print = line_to_print[:-1]+"\n"
-            print(line_to_print[:-1])
-            csv += line_to_print
-        print(res_0)
-        print(res_1)
-        print(som)
-        return csv
+                self.__consensus[sc].append((dataset, consensus))
 
 
-values_b5_expe = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
-exp1 = Experiment1VLDB("/home/pierre/Bureau/nouveauVLDB/datasets", values_b5_expe)
-exp1.run_from_consensus_files()
+values_b5_expe = [0.0, 0.25, 0.5, 1, 2]
+dataset_selector = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
+exp1 = ExperimentOrphanet("orphanet", "/home/pierre/vldb/datasets/biological_dataset", values_b5_expe, dataset_selector=dataset_selector)
+exp1.run_and_print()
+print(exp1.get_datasets())
 
-# exp1.run_from_scratch()
+# 515

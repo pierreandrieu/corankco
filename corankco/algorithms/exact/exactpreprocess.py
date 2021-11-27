@@ -7,7 +7,7 @@ from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 
 class ExactPreprocess(ParCons):
     def __init__(self, optimize: bool = True):
-        super().__init__(auxiliary_algorithm=ExactAlgorithm())
+        super().__init__(auxiliary_algorithm=ExactAlgorithm(preprocess=False), bound_for_exact=0)
         self.__optimize = optimize
 
     def compute_consensus_rankings(

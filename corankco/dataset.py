@@ -16,10 +16,10 @@ class Dataset:
         self.__with_ties = None
         if type(rankings) == str:
             rankings_list = get_rankings_from_file(rankings)
-            self.__path = rankings
+            self.__name = rankings
         else:
             rankings_list = rankings
-            self.__path = "manual"
+            self.__name = "manual"
         if len(rankings_list) == 0:
             raise EmptyDatasetException
 
@@ -62,7 +62,7 @@ class Dataset:
         # updates previous values with right values for n, m and complete
         self.__set_rankings_and_update_properties(rankings=rankings_final)
         if self.n == 0:
-            raise EmptyDatasetException
+            raise EmptyDatasetException("Datast must not be empty")
 
     def __get_rankings(self) -> List[List[List or Set[int or str]]]:
         return self.__rankings
@@ -71,7 +71,7 @@ class Dataset:
         return self.__nb_elements
 
     def __get_path(self) -> str:
-        return self.__path
+        return self.__name
 
     def __get_nb_rankings(self) -> int:
         return self.__nb_rankings
@@ -95,7 +95,7 @@ class Dataset:
         self.__with_ties = with_ties
 
     def __set_path(self, path: str):
-        self.__path = path
+        self.__name = path
 
     def __set_rankings_and_update_properties(self, rankings: List[List[List or Set[int or str]]]):
         self.__rankings = rankings
@@ -107,7 +107,7 @@ class Dataset:
     rankings = property(__get_rankings, __set_rankings_and_update_properties)
     is_complete = property(__get_is_complete, __set_is_complete)
     with_ties = property(__get_with_ties, __set_with_ties)
-    path = property(__get_path, __set_path)
+    name = property(__get_path, __set_path)
 
     def __str__(self) -> str:
         return str(self.rankings)
@@ -228,7 +228,7 @@ class Dataset:
         datasets_rankings = get_rankings_from_folder(path_folder)
         for dataset_ranking, file_path in datasets_rankings:
             dataset = Dataset(dataset_ranking)
-            dataset.path = file_path
+            dataset.name = file_path
             datasets.append(dataset)
         return datasets
 
@@ -255,14 +255,14 @@ class Dataset:
         return self.n >= other.n or (self.n == other.n and self.m >= other.m)
 
     def __repr__(self):
-        return self.path
+        return self.name
 
-    def is_element_in_dataset(self, element: str or int) -> bool:
+    def contains_element(self, element: str or int) -> bool:
         to_check = str(element)
         for ranking in self.rankings:
             for bucket in ranking:
                 for elem in bucket:
-                    if str(element) == to_check:
+                    if str(elem) == to_check:
                         return True
         return False
 
@@ -302,3 +302,10 @@ class DatasetSelector:
                 if self.__nb_rankings_min <= dataset.m <= self.__nb_rankings_max:
                     res.append(dataset)
         return res
+
+    def __str__(self) -> str:
+        return "nb elements between " + str(self.__nb_elem_min) + " and " + str(self.__nb_elem_max) + \
+               "; nb rankings between " + str(self.__nb_rankings_min) + " and " + str(self.__nb_rankings_max)
+
+    def __repr__(self) -> str:
+        return self.__str__()

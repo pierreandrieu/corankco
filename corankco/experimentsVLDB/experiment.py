@@ -12,8 +12,8 @@ class Experiment:
         self._dataset_selector = dataset_selector
         if self._dataset_selector is None:
             self._dataset_selector = DatasetSelector(0, float('inf'), 0, float('inf'))
-        self._file_output_raw_data = "output_raw.csv"
-        self._file_output_final_data = "output_final.csv"
+        self._file_output_raw_data = "raw_data.csv"
+        self._file_output_final_data = "final_data.csv"
 
         parent_path = get_parent_path(path_datasets)
         path_output = parent_path + get_os_sep() + "experiment_"+self._name_expe+"_"
@@ -30,6 +30,11 @@ class Experiment:
                 cpt += 1
 
         self._datasets = self._dataset_selector.select_datasets(Dataset.get_datasets_from_folder(path_datasets))
+
+    def __get_folder_output(self) -> str:
+        return self._folder_output
+
+    folder_output = property(__get_folder_output)
 
     def _create_dir_output(self):
         create_dir(self._folder_output)
@@ -65,10 +70,16 @@ class Experiment:
         final_data = self._run_final_data(raw_data)
         self._write_output_raw(raw_data)
         self._write_output_final(final_data)
+        f = open(self._folder_output + "readme.txt", "w")
+        f.write(self.readme())
+        f.close()
 
     def run_and_print(self):
         raw_data = self._run_raw_data()
         final_data = self._run_final_data(raw_data)
+        print("PARAMETERS : ")
+        print(self.readme())
+
         print("RAW DATA : ")
         print(raw_data)
         print("FINAL DATA : ")
@@ -95,4 +106,15 @@ class Experiment:
             self._create_file_output_final()
             self._write_output_raw(raw_data)
             self._write_output_final(res)
+        return res
+
+    def readme(self) -> str:
+        res = ""
+        for k in self.__dict__:
+            if k != "_datasets":
+                res += repr(k) + ":" + repr(self.__dict__[k]) + "\n"
+        if "_datasets" in self.__dict__:
+            res += "_datasets: \n"
+            for dataset in self._datasets:
+                res += "\t" + dataset.name + "\n"
         return res

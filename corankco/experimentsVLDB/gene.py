@@ -14,17 +14,22 @@ class Gene:
     def add_crossref(self, db: Database, id_gene_db_crossref: str):
         self.__crossref[db.name] = id_gene_db_crossref
 
-    def get_crossref(self) -> Dict[Database, str]:
+    def __get_crossref(self) -> Dict[Database, str]:
         return self.__crossref
 
-    def get_id(self) -> str:
+    def __get_id(self) -> str:
         return self.__id_gene
 
-    def get_name(self) -> str:
+    def __get_name(self) -> str:
         return self.__name
 
-    def get_symbol(self) -> str:
+    def __get_symbol(self) -> str:
         return self.__symbol
+
+    crossref = property(__get_crossref)
+    id_gene = property(__get_id)
+    name = property(__get_name)
+    symbol = property(__get_symbol)
 
     def similarity(self, gene) -> Tuple[float, int]:
         crossref_in_both_db = 0
@@ -45,3 +50,6 @@ class Gene:
     def __str__(self) -> str:
         return self.__id_gene + " (" + self.__database_from + "):  " + self.__name + " (" + self.__symbol + ")" \
                + " - crossref: " + str(self.__crossref)
+
+    def __repr__(self) -> str:
+        return str(self.__id_gene)

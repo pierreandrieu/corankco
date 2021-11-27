@@ -32,6 +32,6 @@ class DatasetToClean(Dataset):
         datasets_rankings = get_rankings_from_folder(path_folder)
         for dataset_ranking, file_path in datasets_rankings:
             dataset = DatasetToClean(dataset_ranking)
-            dataset.path = file_path
+            dataset.name = file_path
             datasets.append(dataset)
         return datasets

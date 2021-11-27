@@ -3,14 +3,11 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
+from corankco.algorithms.exact.exactpreprocess import ExactPreprocess
 
 
 class ExactAlgorithm(MedianRanking):
-    def __init__(self, limit_time_sec=0, optimize=True, preprocess=True):
-        if limit_time_sec > 0:
-            self.__limit_time_sec = limit_time_sec
-        else:
-            self.__limit_time_sec = 0
+    def __init__(self, optimize=True, preprocess=True):
         self.__optimize = optimize
         self.__preprocess = preprocess
 
@@ -37,11 +34,16 @@ class ExactAlgorithm(MedianRanking):
         :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
         implementation of the algorithm does not fit with the scoring scheme
         """
+        if self.__preprocess:
+            return ExactPreprocess(self.__optimize).compute_consensus_rankings(dataset,
+                                                                               scoring_scheme,
+                                                                               return_at_most_one_ranking,
+                                                                               bench_mode)
 
         try:
             import cplex
             from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
-            alg = ExactAlgorithmCplex(self.__limit_time_sec, self.__optimize, self.__preprocess)
+            alg = ExactAlgorithmCplex(self.__optimize, self.__preprocess)
             return alg.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, bench_mode)
         except ImportError:
             ret = return_at_most_one_ranking

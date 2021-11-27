@@ -49,18 +49,24 @@ class OrphanetParser(BiologicalDatabase):
                         geneText.split("<DisorderGeneAssociationStatus id=")[1].split(
                             "</DisorderGeneAssociationStatus>")[0]
                     # disorderGeneAssociationTypeId = disorder_gene_association_type_text.split(">")[0][1:-1]
-                    disorder_gene_association_type_name = disorder_gene_association_type_text.split("</Name>")[0].split(">")[-1]
+                    disorder_gene_association_type_name = \
+                        disorder_gene_association_type_text.split("</Name>")[0].split(">")[-1]
 
                     # disorderGeneAssociationStatusId = disorderGeneAssociationStatusText.split(">")[0][1:-1]
-                    disorder_gene_asso_status_name = disorder_gene_association_status_text.split("</Name>")[0].split(">")[-1]
+                    disorder_gene_asso_status_name = \
+                        disorder_gene_association_status_text.split("</Name>")[0].split(">")[-1]
 
-                    disease.add_associated_gene(gene, disorder_gene_association_type_name, disorder_gene_asso_status_name)
+                    disease.add_associated_gene(gene,
+                                                disorder_gene_association_type_name,
+                                                disorder_gene_asso_status_name)
+
+    def __get_diseases(self) -> List[Disease]:
+        return self.__diseaseList
+
+    diseases = property(__get_diseases)
 
     def contains_mesh(self, mesh_term: str) -> bool:
         return mesh_term in self.__disease_from_mesh
-
-    def get_diseases(self) -> List[Disease]:
-        return self.__diseaseList
 
     def str_genes(self) -> str:
         res = ""
@@ -103,7 +109,7 @@ class OrphanetParser(BiologicalDatabase):
                     orpha_id = cols[0].split(":")[-1]
                     mesh_id = cols[1]
                     if mesh_id != "-" and orpha_id in self.__diseaseHash:
-                        self.__diseaseHash[orpha_id].set_id_mesh(mesh_id)
+                        self.__diseaseHash[orpha_id].id_mesh = mesh_id
                         self.__disease_from_mesh[mesh_id] = self.__diseaseHash[orpha_id]
 
     def get_disease_from_mesh(self, mesh_term: str) -> Disease:
@@ -111,10 +117,10 @@ class OrphanetParser(BiologicalDatabase):
 
     @staticmethod
     def get_diseases_completely_filled(file_xml_orphanet: str, data_gene_ncbi: str, file_mapping: str) -> List[Disease]:
-        orphaParser = OrphanetParser(file_xml_orphanet)
-        orphaParser.add_genes_ncbi(data_gene_ncbi)
-        orphaParser.add_mesh_id(file_mapping)
-        return orphaParser.get_diseases()
+        orpha_parser = OrphanetParser(file_xml_orphanet)
+        orpha_parser.add_genes_ncbi(data_gene_ncbi)
+        orpha_parser.add_mesh_id(file_mapping)
+        return orpha_parser.diseases
 
     @staticmethod
     def get_orpha_base_for_vldb():

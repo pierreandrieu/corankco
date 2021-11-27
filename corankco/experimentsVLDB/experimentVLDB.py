@@ -1,4 +1,4 @@
-from corankco.experimentsVLDB.conqurbio_dataset import ConqurbioDataset
+from corankco.dataset import Dataset
 import os
 from typing import List
 
@@ -25,7 +25,7 @@ class ExperimentVLDB:
                     self._folder_last_output = path_output + str(cpt-1) + os.path.sep
             else:
                 cpt += 1
-        for dataset in ConqurbioDataset.get_datasets_from_folder(path_datasets):
+        for dataset in Dataset.get_datasets_from_folder(path_datasets):
             if dataset.n >= self._min_n and dataset.m >= self._min_m:
                 self._datasets.append(dataset)
 
@@ -40,15 +40,8 @@ class ExperimentVLDB:
                 os.mkdir(res)
         return res
 
-    def get_datasets(self) -> List[ConqurbioDataset]:
+    def get_datasets(self) -> List[Dataset]:
         return self._datasets
 
-    def select_datasets(self) -> List[ConqurbioDataset]:
+    def select_datasets(self) -> List[Dataset]:
         raise NotImplementedError("The method not implemented")
-
-    def get_sep_os(self):
-        return os.path.sep
-
-    # def run(self):
-    #
-

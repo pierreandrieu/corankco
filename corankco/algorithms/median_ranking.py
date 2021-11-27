@@ -56,3 +56,6 @@ class MedianRanking:
         :return: a list of distances from distance_enumeration
         """
         raise NotImplementedError("The method not implemented")
+
+    def __repr__(self):
+        return self.__class__.__name__ + " " + str(self.__dict__)

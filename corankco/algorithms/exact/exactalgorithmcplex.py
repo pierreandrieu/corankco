@@ -10,11 +10,7 @@ import cplex
 
 
 class ExactAlgorithmCplex(MedianRanking):
-    def __init__(self, limit_time_sec=0, optimize=True, preprocess=True):
-        if limit_time_sec > 0:
-            self.__limit_time_sec = limit_time_sec
-        else:
-            self.__limit_time_sec = 0
+    def __init__(self, optimize=True, preprocess=True):
         self.__optimize = optimize
         self.__preprocess = preprocess
 
@@ -69,9 +65,6 @@ class ExactAlgorithmCplex(MedianRanking):
         my_prob.set_results_stream(None)  # mute
         my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
         my_prob.parameters.mip.pool.absgap.set(0.000001)
-        if self.__limit_time_sec > 0:
-            my_prob.parameters.timelimit = self.__limit_time_sec
-        #   my_prob.parameters.tuning.timelimit.set(self.__limit_time_sec)
 
         my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
         if not return_at_most_one_ranking:
@@ -87,8 +80,10 @@ class ExactAlgorithmCplex(MedianRanking):
         for i in range(nb_elem):
             for j in range(nb_elem):
                 if not i == j:
-                    if not should_consider_ties and mat_score[i][j][0] + mat_score[i][j][1] > 2 * mat_score[i][j][2]:
-                        should_consider_ties = True
+                    if not should_consider_ties:
+                        calc = mat_score[i][j][0] + mat_score[i][j][1] - 2 * mat_score[i][j][2]
+                        if (-0.00001 <= calc <= 0.00001 and not return_at_most_one_ranking) or calc > 0:
+                            should_consider_ties = True
                     s = "x_%s_%s" % (i, j)
                     my_obj.append(mat_score[i][j][0])
                     my_ub.append(1.0)
@@ -219,7 +214,7 @@ class ExactAlgorithmCplex(MedianRanking):
                               })
 
     @staticmethod
-    def __create_consensus(nb_elem: int, x: List, map_elements_cplex: Dict, id_elements: Dict):
+    def __create_consensus(nb_elem: int, x: List, map_elements_cplex: Dict, id_elements: Dict) -> List[List[int]]:
         ranking = []
         count_after = {}
         for i in range(nb_elem):

@@ -3,7 +3,6 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
-from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from typing import Tuple
 from itertools import combinations
 from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray
@@ -13,9 +12,9 @@ from igraph import Graph
 class ParCons(MedianRanking):
     def __init__(self, auxiliary_algorithm=None, bound_for_exact=80):
         if isinstance(auxiliary_algorithm, MedianRanking):
-            self.alg = auxiliary_algorithm
+            self.auxiliary_alg = auxiliary_algorithm
         else:
-            self.alg = BioConsert(starting_algorithms=None)
+            self.auxiliary_alg = BioConsert(starting_algorithms=None)
         self.bound_for_exact = bound_for_exact
 
     def compute_consensus_rankings(
@@ -41,6 +40,9 @@ class ParCons(MedianRanking):
         :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
         implementation of the algorithm does not fit with the scoring scheme
         """
+        if self.bound_for_exact > 0:
+            from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
+
         optimal = True
         sc = asarray(scoring_scheme.penalty_vectors)
         rankings = dataset.rankings
@@ -88,15 +90,16 @@ class ParCons(MedianRanking):
                         if len(project_ranking) > 0:
                             project_rankings.append(project_ranking)
                     if len(scc_i) > self.bound_for_exact:
-                        cons_ext = self.alg.compute_consensus_rankings(Dataset(project_rankings),
-                                                                       scoring_scheme,
-                                                                       True).consensus_rankings[0]
+                        cons_ext = self.auxiliary_alg.compute_consensus_rankings(Dataset(project_rankings),
+                                                                                 scoring_scheme,
+                                                                                 True).consensus_rankings[0]
                         res.extend(cons_ext)
                         optimal = False
                     else:
-                        cons_ext = ExactAlgorithm().compute_consensus_rankings(Dataset(project_rankings),
-                                                                               scoring_scheme,
-                                                                               True).consensus_rankings[0]
+                        cons_ext = ExactAlgorithm(preprocess=False).compute_consensus_rankings(
+                                                                            Dataset(project_rankings),
+                                                                            scoring_scheme,
+                                                                            True).consensus_rankings[0]
                         res.extend(cons_ext)
         hash_information = {ConsensusFeature.IsNecessarilyOptimal: optimal,
                             ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
@@ -151,7 +154,7 @@ class ParCons(MedianRanking):
         return graph_of_elements, matrix
 
     def get_full_name(self) -> str:
-        return "ParCons, uses  \"" + self.alg.get_full_name() + "\" on groups of size >  " + str(self.bound_for_exact)
+        return "ParCons, uses  \"" + self.auxiliary_alg.get_full_name() + "\" on groups of size >  " + str(self.bound_for_exact)
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

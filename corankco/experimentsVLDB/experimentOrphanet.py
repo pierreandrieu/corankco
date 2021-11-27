@@ -1,24 +1,25 @@
-from corankco.experimentsVLDB.experiment import Experiment
+from corankco.experimentsVLDB.experiment import ExperimentFromDataset
 from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
 from corankco.experimentsVLDB.disease import Disease
-from corankco.dataset import Dataset, DatasetSelector
+from corankco.dataset import DatasetSelector
 from corankco.algorithms.algorithmChoice import Algorithm, get_algorithm
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
-from typing import List, Iterable, Dict, Tuple
+from typing import Iterable
 import numpy as np
 
 
-class ExperimentOrphanet(Experiment):
+class ExperimentOrphanet(ExperimentFromDataset):
 
     def __init__(self,
                  name_experiment: str,
-                 path_datasets: str,
+                 main_folder_path: str,
+                 dataset_folder: str,
                  values_b5: Iterable[float],
                  dataset_selector: DatasetSelector = None,
                  ):
-        super().__init__(name_experiment, path_datasets, dataset_selector)
+        super().__init__(name_experiment, main_folder_path, dataset_folder, dataset_selector)
         self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb()
         self.__algo = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
         self.__remove_useless_datasets()
@@ -73,7 +74,9 @@ class ExperimentOrphanet(Experiment):
         for sc in self.__scoring_schemes:
             self.__consensus[sc] = []
             for dataset in self._datasets:
-                self.__consensus[sc].append((dataset, Consensus.get_consensus_from_file(self._folder_last_output + "consensus/" + str(sc.b5) + "/" + dataset.name.split("/")[-1])))
+                self.__consensus[sc].append(
+                    (dataset, Consensus.get_consensus_from_file(
+                        self._folder_last_output + "consensus/" + str(sc.b5) + "/" + dataset.name.split("/")[-1])))
 
     def _run_final_data(self, raw_data: str) -> str:
         top_k_all = list(range(10, 301, 10))
@@ -114,8 +117,11 @@ class ExperimentOrphanet(Experiment):
 
 
 values_b5_expe = [0.0, 0.25, 0.5, 1, 2]
-dataset_selector = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
-exp1 = ExperimentOrphanet("orphanet", "/home/pierre/vldb/datasets/biological_dataset", values_b5_expe, dataset_selector=dataset_selector)
+dataset_selector_expe = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
+exp1 = ExperimentOrphanet("orphanet", "/home/pierre/vldb/datasets/",
+                          "biological_dataset",
+                          values_b5_expe,
+                          dataset_selector=dataset_selector_expe)
 exp1.run_and_print()
 print(exp1.get_datasets())
 

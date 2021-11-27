@@ -15,6 +15,7 @@
       <w>expe</w>
       <w>gdstandard</w>
       <w>genatlas</w>
+      <w>goldstandard</w>
       <w>hgnc</w>
       <w>igraph</w>
       <w>imgt</w>
@@ -24,8 +25,10 @@
       <w>orphanet</w>
       <w>parfront</w>
       <w>prot</w>
+      <w>pseudodistance</w>
       <w>reactome</w>
       <w>splitted</w>
+      <w>topk</w>
       <w>vldb</w>
     </words>
   </dictionary>

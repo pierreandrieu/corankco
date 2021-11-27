@@ -4,19 +4,20 @@ from corankco.utils import get_parent_path, get_os_sep, can_be_created, create_d
 
 
 class Experiment:
-    def __init__(self, name_expe: str or int, path_datasets: str, dataset_selector: DatasetSelector):
+    def __init__(self, name_expe: str or int, main_folder_path: str):
         self._datasets = []
         self._name_expe = str(name_expe).replace(" ", "-")
         self._folder_last_output = ""
         self._folder_output = ""
-        self._dataset_selector = dataset_selector
-        if self._dataset_selector is None:
-            self._dataset_selector = DatasetSelector(0, float('inf'), 0, float('inf'))
+
         self._file_output_raw_data = "raw_data.csv"
         self._file_output_final_data = "final_data.csv"
 
-        parent_path = get_parent_path(path_datasets)
-        path_output = parent_path + get_os_sep() + "experiment_"+self._name_expe+"_"
+        path_output = main_folder_path
+        if not main_folder_path.endswith(get_os_sep()):
+            path_output += get_os_sep()
+        create_dir(path_output + "Experiments")
+        path_output += "Experiments" + get_os_sep() + self._name_expe+"_"
         dir_already_exists = True
         cpt = 1
         while dir_already_exists:
@@ -29,7 +30,6 @@ class Experiment:
             else:
                 cpt += 1
 
-        self._datasets = self._dataset_selector.select_datasets(Dataset.get_datasets_from_folder(path_datasets))
 
     def __get_folder_output(self) -> str:
         return self._folder_output
@@ -118,3 +118,20 @@ class Experiment:
             for dataset in self._datasets:
                 res += "\t" + dataset.name + "\n"
         return res
+
+
+class ExperimentFromDataset(Experiment):
+    def _run_raw_data(self) -> str:
+        return super()._run_raw_data()
+
+    def _run_final_data(self, raw_data: str) -> str:
+        return super()._run_final_data()
+
+
+    def __init__(self, name_expe: str or int, main_folder_path: str, dataset_folder: str, dataset_selector: DatasetSelector = None):
+        super().__init__(name_expe, main_folder_path)
+        self._dataset_selector = dataset_selector
+        if self._dataset_selector is None:
+            self._dataset_selector = DatasetSelector(0, float('inf'), 0, float('inf'))
+        self._datasets = []
+        self._datasets = self._dataset_selector.select_datasets(Dataset.get_datasets_from_folder(dataset_folder))

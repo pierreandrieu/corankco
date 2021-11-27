@@ -2,24 +2,24 @@ from corankco.dataset import DatasetSelector
 from corankco.algorithms.algorithmChoice import get_algorithm, Algorithm
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.scoringscheme import ScoringScheme
-from corankco.experimentsVLDB.experiment import Experiment
-# from corankco.partitioning.parfront import ParFront
+from corankco.experimentsVLDB.experiment import ExperimentFromDataset
 from typing import List
 import numpy as np
 
 
-class BenchTime(Experiment):
+class BenchTime(ExperimentFromDataset):
 
     def __init__(self,
                  name_exp: str or int,
-                 path_folder_datasets: str,
+                 main_folder_path: str,
+                 dataset_folder: str,
                  algs: List[MedianRanking],
                  scoring_scheme: ScoringScheme,
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
                  max_time: float = float('inf')
                  ):
-        super().__init__(name_exp, path_folder_datasets, dataset_selector_exp)
+        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__algs = algs
         self.__scoring_scheme = scoring_scheme
         self.__steps = steps
@@ -90,17 +90,18 @@ class BenchTime(Experiment):
 #######################################################################################################################
 
 
-class BenchScoringScheme(Experiment):
+class BenchScoringScheme(ExperimentFromDataset):
 
     def __init__(self,
                  name_exp: str or int,
-                 path_folder_datasets: str,
+                 main_folder_path: str,
+                 dataset_folder: str,
                  alg: MedianRanking,
                  scoring_schemes: List[ScoringScheme],
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5
                  ):
-        super().__init__(name_exp, path_folder_datasets, dataset_selector_exp)
+        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__alg = alg
         self.__scoring_schemes = scoring_schemes
         self.__steps = steps
@@ -154,14 +155,15 @@ class BenchScoringScheme(Experiment):
 #######################################################################################################################
 
 
-class BenchPartitioningScoringScheme(Experiment):
+class BenchPartitioningScoringScheme(ExperimentFromDataset):
     def __init__(self,
                  name_exp: str or int,
-                 path_folder_datasets: str,
+                 main_folder_path: str,
+                 dataset_folder: str,
                  scoring_schemes_exp: List[ScoringScheme],
                  dataset_selector_exp: DatasetSelector = None,
                  ):
-        super().__init__(name_exp, path_folder_datasets, dataset_selector_exp)
+        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__scoring_schemes = scoring_schemes_exp
         self.__alg = get_algorithm(alg=Algorithm.ParCons, parameters={"bound_for_exact": 0,
                                                                           "auxiliary_algorithm":
@@ -198,7 +200,9 @@ class BenchPartitioningScoringScheme(Experiment):
             res += str(scoring_scheme.t1_t2) + ";"+str(np.mean(np.asarray(h_res[scoring_scheme])))+"\n"
         return res
 #######################################################################################################################
-#sc1 = ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)
+# sc1 = ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)
+
+
 sc2 = ScoringScheme.get_induced_measure_scoring_scheme_p(1.)
 sc3 = ScoringScheme.get_unifying_scoring_scheme_p(1.)
 sc4 = ScoringScheme([[0., 1., 0., 0., 0., 0.], [1., 1., 0., 1., 1., 1.]])
@@ -214,21 +218,22 @@ dataset_selector = DatasetSelector(nb_elem_min=30, nb_elem_max=119, nb_rankings_
 
 for sc in scs:
     print(sc)
-    bench = BenchTime("bench_exacts", "/home/pierre/vldb/datasets/biological_dataset",
-                      algorithms_for_bench, sc, dataset_selector, steps=10)
-    #bench.run_final_data_from_previous_exp(save=True)
+    bench = BenchTime("bench_exacts", "/home/pierre/vldb/datasets/", "biological_datasets", algorithms_for_bench, sc,
+                      dataset_selector, steps=10)
+    # bench.run_final_data_from_previous_exp(save=True)
     bench.run_and_save()
 
-""""
+
 scoring_schemes = []
 penalties_6 = [0.0, 0.25, 0.5, 0.75, 1.]
 for penalty_6 in penalties_6:
     scoring_schemes.append(ScoringScheme([[0., 1., 1., 0., 1., penalty_6],
                                           [1., 1., 0., 1., 1., 0.]]))
-bench = BenchPartitioningScoringScheme(name_exp="bench_scoring_scheme_bio",
-                                       path_folder_datasets="/home/pierre/vldb/datasets/sushi_dataset",
+bench = BenchPartitioningScoringScheme(name_exp="bench_scoring_scheme_sushi",
+                                       main_folder_path="/home/pierre/vldb/datasets/",
+                                       dataset_folder="sushi_dataset",
                                        scoring_schemes_exp=scoring_schemes,
                                        dataset_selector_exp=DatasetSelector()
                                       )
 bench.run_and_save()
-"""
+

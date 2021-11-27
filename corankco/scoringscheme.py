@@ -21,25 +21,27 @@ class ScoringScheme:
                 print(type(penalties))
                 raise InvalidScoringScheme
             elif len(penalties) != 2:
-                print("a " + str(len(penalties)))
                 raise InvalidScoringScheme
             elif type(penalties[0]) is not list and type(penalties[0]) is not tuple and type(penalties[0]) is not ndarray:
-                print((type(penalties)[0]))
                 raise InvalidScoringScheme
             elif type(penalties[1]) is not list and type(penalties[1]) is not tuple and type(penalties[1]) is not ndarray:
-                print("c  "+ str(type(penalties[1])))
                 raise InvalidScoringScheme
             elif len(penalties[0]) != 6 or len(penalties[1]) != 6:
-                print("d " + str(len(penalties[0])))
                 raise InvalidScoringScheme
             penalties_copy = [[], []]
             for pen in penalties[0]:
+                if float(pen) < 0:
+                    raise InvalidScoringScheme("Coefficients must be >= 0")
+
                 penalties_copy[0].append(float(pen))
             for pen in penalties[1]:
                 penalties_copy[1].append(float(pen))
-
+                if float(pen) < 0:
+                    raise InvalidScoringScheme("Coefficients must be >= 0")
             if penalties_copy[1][0] != penalties_copy[1][1] or penalties_copy[1][3] != penalties_copy[1][4]:
-                raise NotRelevantScoringScheme
+                raise NotRelevantScoringScheme("Must have T1 = T2 and T4 = T5")
+            if penalties_copy[0][0] > 0 or penalties_copy[1][2] > 0:
+                raise NotRelevantScoringScheme("Must have B[1] = 0")
             self.__penalty_vectors = penalties_copy
 
     def __get_b1(self) -> float:
@@ -88,6 +90,9 @@ class ScoringScheme:
         return self.__penalty_vectors
 
     def __str__(self) -> str:
+        return str(self.__penalty_vectors)
+
+    def __repr__(self) -> str:
         return str(self.__penalty_vectors)
 
     def description(self):

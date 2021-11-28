@@ -135,6 +135,10 @@ class ScoringScheme:
         return ScoringScheme(penalties=[[0., 1., p, 0., 0., 0.], [p, p, 0., 0., 0., 0.]])
 
     @staticmethod
+    def get_extended_measure_scoring_scheme():
+        return ScoringScheme(penalties=[[0., 1., 0., 0., 0., 0.], [1., 1., 0., 1., 1., 1.]])
+
+    @staticmethod
     def get_fagin_score_for_complete_ranking(p: float):
         return ScoringScheme(penalties=[[0., 1., p, 0., 0., 0.], [p, p, 0., 0., 0., 0.]])
 

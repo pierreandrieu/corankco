@@ -14,7 +14,6 @@ dataset = Dataset([
 
 # print information about the dataset
 print(dataset.description())
-
 # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
 sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
 

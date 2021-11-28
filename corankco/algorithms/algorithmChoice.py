@@ -11,7 +11,6 @@ from corankco.algorithms.medrank.medrank import MedRank
 from corankco.algorithms.borda.borda import BordaCount
 from corankco.algorithms.bioconsert.bioco import BioCo
 from corankco.algorithms.copeland.copeland import CopelandMethod
-from corankco.algorithms.exact.exactpreprocess import ExactPreprocess
 from corankco.algorithms.alltied.all_tied import AllTied
 
 
@@ -27,7 +26,6 @@ class AlgorithmEnumeration:
         BordaCount,
         BioCo,
         CopelandMethod,
-        ExactPreprocess,
         AllTied
     ]
 
@@ -44,8 +42,7 @@ class Algorithm(Enum):
     BordaCount = 7
     BioCo = 8
     CopelandMethod = 9
-    ExactPreprocess = 10
-    AllTied = 11
+    AllTied = 10
 
     @staticmethod
     def get_all():

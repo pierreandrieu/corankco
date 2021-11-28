@@ -7,6 +7,7 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
 from typing import Iterable
+from corankco.utils import get_os_sep
 import numpy as np
 
 
@@ -20,7 +21,10 @@ class ExperimentOrphanet(ExperimentFromDataset):
                  dataset_selector: DatasetSelector = None,
                  ):
         super().__init__(name_experiment, main_folder_path, dataset_folder, dataset_selector)
-        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb()
+        path_supp_data = main_folder_path
+        if not main_folder_path.endswith(get_os_sep()):
+            path_supp_data += get_os_sep()
+        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(main_folder_path + "supplementary_data/")
         self.__algo = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
         self.__remove_useless_datasets()
         self.__scoring_schemes = []

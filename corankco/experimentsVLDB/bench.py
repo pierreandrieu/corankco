@@ -3,7 +3,7 @@ from corankco.algorithms.algorithmChoice import get_algorithm, Algorithm
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.scoringscheme import ScoringScheme
 from corankco.experimentsVLDB.experiment import ExperimentFromDataset
-from typing import List
+from typing import List, Tuple
 import numpy as np
 
 
@@ -115,7 +115,7 @@ class BenchScoringScheme(ExperimentFromDataset):
             print("\t" + dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)+";"
             for scoring_scheme in self.__scoring_schemes:
-                time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True, 2)
+                time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True, 0)
                 res += str(time_computation) + ";"
             res += "\n"
         # print(res)
@@ -161,13 +161,27 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                  main_folder_path: str,
                  dataset_folder: str,
                  scoring_schemes_exp: List[ScoringScheme],
+                 changing_coeff: Tuple[int, int],
+                 intervals: List[Tuple[int, int]] = None,
                  dataset_selector_exp: DatasetSelector = None,
                  ):
         super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__scoring_schemes = scoring_schemes_exp
         self.__alg = get_algorithm(alg=Algorithm.ParCons, parameters={"bound_for_exact": 0,
-                                                                          "auxiliary_algorithm":
-                                                                              get_algorithm(alg=Algorithm.AllTied)})
+                                                                      "auxiliary_algorithm":
+                                                                          get_algorithm(alg=Algorithm.AllTied)})
+        self.__changing_coeff = changing_coeff
+        if intervals is not None:
+            self.__intervals = intervals
+        else:
+            max_n = self.datasets[0].n
+            min_n = not self.datasets[0].n
+            for dataset in self.datasets:
+                if dataset.n > max_n:
+                    max_n = dataset.n
+                if dataset.n < min_n:
+                    min_n = dataset.n
+            self.__intervals = [(min_n, max_n)]
 
     def _run_raw_data(self) -> str:
         res = "dataset;nb_elements;"
@@ -175,65 +189,50 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
             res += str(scoring_scheme.penalty_vectors) + ";"
         res += "\n"
         for dataset in sorted(self.get_datasets()):
+            print(dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)+";"
             for scoring_scheme in self.__scoring_schemes:
-                nb_scc = len(self.__alg.compute_consensus_rankings(dataset, scoring_scheme, True).consensus_rankings[0])
-                res += str(nb_scc/dataset.n) + ";"
+                consensus = self.__alg.compute_consensus_rankings(dataset, scoring_scheme, True)
+                biggest_scc = 0
+                for bucket in consensus.consensus_rankings[0]:
+                    if len(bucket) > biggest_scc:
+                        biggest_scc = len(bucket)
+                res += str(biggest_scc) + ";"
             res += "\n"
         # print(res)
         return res
 
     def _run_final_data(self, raw_data: str) -> str:
+        mapping_int_interval = {}
+        for interval in self.__intervals:
+            for i in range(interval[0], interval[1]+1):
+                mapping_int_interval[i] = interval
         res = ""
+        for scoring_scheme in self.__scoring_schemes:
+            value_coeff = scoring_scheme.penalty_vectors[self.__changing_coeff[0]][self.__changing_coeff[1]]
+            res += ";" + str(value_coeff)
+        res += "\n"
         nb_scoring_schemes = len(self.__scoring_schemes)
         h_res = {}
-        for scoring_scheme in self.__scoring_schemes:
-            h_res[scoring_scheme] = []
+        for interval in self.__intervals:
+            h_res[interval] = {}
+            for scoring_scheme in self.__scoring_schemes:
+                h_res[interval][scoring_scheme] = []
+
         for line in raw_data.split("\n")[1:]:
             if len(line) > 1:
                 cols = line.split(";")
                 id_scoring_scheme = 0
+                nb_elem = int(cols[1])
                 for i in range(len(cols)-nb_scoring_schemes-1, len(cols)-1):
-                    h_res[self.__scoring_schemes[id_scoring_scheme]].append(float(cols[i]))
+                    h_res[mapping_int_interval[nb_elem]][self.__scoring_schemes[id_scoring_scheme]].append(float(cols[i]))
                     id_scoring_scheme += 1
-        for scoring_scheme in self.__scoring_schemes:
-            res += str(scoring_scheme.t1_t2) + ";"+str(np.mean(np.asarray(h_res[scoring_scheme])))+"\n"
+        for interval in self.__intervals:
+            res += str(interval)
+            for scoring_scheme in self.__scoring_schemes:
+                res += ";" + str(np.max(np.asarray(h_res[interval][scoring_scheme])))
+            res += "\n"
         return res
+
 #######################################################################################################################
 # sc1 = ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)
-
-
-sc2 = ScoringScheme.get_induced_measure_scoring_scheme_p(1.)
-sc3 = ScoringScheme.get_unifying_scoring_scheme_p(1.)
-sc4 = ScoringScheme([[0., 1., 0., 0., 0., 0.], [1., 1., 0., 1., 1., 1.]])
-scs = [sc2, sc3, sc4]
-
-algorithms_for_bench = [
-                        get_algorithm(alg=Algorithm.ExactPreprocess, parameters={"optimize": True}),
-                        get_algorithm(alg=Algorithm.ExactPreprocess, parameters={"optimize": False}),
-                        get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True, "preprocess": False}),
-                        get_algorithm(alg=Algorithm.Exact, parameters={"optimize": False, "preprocess": False}),
-                        ]
-dataset_selector = DatasetSelector(nb_elem_min=30, nb_elem_max=119, nb_rankings_min=3)
-
-for sc in scs:
-    print(sc)
-    bench = BenchTime("bench_exacts", "/home/pierre/vldb/datasets/", "biological_datasets", algorithms_for_bench, sc,
-                      dataset_selector, steps=10)
-    # bench.run_final_data_from_previous_exp(save=True)
-    bench.run_and_save()
-
-
-scoring_schemes = []
-penalties_6 = [0.0, 0.25, 0.5, 0.75, 1.]
-for penalty_6 in penalties_6:
-    scoring_schemes.append(ScoringScheme([[0., 1., 1., 0., 1., penalty_6],
-                                          [1., 1., 0., 1., 1., 0.]]))
-bench = BenchPartitioningScoringScheme(name_exp="bench_scoring_scheme_sushi",
-                                       main_folder_path="/home/pierre/vldb/datasets/",
-                                       dataset_folder="sushi_dataset",
-                                       scoring_schemes_exp=scoring_schemes,
-                                       dataset_selector_exp=DatasetSelector()
-                                      )
-bench.run_and_save()
-

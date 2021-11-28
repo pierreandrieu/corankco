@@ -3,7 +3,6 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
-from corankco.algorithms.exact.exactpreprocess import ExactPreprocess
 
 
 class ExactAlgorithm(MedianRanking):
@@ -35,6 +34,7 @@ class ExactAlgorithm(MedianRanking):
         implementation of the algorithm does not fit with the scoring scheme
         """
         if self.__preprocess:
+            from corankco.algorithms.exact.exactpreprocess import ExactPreprocess
             return ExactPreprocess(self.__optimize).compute_consensus_rankings(dataset,
                                                                                scoring_scheme,
                                                                                return_at_most_one_ranking,

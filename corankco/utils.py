@@ -115,12 +115,12 @@ def write_file(path_file: str, text: str):
     f.close()
 
 
-def get_os_sep() -> str:
-    return os.path.sep
-
-
 def get_parent_path(path: str) -> str:
     return os.path.abspath(os.path.join(path, os.pardir))
+
+
+def join_paths(path, *paths) -> str:
+    return os.path.join(path, *paths)
 
 
 def can_be_created(path_to_check) -> bool:

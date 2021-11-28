@@ -1,10 +1,14 @@
 from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
 from corankco.experimentsVLDB.geneNcbiParser import GeneNcbiParser
+from corankco.utils import get_os_sep
 
+folder_input = input("folder path containing data NCBI and orphanet ?")
+if not folder_input.endswith(get_os_sep()):
+    folder_input += get_os_sep()
 
-orphaParser = OrphanetParser("../../data/en_product6.xml")
+orphaParser = OrphanetParser(folder_input + "en_product6.xml")
 
-geneNcbiParser = GeneNcbiParser("../../data/dataGeneNCBI.txt")
+geneNcbiParser = GeneNcbiParser(folder_input+"dataGeneNCBI.txt")
 res = {}
 cpt = 0
 # print(str(geneNcbiParser.get_gene(285362)))
@@ -22,7 +26,7 @@ for geneOrpha in orphaParser.get_genes():
                 elif geneOrpha.has_same_name(res[geneOrpha][1][0]):
                     res[geneOrpha] = [res[geneOrpha][1]]
 
-mapping_final = open("/home/pierre/Bureau/mapping_genes_geneNCBI_orphanet.csv", "w")
+mapping_final = open(folder_input + "mapping_genes_geneNCBI_orphanet.csv", "w")
 
 for geneOrpha, mapping_ncbi in res.items():
     ncbi_associated = res[geneOrpha][0][0]

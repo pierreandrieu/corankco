@@ -27,10 +27,13 @@ Example usage
                   [[3, 1], [4]],
                   [[1], [5], [3, 2]]
                  ])
-    # or d = Dataset(file_path), where file_path is a string
+    # or d = Dataset.get_rankings_from_file(file_path), where file_path is a string
     
     # print information about the dataset
     print(dataset.description())
+
+    # get all datasets in a folder
+    list_datasets = Dataset.get_datasets_from_folder(folder_path) 
     
     # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
     sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])

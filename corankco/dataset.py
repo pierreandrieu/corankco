@@ -255,7 +255,7 @@ class Dataset:
         return self.n >= other.n or (self.n == other.n and self.m >= other.m)
 
     def __repr__(self):
-        return self.name
+        return str(self.rankings)
 
     def contains_element(self, element: str or int) -> bool:
         to_check = str(element)

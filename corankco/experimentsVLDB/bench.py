@@ -107,16 +107,16 @@ class BenchScoringScheme(ExperimentFromDataset):
         self.__steps = steps
 
     def _run_raw_data(self) -> str:
-        res = "dataset;nb_elements;"
+        res = "dataset;nb_elements"
         for scoring_scheme in self.__scoring_schemes:
-            res += str(scoring_scheme.penalty_vectors) + ";"
+            res += ";" + str(scoring_scheme.penalty_vectors)
         res += "\n"
         for dataset in sorted(self.get_datasets()):
             print("\t" + dataset.name + " " + str(dataset.n))
-            res += dataset.name + ";" + str(dataset.n)+";"
+            res += dataset.name + ";" + str(dataset.n)
             for scoring_scheme in self.__scoring_schemes:
                 time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True, 0)
-                res += str(time_computation) + ";"
+                res += ";" + str(time_computation)
             res += "\n"
         # print(res)
 
@@ -227,10 +227,11 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                 for i in range(len(cols)-nb_scoring_schemes-1, len(cols)-1):
                     h_res[mapping_int_interval[nb_elem]][self.__scoring_schemes[id_scoring_scheme]].append(float(cols[i]))
                     id_scoring_scheme += 1
+
         for interval in self.__intervals:
             res += str(interval)
             for scoring_scheme in self.__scoring_schemes:
-                res += ";" + str(np.max(np.asarray(h_res[interval][scoring_scheme])))
+                res += ";" + str(round(float(np.mean(np.asarray(h_res[interval][scoring_scheme]))), 2))
             res += "\n"
         return res
 

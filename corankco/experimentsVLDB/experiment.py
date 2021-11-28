@@ -86,6 +86,12 @@ class Experiment:
         print("FINAL DATA : ")
         print(final_data)
 
+    def _get_previous_readme(self) -> str:
+        f = open(join_paths(self._folder_last_output, "readme.txt"), "r")
+        text = f.read()
+        f.close()
+        return text
+
     def _get_previous_raw_results(self) -> str:
         f = open(join_paths(self._folder_last_output, self._file_output_raw_data), "r")
         text = f.read()
@@ -107,6 +113,9 @@ class Experiment:
             self._create_file_output_final()
             self._write_output_raw(raw_data)
             self._write_output_final(res)
+            f = open(join_paths(self._folder_output, "readme.txt"), "w")
+            f.write(self.readme())
+            f.close()
         return res
 
     def readme(self) -> str:

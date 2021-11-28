@@ -85,6 +85,9 @@ class Consensus:
     def __str__(self) -> str:
         return str(self.consensus_rankings)
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def description(self) -> str:
         self.__get_associated_score()
         return "Consensus description:" + "".join("\n\t"+str(key.value)+str(self.att[key]) for key in self.att) \

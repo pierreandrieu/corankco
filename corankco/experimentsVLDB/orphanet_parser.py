@@ -2,7 +2,7 @@ from corankco.experimentsVLDB.database_enum import Database
 from corankco.experimentsVLDB.disease import Disease
 from corankco.experimentsVLDB.gene import Gene
 from corankco.experimentsVLDB.biological_database import BiologicalDatabase
-from corankco.utils import get_os_sep
+from corankco.utils import join_paths
 from typing import List
 
 
@@ -125,9 +125,9 @@ class OrphanetParser(BiologicalDatabase):
 
     @staticmethod
     def get_orpha_base_for_vldb(folder_data_files: str):
-        path_orphanet_base = folder_data_files + "en_product6.xml"
-        path_mapping_ncbi = folder_data_files + "mapping_genes_geneNCBI_orphanet.csv"
-        path_mapping_diseases = folder_data_files + "mappingDiseaseID.csv"
+        path_orphanet_base = join_paths(folder_data_files, "en_product6.xml")
+        path_mapping_ncbi =  join_paths(folder_data_files, "mapping_genes_geneNCBI_orphanet.csv")
+        path_mapping_diseases =  join_paths(folder_data_files, "mappingDiseaseID.csv")
         return OrphanetParser.get_orpha_base(path_orphanet_base, path_mapping_ncbi, path_mapping_diseases)
 
     @staticmethod

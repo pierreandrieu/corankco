@@ -1,4 +1,5 @@
 from corankco.experimentsVLDB.bench import BenchPartitioningScoringScheme, BenchScoringScheme, BenchTime
+from corankco.experimentsVLDB.experimentOrphanet import ExperimentOrphanet
 from corankco.experimentsVLDB.marksExperiment import MarksExperiment
 from corankco.dataset import DatasetSelector
 from corankco.scoringscheme import ScoringScheme
@@ -121,4 +122,15 @@ def run_experiment_evaluation_partitioning():
     run_count_subproblems_t("biological_dataset", intervals_exp, ds)
 
 
-run_bench_time_alg_exacts()
+def run_experiment_bio_orphanet():
+    values_b5_expe = [0.0, 0.25, 0.5, 1, 2]
+    dataset_selector_expe = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
+    exp1 = ExperimentOrphanet("part_3",
+                              "/home/pierre/vldb_data",
+                              "biological_dataset",
+                              values_b5_expe,
+                              dataset_selector=dataset_selector_expe)
+    exp1.run_and_save()
+
+
+run_experiment_bio_orphanet()

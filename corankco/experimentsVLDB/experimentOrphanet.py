@@ -7,7 +7,7 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
 from typing import Iterable
-from corankco.utils import get_os_sep
+from corankco.utils import join_paths
 import numpy as np
 
 
@@ -21,10 +21,8 @@ class ExperimentOrphanet(ExperimentFromDataset):
                  dataset_selector: DatasetSelector = None,
                  ):
         super().__init__(name_experiment, main_folder_path, dataset_folder, dataset_selector)
-        path_supp_data = main_folder_path
-        if not main_folder_path.endswith(get_os_sep()):
-            path_supp_data += get_os_sep()
-        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(main_folder_path + "supplementary_data/")
+        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(join_paths(main_folder_path,
+                                                                                  "supplementary_data"))
         self.__algo = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
         self.__remove_useless_datasets()
         self.__scoring_schemes = []
@@ -65,12 +63,12 @@ class ExperimentOrphanet(ExperimentFromDataset):
                     real_gs.add(gene)
             h_disease_gs[dataset.name] = real_gs
         res = "b5-b4;dataset;nb_elements;goldstandard;size_goldstandard;consensus\n"
-        self.__get_consensus_from_files()
+        self.__compute_consensus()
         for sc in self.__scoring_schemes:
             for dataset, consensus in self.__consensus[sc]:
                 gs = h_disease_gs[dataset.name]
                 res += str(sc.b5) + ";" + dataset.name + ";" + str(dataset.n) + ";" + str(gs) + ";" \
-                       + str(len(gs)) + ";" + str(consensus.consensus_rankings[0]) + "\n"
+                    + str(len(gs)) + ";" + str(consensus.consensus_rankings[0]) + "\n"
 
         return res
 
@@ -118,15 +116,3 @@ class ExperimentOrphanet(ExperimentFromDataset):
             for dataset in self._datasets:
                 consensus = self.__algo.compute_consensus_rankings(dataset, sc, True)
                 self.__consensus[sc].append((dataset, consensus))
-
-
-values_b5_expe = [0.0, 0.25, 0.5, 1, 2]
-dataset_selector_expe = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
-exp1 = ExperimentOrphanet("orphanet", "/home/pierre/vldb/datasets/",
-                          "biological_dataset",
-                          values_b5_expe,
-                          dataset_selector=dataset_selector_expe)
-exp1.run_and_print()
-print(exp1.get_datasets())
-
-# 515

@@ -7,7 +7,7 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
 from typing import Iterable
-from corankco.utils import join_paths
+from corankco.utils import join_paths, name_file
 import numpy as np
 
 
@@ -64,6 +64,7 @@ class ExperimentOrphanet(ExperimentFromDataset):
             h_disease_gs[dataset.name] = real_gs
         res = "b5-b4;dataset;nb_elements;goldstandard;size_goldstandard;consensus\n"
         self.__compute_consensus()
+        # self.__get_consensus_from_files()
         for sc in self.__scoring_schemes:
             for dataset, consensus in self.__consensus[sc]:
                 gs = h_disease_gs[dataset.name]
@@ -78,11 +79,14 @@ class ExperimentOrphanet(ExperimentFromDataset):
             for dataset in self._datasets:
                 self.__consensus[sc].append(
                     (dataset, Consensus.get_consensus_from_file(
-                        self._folder_last_output + "consensus/" + str(sc.b5) + "/" + dataset.name.split("/")[-1])))
+                        join_paths(self._folder_last_output, "consensus", str(sc.b5), name_file(dataset.name)))))
 
     def _run_final_data(self, raw_data: str) -> str:
-        top_k_all = list(range(10, 301, 10))
-        res = ""
+        top_k_all = list(range(10, 111, 10))
+        res = "k"
+        for scoring_scheme in self.__scoring_schemes:
+            res += ";b5-b4=" + str(scoring_scheme.b5-scoring_scheme.b4)
+        res += "\n"
         h_res = {}
         for top_k in top_k_all:
             h_res[top_k] = {}

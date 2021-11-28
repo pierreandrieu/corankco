@@ -105,23 +105,38 @@ class BenchScoringScheme(ExperimentFromDataset):
                  scoring_schemes: List[ScoringScheme],
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
+                 max_time: float = float('inf'),
+                 repeat_time_computation_until: int = 2
                  ):
         super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__alg = alg
         self.__scoring_schemes = scoring_schemes
         self.__steps = steps
+        self.__max_time = max_time
+        self.__repeat_time_computation_until = repeat_time_computation_until
 
     def _run_raw_data(self) -> str:
         res = "dataset;nb_elements"
         for scoring_scheme in self.__scoring_schemes:
             res += ";" + str(scoring_scheme.penalty_vectors)
         res += "\n"
+        go_on = [True]*len(self.__scoring_schemes)
         for dataset in sorted(self.get_datasets()):
             print("\t" + dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)
+            id_sc = 0
             for scoring_scheme in self.__scoring_schemes:
-                time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True)
+                if go_on[id_sc]:
+                    time_computation = self.__alg.bench_time_consensus(dataset,
+                                                                       scoring_scheme,
+                                                                       True,
+                                                                       self.__repeat_time_computation_until)
+                    if time_computation > self.__max_time:
+                        go_on[id_sc] = False
+                else:
+                    time_computation = float('inf')
                 res += ";" + str(time_computation)
+                id_sc += 1
             res += "\n"
         # print(res)
 
@@ -133,7 +148,11 @@ class BenchScoringScheme(ExperimentFromDataset):
         mapping_nb_elements_group = {}
         cpt = 0
         key_mapping = 0
-        h_res[0] = []
+        h_res[0] = {}
+        for sc in self.__scoring_schemes:
+            res += ";" + str(sc)
+            h_res[0][sc] = []
+        res += "\n"
         tuples_groups = []
         for i in range(self._dataset_selector.nb_elem_min, self._dataset_selector.nb_elem_max+1):
             cpt += 1
@@ -142,20 +161,27 @@ class BenchScoringScheme(ExperimentFromDataset):
             if cpt == self.__steps:
                 key_mapping += 1
                 cpt = 0
-                h_res[key_mapping] = []
-
+                h_res[key_mapping] = {}
+                for sc in self.__scoring_schemes:
+                    h_res[key_mapping][sc] = []
         for i in range(self._dataset_selector.nb_elem_min, self._dataset_selector.nb_elem_max+1, self.__steps):
             tuples_groups.append((i, i+self.__steps-1))
+        mapping_sc_id = {}
+        for i in range(2, len(self.__scoring_schemes) + 2):
+            mapping_sc_id[i] = self.__scoring_schemes[i-3]
         for line in raw_data.split("\n")[1:]:
             if len(line) > 1:
                 cols = line.split(";")
                 nb_elements = int(cols[1])
                 time_computation = cols[2]
-                h_res[mapping_nb_elements_group[nb_elements]].append(float(time_computation))
+                for i in range(2, len(cols)):
+                    h_res[mapping_nb_elements_group[nb_elements]][mapping_sc_id[i]].append(float(cols[i]))
 
         for i in range(len(tuples_groups)):
-            res += str(tuples_groups[i]) \
-                   + ";"+str(np.mean(np.asarray(h_res[i]))) + ";" + str(np.max(np.asarray(h_res[i]))) + "\n"
+            res += str(tuples_groups[i])
+            for j in range(2, len(self.__scoring_schemes)+2):
+                res += ";" + str(np.mean(h_res[i][mapping_sc_id[j]]))
+            res += "\n"
         return res
 #######################################################################################################################
 

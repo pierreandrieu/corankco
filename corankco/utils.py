@@ -130,3 +130,7 @@ def can_be_created(path_to_check) -> bool:
 def create_dir(path):
     if can_be_created(path):
         os.mkdir(path)
+
+
+def name_file(path_file: str) -> str:
+    return os.path.basename(path_file)

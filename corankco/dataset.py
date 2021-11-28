@@ -1,6 +1,7 @@
 from typing import List, Dict, Set
 import numpy as np
-from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings
+from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, \
+    dump_ranking_with_ties_to_str
 from corankco.rankingsgeneration.rankingsgenerate import create_rankings, uniform_permutation
 
 
@@ -15,14 +16,14 @@ class Dataset:
         self.__is_complete = None
         self.__with_ties = None
         if type(rankings) == str:
-            rankings_list = get_rankings_from_file(rankings)
-            self.__name = rankings
+            rankings_list = dump_ranking_with_ties_to_str(rankings)
         else:
             rankings_list = rankings
-            self.__name = "manual"
+        self.__name = "manual"
         if len(rankings_list) == 0:
             raise EmptyDatasetException
 
+        # check if all elements are integers. If yes, all str are converted to integers
         all_integers = True
         id_ranking = 0
         while id_ranking < len(rankings_list) and all_integers:
@@ -102,11 +103,17 @@ class Dataset:
         self.__nb_rankings = len(rankings)
         self.__is_complete = self.__check_if_rankings_complete_and_update_n()
 
+    # number of elements
     n = property(__get_nb_elements, __set_nb_elements)
+    # number of rankings
     m = property(__get_nb_rankings, __set_nb_rankings)
+    # input rankings
     rankings = property(__get_rankings, __set_rankings_and_update_properties)
+    # boolean: True iif all the rankings are on the same set of elements
     is_complete = property(__get_is_complete, __set_is_complete)
+    # boolean: True iif there exists at least a bucket of size >= 2
     with_ties = property(__get_with_ties, __set_with_ties)
+    # name of the dataset
     name = property(__get_path, __set_path)
 
     def __str__(self) -> str:
@@ -117,6 +124,7 @@ class Dataset:
                + str(self.is_complete) + "\n\twith ties: "+str(self.with_ties) + "\n\t"+"rankings:\n"\
                + "\n".join("\t\tr"+str(i+1)+" = "+str(self.rankings[i]) for i in range(len(self.rankings)))
 
+    # to update properties
     def __check_if_rankings_complete_and_update_n(self):
         self.with_ties = False
         if len(self.rankings) == 0:
@@ -143,6 +151,7 @@ class Dataset:
                     return False
         return True
 
+    # map each element with {1, ..., n} (bijection)
     def map_elements_id(self) -> Dict[int or str, int]:
         h = {}
         id_elem = 0
@@ -154,6 +163,7 @@ class Dataset:
                         id_elem += 1
         return h
 
+    # returns a numpy ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
     def get_positions(self, elements_id: Dict[str or int, int]) -> np.ndarray:
         n = self.n
         m = self.m
@@ -168,6 +178,7 @@ class Dataset:
             id_ranking += 1
         return positions
 
+    # returns the pairwise cost matrix
     def pairs_relative_positions(self, positions: np.ndarray) -> np.ndarray:
         n = self.n
         m = self.m
@@ -256,6 +267,7 @@ class Dataset:
 
     def __repr__(self):
         return str(self.rankings)
+
 
     def contains_element(self, element: str or int) -> bool:
         to_check = str(element)

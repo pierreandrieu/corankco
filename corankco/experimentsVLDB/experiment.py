@@ -75,14 +75,15 @@ class Experiment:
         f.write(self.readme())
         f.close()
 
-    def run_and_print(self):
+    def run_and_print(self, only_final_data: bool=True):
         raw_data = self._run_raw_data()
         final_data = self._run_final_data(raw_data)
-        print("PARAMETERS : ")
-        print(self.readme())
+        if not only_final_data:
+            print("PARAMETERS : ")
+            print(self.readme())
 
-        print("RAW DATA : ")
-        print(raw_data)
+            print("RAW DATA : ")
+            print(raw_data)
         print("FINAL DATA : ")
         print(final_data)
 

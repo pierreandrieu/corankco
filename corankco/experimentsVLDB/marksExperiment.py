@@ -1,5 +1,3 @@
-import numpy.random
-
 from corankco.dataset import Dataset
 from corankco.experimentsVLDB.experiment import Experiment
 from corankco.algorithms.algorithmChoice import get_algorithm, Algorithm
@@ -106,7 +104,7 @@ class MarksExperiment(Experiment):
                  scoring_schemes: List[ScoringScheme]
                  ):
         super().__init__(name_expe, main_folder_path)
-        self.__alg = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 100})
+        self.__alg = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
         self.__scoring_schemes = scoring_schemes
         self.__nb_years = nb_years
         self.__nb_students_track_1 = nb_students_track1
@@ -122,7 +120,6 @@ class MarksExperiment(Experiment):
 
     def _run_raw_data(self) -> str:
         res = "year;b5-b4;nb_students_both_topkconsensus_topkgoldstandard\n"
-
         for i in range(self.__nb_years):
             school_year = SchoolYear(self.__nb_students_track_1,
                                      self.__nb_students_track_2,
@@ -143,8 +140,8 @@ class MarksExperiment(Experiment):
 
     def _run_final_data(self, raw_data: str) -> str:
         h_res = {}
-        for scoring_shceme in self.__scoring_schemes:
-            h_res[scoring_shceme.b5] = []
+        for scoring_scheme in self.__scoring_schemes:
+            h_res[scoring_scheme.b5] = []
         for line in raw_data.split("\n")[1:]:
             if len(line) > 1:
                 cols = line.split(";")
@@ -152,6 +149,6 @@ class MarksExperiment(Experiment):
                 target = float(cols[2])
                 h_res[b5].append(target)
         res = "b5-b4;common_goldstandard_topkconsensus\n"
-        for scoring_shceme in self.__scoring_schemes:
-            res += str(scoring_shceme.b5) + ";" + str(np.round(np.mean(np.asarray(h_res[scoring_shceme.b5])), 2))+"\n"
+        for scoring_scheme in self.__scoring_schemes:
+            res += str(scoring_scheme.b5) + ";" + str(np.round(np.mean(np.asarray(h_res[scoring_scheme.b5])), 2))+"\n"
         return res

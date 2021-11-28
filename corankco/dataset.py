@@ -1,7 +1,7 @@
 from typing import List, Dict, Set
 import numpy as np
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, \
-    dump_ranking_with_ties_to_str
+    dump_ranking_with_ties_to_str, name_file
 from corankco.rankingsgeneration.rankingsgenerate import create_rankings, uniform_permutation
 
 
@@ -64,6 +64,12 @@ class Dataset:
         self.__set_rankings_and_update_properties(rankings=rankings_final)
         if self.n == 0:
             raise EmptyDatasetException("Datast must not be empty")
+
+    @staticmethod
+    def get_ranking_from_file(path: str):
+        d = Dataset(get_rankings_from_file(path))
+        d.name = name_file(path)
+        return d
 
     def __get_rankings(self) -> List[List[List or Set[int or str]]]:
         return self.__rankings

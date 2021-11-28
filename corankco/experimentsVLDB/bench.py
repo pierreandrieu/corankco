@@ -17,13 +17,15 @@ class BenchTime(ExperimentFromDataset):
                  scoring_scheme: ScoringScheme,
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
-                 max_time: float = float('inf')
-                 ):
+                 max_time: float = float('inf'),
+                 repeat_time_computation_until: int = 2):
+
         super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__algs = algs
         self.__scoring_scheme = scoring_scheme
         self.__steps = steps
         self.__max_time = max_time
+        self.__repeat_time_computation_until = repeat_time_computation_until
 
     def _run_raw_data(self) -> str:
         res = "dataset;nb_elements"
@@ -37,7 +39,10 @@ class BenchTime(ExperimentFromDataset):
             id_alg = 0
             for alg in self.__algs:
                 if must_run[id_alg]:
-                    time_computation = alg.bench_time_consensus(dataset, self.__scoring_scheme, True, 1)
+                    time_computation = alg.bench_time_consensus(dataset,
+                                                                self.__scoring_scheme,
+                                                                True,
+                                                                self.__repeat_time_computation_until)
                     res += ";" + str(time_computation)
                     if time_computation > self.__max_time:
                         must_run[id_alg] = False
@@ -99,7 +104,7 @@ class BenchScoringScheme(ExperimentFromDataset):
                  alg: MedianRanking,
                  scoring_schemes: List[ScoringScheme],
                  dataset_selector_exp: DatasetSelector = None,
-                 steps: int = 5
+                 steps: int = 5,
                  ):
         super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
         self.__alg = alg
@@ -115,7 +120,7 @@ class BenchScoringScheme(ExperimentFromDataset):
             print("\t" + dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)
             for scoring_scheme in self.__scoring_schemes:
-                time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True, 0)
+                time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True)
                 res += ";" + str(time_computation)
             res += "\n"
         # print(res)

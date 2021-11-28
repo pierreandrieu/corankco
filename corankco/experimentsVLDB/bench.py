@@ -34,7 +34,6 @@ class BenchTime(ExperimentFromDataset):
         res += "\n"
         must_run = [True] * len(self.__algs)
         for dataset in sorted(self.get_datasets()):
-            print("\t" + dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)
             id_alg = 0
             for alg in self.__algs:
@@ -122,7 +121,6 @@ class BenchScoringScheme(ExperimentFromDataset):
         res += "\n"
         go_on = [True]*len(self.__scoring_schemes)
         for dataset in sorted(self.get_datasets()):
-            print("\t" + dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)
             id_sc = 0
             for scoring_scheme in self.__scoring_schemes:
@@ -138,7 +136,6 @@ class BenchScoringScheme(ExperimentFromDataset):
                 res += ";" + str(time_computation)
                 id_sc += 1
             res += "\n"
-        # print(res)
 
         return res
 
@@ -220,7 +217,6 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
             res += str(scoring_scheme.penalty_vectors) + ";"
         res += "\n"
         for dataset in sorted(self.get_datasets()):
-            print(dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)+";"
             for scoring_scheme in self.__scoring_schemes:
                 consensus = self.__alg.compute_consensus_rankings(dataset, scoring_scheme, True)
@@ -230,7 +226,6 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                         biggest_scc = len(bucket)
                 res += str(biggest_scc) + ";"
             res += "\n"
-        # print(res)
         return res
 
     def _run_final_data(self, raw_data: str) -> str:

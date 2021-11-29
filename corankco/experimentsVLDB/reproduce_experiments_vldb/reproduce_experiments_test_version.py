@@ -229,6 +229,11 @@ def args_experiments_to_run(args: List[str]) -> Set[int]:
                 experiments_set.add(i+1)
         else:
             arg_sep = arg.split("=")
+            if len(arg_sep) != 2:
+                print("Invalid argument.")
+                print("Try exp=i,j,... without spaces, with i,j,... in {1, ..., 6}.")
+                print("For example, exp=3,4,6")
+                return set()
             type_arg = arg_sep[0]
             vals_arg = arg_sep[1]
             values_int = set()
@@ -256,13 +261,14 @@ def display_manual():
     print("If you want to reproduce the two experiments of part 1: then the argument is \"part=1\"")
     print("If you want to reproduce the two experiments of part 1 and 2: then the argument is \"part=1,2\"")
     print("If you want to reproduce experiments 1, 4, 6: then the argument is \"exp=1,4,6\"")
+    print("You can combine arguments: exp=1,3 part=3 runs experiments 1, 3, 5 and 6.")
     print("If you want to reproduce all the experiments, then the argument is \"all\"")
 
 
 if len(sys.argv) == 1:
     display_manual()
 else:
-    exp_to_run = args_experiments_to_run(sys.argv)
+    exp_to_run = args_experiments_to_run(sys.argv[1:])
     path_datasets = "vldb_data"
     if 6 in exp_to_run:
         print("Run experiment students.")

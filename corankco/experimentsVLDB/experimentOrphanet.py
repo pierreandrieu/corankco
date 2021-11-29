@@ -112,7 +112,6 @@ class ExperimentOrphanet(ExperimentFromDataset):
         return res
 
     def __compute_consensus(self):
-        self._create_dir_output()
         for sc in self.__scoring_schemes:
             self.__consensus[sc] = []
             for dataset in self._datasets:

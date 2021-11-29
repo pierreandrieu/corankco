@@ -240,8 +240,8 @@ def args_experiments_to_run(args: List[str]) -> Set[int]:
                 elif type_arg.lower() == "part":
                     for value_int in values_int:
                         if 1 <= value_int <= 3:
-                            experiments_set.add(value_int)
-                            experiments_set.add(value_int + 1)
+                            experiments_set.add(2 * value_int)
+                            experiments_set.add(2 * value_int - 1)
     return experiments_set
 
 
@@ -257,12 +257,11 @@ def display_manual():
     print("If you want to reproduce all the experiments, then the argument is \"all\"")
 
 
-if len(sys.argv) < 1:
+if len(sys.argv) == 1:
     display_manual()
 else:
-    path_datasets = "/home/pierre/Bureau/vldb_data/"
-
     exp_to_run = args_experiments_to_run(sys.argv)
+    path_datasets = "vldb_data"
     if 6 in exp_to_run:
         print("Run experiment students.")
         print("Estimated time: ~ 30 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")

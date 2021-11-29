@@ -50,7 +50,7 @@ def run_bench_time_alg_exacts_vldb(path_dataset: str):
             # re-compute the consensus until final time computation > 1 sec.
             # the average time computation is then returned
             repeat_time_computation_until=1)
-        bench.run_and_save()
+        bench.run_and_print()
 
 
 # runs experiment 2 in research paper
@@ -89,7 +89,7 @@ def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str):
         # re-compute the consensus until final time computation > 1 sec.
         # the average time computation is then returned
         repeat_time_computation_until=1)
-    bench.run_and_save()
+    bench.run_and_print()
 
 
 # runs experiment 3 in research paper
@@ -115,7 +115,7 @@ def run_count_subproblems_t_vldb(path_dataset: str):
         changing_coeff=(1, 0),
         # range of number of elements to consider for the output
         intervals=intervals_exp)
-    bench.run_and_save()
+    bench.run_and_print()
 
 
 # runs experiment 4 in research paper
@@ -144,8 +144,8 @@ def run_count_subproblems_b6_vldb(path_dataset: str):
         # range of number of elements to consider for the output
         intervals=intervals_exp)
 
-    # run experiment and save results in folder given by user
-    bench.run_and_save()
+    # run experiment and print results
+    bench.run_and_print()
 
 
 # runs experiment 5 in research paper
@@ -169,7 +169,8 @@ def run_experiment_bio_orphanet(dataset_path: str):
         scoring_schemes=kcfs,
         # selects all the tuples of rankings
         dataset_selector=dataset_selector_expe)
-    exp1.run_and_save()
+    # run experiment and print results
+    exp1.run_and_print()
 
 
 def run_experiment_students_vldb(main_folder_path: str):
@@ -216,7 +217,8 @@ def run_experiment_students_vldb(main_folder_path: str):
         topk=20,
         # kcfs to consider
         scoring_schemes=kcfs)
-    exp.run_and_save()
+    # run experiment and print results
+    exp.run_and_print()
 
 
 def args_experiments_to_run(args: List[str]) -> Set[int]:

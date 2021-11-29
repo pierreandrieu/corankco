@@ -7,6 +7,7 @@
       <w>bioconsertcimpl</w>
       <w>coeff</w>
       <w>conqurbio</w>
+      <w>consert</w>
       <w>corankco</w>
       <w>crossref</w>
       <w>crossrefs</w>
@@ -21,16 +22,24 @@
       <w>igraph</w>
       <w>imgt</w>
       <w>iuphar</w>
+      <w>kcfs</w>
+      <w>kwik</w>
       <w>omim</w>
+      <w>optim</w>
       <w>orpha</w>
       <w>orphanet</w>
       <w>parfront</w>
+      <w>porgn</w>
       <w>prot</w>
       <w>pseudodistance</w>
       <w>reactome</w>
+      <w>retmax</w>
+      <w>scalabilty</w>
       <w>splitted</w>
       <w>subproblems</w>
       <w>topk</w>
+      <w>topkconsensus</w>
+      <w>topkgoldstandard</w>
       <w>vldb</w>
     </words>
   </dictionary>

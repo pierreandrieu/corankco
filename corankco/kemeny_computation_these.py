@@ -36,7 +36,7 @@ class KemenyComputation:
         # the cost induced by each ranking
         for ranking in rankings:
             cost_ranking = self.__cost_by_ranking(
-                                        consensus, mapping_elem_consensus_id_bucket, ranking
+                consensus, mapping_elem_consensus_id_bucket, ranking
             )
             s_1 += cost_ranking[0]
             s_2 += cost_ranking[1]
@@ -169,7 +169,7 @@ class KemenyComputation:
 
     @staticmethod
     def __mergesortlike(r_prime: List[ndarray], left: int, right: int, s_1: ndarray,
-                                  s_2: ndarray) -> ndarray:
+                        s_2: ndarray) -> ndarray:
         # if input ranking is empty
         if not r_prime:
             return asarray([])
@@ -181,10 +181,10 @@ class KemenyComputation:
             middle = (right - left) // 2
             begin = middle + left + 1
             return KemenyComputation.__merge(KemenyComputation.__mergesortlike(
-                                                        r_prime, left, middle + left, s_1, s_2),
-                                             KemenyComputation.__mergesortlike(
-                                                        r_prime, begin, right, s_1, s_2),
-                                             s_1, s_2)
+                r_prime, left, middle + left, s_1, s_2),
+                KemenyComputation.__mergesortlike(
+                    r_prime, begin, right, s_1, s_2),
+                s_1, s_2)
 
     @staticmethod
     def __merge(left: ndarray, right: ndarray, s_1: ndarray, s_2: ndarray):

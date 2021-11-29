@@ -109,7 +109,7 @@ class ParCons(MedianRanking):
             for scc_i in scc:
                 group = set()
                 for elem in scc_i:
-                    group.add(id_elements[elem])
+                    group.add(id_elements.get(elem))
                 cfc_name.append(group)
             hash_information[ConsensusFeature.WeakPartitioning] = cfc_name
 
@@ -154,7 +154,8 @@ class ParCons(MedianRanking):
         return graph_of_elements, matrix
 
     def get_full_name(self) -> str:
-        return "ParCons, uses  \"" + self.auxiliary_alg.get_full_name() + "\" on groups of size >  " + str(self.bound_for_exact)
+        return "ParCons, uses  \"" + self.auxiliary_alg.get_full_name() + "\" on groups of size >  " + \
+               str(self.bound_for_exact)
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         return True

@@ -92,10 +92,10 @@ def import_rankings_from_url(url_path: str) -> List[List[List[int or str]]]:
     rankings = []
     # to manage the "step" datasets of java rank-n-ties
     ignore_lines = ["%"]
-    for ligne in data:
-        ligne_str = ligne.decode('utf-8')
-        if len(ligne_str) > 2 and ligne_str[0] not in ignore_lines:
-            rankings.append(parse_ranking_with_ties_of_int(ligne_str))
+    for line_file in data:
+        line_str = line_file.decode('utf-8')
+        if len(line_str) > 2 and line_str[0] not in ignore_lines:
+            rankings.append(parse_ranking_with_ties_of_int(line_str))
     return rankings
 
 

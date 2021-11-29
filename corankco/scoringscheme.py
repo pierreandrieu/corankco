@@ -20,13 +20,13 @@ class ScoringScheme:
             if type(penalties) is not list and type(penalties) is not tuple and type(penalties) is not ndarray:
                 print(type(penalties))
                 raise InvalidScoringScheme
-            elif len(penalties) != 2:
+            if len(penalties) != 2:
                 raise InvalidScoringScheme
-            elif type(penalties[0]) is not list and type(penalties[0]) is not tuple and type(penalties[0]) is not ndarray:
+            if type(penalties[0]) is not list and type(penalties[0]) is not tuple and type(penalties[0]) is not ndarray:
                 raise InvalidScoringScheme
-            elif type(penalties[1]) is not list and type(penalties[1]) is not tuple and type(penalties[1]) is not ndarray:
+            if type(penalties[1]) is not list and type(penalties[1]) is not tuple and type(penalties[1]) is not ndarray:
                 raise InvalidScoringScheme
-            elif len(penalties[0]) != 6 or len(penalties[1]) != 6:
+            if len(penalties[0]) != 6 or len(penalties[1]) != 6:
                 raise InvalidScoringScheme
             penalties_copy = [[], []]
             for pen in penalties[0]:
@@ -103,7 +103,7 @@ class ScoringScheme:
                + "\n\t\tx present y missing in input ranking: " + str(self.__penalty_vectors[0][3])\
                + "\n\t\tx missing y present ranking: " + str(self.__penalty_vectors[0][4]) \
                + "\n\t\tx and y missing in input ranking: " + str(self.__penalty_vectors[0][5]) \
-               + "\n\tx and y tied in consensus\n\t\tx before y in input ranking: " + str(self.__penalty_vectors[1][0]) \
+               + "\n\tx and y tied in consensus\n\t\tx before y in input ranking: " + str(self.__penalty_vectors[1][0])\
                 + "\n\t\ty before x in input ranking: " + str(self.__penalty_vectors[1][1]) \
                 + "\n\t\tx and y tied in input ranking: " + str(self.__penalty_vectors[1][2]) \
                 + "\n\t\tx present y missing in input ranking: " + str(self.__penalty_vectors[1][3]) \

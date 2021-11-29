@@ -274,7 +274,6 @@ class Dataset:
     def __repr__(self):
         return str(self.rankings)
 
-
     def contains_element(self, element: str or int) -> bool:
         to_check = str(element)
         for ranking in self.rankings:

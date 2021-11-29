@@ -71,9 +71,9 @@ class SchoolYear:
             ranking = []
             current_mark = None
             bucket = []
-            for tple_mark_student in marks_students:
-                mark_student = tple_mark_student[0]
-                student = tple_mark_student[1]
+            for tuple_mark_student in marks_students:
+                mark_student = tuple_mark_student[0]
+                student = tuple_mark_student[1]
                 if mark_student == current_mark:
                     bucket.append(student)
                 else:

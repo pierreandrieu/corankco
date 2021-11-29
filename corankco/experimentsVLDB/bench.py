@@ -94,7 +94,7 @@ class BenchTime(ExperimentFromDataset):
 #######################################################################################################################
 
 
-class BenchScalabiltyScoringScheme(ExperimentFromDataset):
+class BenchScalabilityScoringScheme(ExperimentFromDataset):
 
     def __init__(self,
                  name_exp: str or int,

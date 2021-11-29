@@ -1,4 +1,4 @@
-from corankco.experimentsVLDB.bench import BenchPartitioningScoringScheme, BenchTime, BenchScalabiltyScoringScheme
+from corankco.experimentsVLDB.bench import BenchPartitioningScoringScheme, BenchTime, BenchScalabilityScoringScheme
 from corankco.experimentsVLDB.experimentOrphanet import ExperimentOrphanet
 from corankco.experimentsVLDB.marksExperiment import MarksExperiment
 from corankco.dataset import DatasetSelector
@@ -69,7 +69,7 @@ def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str):
     dataset_selector = DatasetSelector(nb_elem_min=70, nb_elem_max=99, nb_rankings_min=3)
 
     # run experiment for each scoring scheme (KCF)
-    bench = BenchScalabiltyScoringScheme(  # name of experiment (if result is stored)
+    bench = BenchScalabilityScoringScheme(  # name of experiment (if result is stored)
         name_exp="exp2_scalability_exact_optimized",
         # the path containing the dataset to consider
         main_folder_path=path_dataset,

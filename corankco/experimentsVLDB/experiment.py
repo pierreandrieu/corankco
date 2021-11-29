@@ -14,7 +14,6 @@ class Experiment:
         self._file_output_final_data = "final_data.csv"
 
         path_output = join_paths(main_folder_path, "Experiments")
-        create_dir(path_output)
         path_output = join_paths(path_output, name_expe + "_")
         dir_already_exists = True
         cpt = 1
@@ -66,6 +65,7 @@ class Experiment:
         return self._datasets
 
     def run_and_save(self):
+        self._create_dir_output()
         raw_data = self._run_raw_data()
         final_data = self._run_final_data(raw_data)
         self._create_dir_output()

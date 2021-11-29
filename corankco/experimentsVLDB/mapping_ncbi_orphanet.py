@@ -1,14 +1,13 @@
 from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
 from corankco.experimentsVLDB.geneNcbiParser import GeneNcbiParser
-from corankco.utils import get_os_sep
+from corankco.utils import join_paths
 
 folder_input = input("folder path containing data NCBI and orphanet ?")
-if not folder_input.endswith(get_os_sep()):
-    folder_input += get_os_sep()
 
-orphaParser = OrphanetParser(folder_input + "en_product6.xml")
+orphaParser = OrphanetParser(join_paths(folder_input, "en_product6.xml"))
 
-geneNcbiParser = GeneNcbiParser(folder_input+"dataGeneNCBI.txt")
+geneNcbiParser = GeneNcbiParser(join_paths(folder_input, "dataGeneNCBI.txt"))
+
 res = {}
 cpt = 0
 # print(str(geneNcbiParser.get_gene(285362)))

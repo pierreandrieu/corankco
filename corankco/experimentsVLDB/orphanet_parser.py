@@ -126,8 +126,8 @@ class OrphanetParser(BiologicalDatabase):
     @staticmethod
     def get_orpha_base_for_vldb(folder_data_files: str):
         path_orphanet_base = join_paths(folder_data_files, "en_product6.xml")
-        path_mapping_ncbi =  join_paths(folder_data_files, "mapping_genes_geneNCBI_orphanet.csv")
-        path_mapping_diseases =  join_paths(folder_data_files, "mappingDiseaseID.csv")
+        path_mapping_ncbi = join_paths(folder_data_files, "mapping_genes_geneNCBI_orphanet.csv")
+        path_mapping_diseases = join_paths(folder_data_files, "mappingDiseaseID.csv")
         return OrphanetParser.get_orpha_base(path_orphanet_base, path_mapping_ncbi, path_mapping_diseases)
 
     @staticmethod

@@ -95,7 +95,7 @@ class BenchTime(ExperimentFromDataset):
 #######################################################################################################################
 
 
-class BenchScalabiltyScoringScheme(ExperimentFromDataset):
+class BenchScalabilityScoringScheme(ExperimentFromDataset):
 
     def __init__(self,
                  name_exp: str or int,
@@ -240,7 +240,8 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                 id_scoring_scheme = 0
                 nb_elem = int(cols[1])
                 for i in range(len(cols)-nb_scoring_schemes-1, len(cols)-1):
-                    h_res[mapping_int_interval[nb_elem]][self.__scoring_schemes[id_scoring_scheme]].append(float(cols[i]))
+                    target_value = float(cols[i])
+                    h_res[mapping_int_interval[nb_elem]][self.__scoring_schemes[id_scoring_scheme]].append(target_value)
                     id_scoring_scheme += 1
 
         for interval in self.__intervals:

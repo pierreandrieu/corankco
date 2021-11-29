@@ -6,7 +6,7 @@ from corankco.algorithms.algorithmChoice import Algorithm, get_algorithm
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
-from typing import Iterable
+from typing import List
 from corankco.utils import join_paths, name_file
 import numpy as np
 
@@ -17,7 +17,7 @@ class ExperimentOrphanet(ExperimentFromDataset):
                  name_experiment: str,
                  main_folder_path: str,
                  dataset_folder: str,
-                 values_b5: Iterable[float],
+                 scoring_schemes: List[ScoringScheme],
                  dataset_selector: DatasetSelector = None,
                  ):
         super().__init__(name_experiment, main_folder_path, dataset_folder, dataset_selector)
@@ -27,9 +27,7 @@ class ExperimentOrphanet(ExperimentFromDataset):
         self.__remove_useless_datasets()
         self.__scoring_schemes = []
         self.__consensus = {}
-        for value_b5 in values_b5:
-            sc = ScoringScheme([[0., 1., 1., 0., value_b5, 0], [1., 1., 0., value_b5, value_b5, 0]])
-            self.__scoring_schemes.append(sc)
+        self.__scoring_schemes = scoring_schemes
 
     def __contains_mesh(self, mesh_term: str) -> bool:
         return self.__orphanetParser.contains_mesh(mesh_term)
@@ -114,7 +112,6 @@ class ExperimentOrphanet(ExperimentFromDataset):
         return res
 
     def __compute_consensus(self):
-        self._create_dir_output()
         for sc in self.__scoring_schemes:
             self.__consensus[sc] = []
             for dataset in self._datasets:

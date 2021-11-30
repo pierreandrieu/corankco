@@ -75,7 +75,7 @@ class Experiment:
         f.write(self.readme())
         f.close()
 
-    def run_and_print(self, only_final_data: bool=True):
+    def run_and_print(self, only_final_data: bool = True):
         raw_data = self._run_raw_data()
         final_data = self._run_final_data(raw_data)
         if not only_final_data:

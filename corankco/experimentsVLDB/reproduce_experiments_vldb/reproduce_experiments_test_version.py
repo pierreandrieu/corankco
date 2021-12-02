@@ -211,7 +211,7 @@ def run_experiment_students_vldb(raw_data=False, figures=False):
 
 def args_experiments_to_run(args: List[str]) -> Tuple[Set[int], bool, bool]:
     display_all = False
-    figures_display = False
+    figures = False
     experiments_set = set()
     for arg in args:
         if arg == "--all":
@@ -220,7 +220,7 @@ def args_experiments_to_run(args: List[str]) -> Tuple[Set[int], bool, bool]:
         elif arg == "--raw_data":
             display_all = True
         elif arg == "--figures":
-            figures_display = True
+            figures = True
         else:
             arg_sep = arg.split("=")
             if len(arg_sep) != 2:
@@ -255,7 +255,7 @@ def args_experiments_to_run(args: List[str]) -> Tuple[Set[int], bool, bool]:
                     print("Try exp=i,j,... without spaces, with i,j,... in {1, ..., 6}.")
                     print("For example, exp=3,4,6")
                     return set(), False, False
-    return experiments_set, display_all, figures_display
+    return experiments_set, display_all, figures
 
 
 def display_manual():

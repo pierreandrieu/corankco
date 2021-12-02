@@ -2,8 +2,10 @@ from corankco.dataset import Dataset
 from corankco.experimentsVLDB.experiment import Experiment
 from corankco.algorithms.algorithmChoice import get_algorithm, Algorithm
 from corankco.scoringscheme import ScoringScheme
+from corankco.algorithms.median_ranking import MedianRanking
 import random
 import numpy as np
+import matplotlib.pyplot as plt
 from typing import List, Set
 
 
@@ -88,8 +90,7 @@ class SchoolYear:
 
 class MarksExperiment(Experiment):
 
-    def __init__(self, name_expe: str or int,
-                 main_folder_path: str,
+    def __init__(self,
                  nb_years: int,
                  nb_students_track1: int,
                  nb_students_track2: int,
@@ -101,10 +102,12 @@ class MarksExperiment(Experiment):
                  mean_track2: float,
                  variance_track2: float,
                  topk: int,
-                 scoring_schemes: List[ScoringScheme]
+                 scoring_schemes: List[ScoringScheme],
+                 algo: MedianRanking = get_algorithm(Algorithm.ParCons, parameters={
+                     "bound_for_exact": 150, "auxiliary_algorithm": get_algorithm(alg=Algorithm.BioConsert)}),
                  ):
-        super().__init__(name_expe, main_folder_path)
-        self.__alg = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
+        super().__init__()
+        self.__alg = algo
         self.__scoring_schemes = scoring_schemes
         self.__nb_years = nb_years
         self.__nb_students_track_1 = nb_students_track1
@@ -152,3 +155,17 @@ class MarksExperiment(Experiment):
         for scoring_scheme in self.__scoring_schemes:
             res += str(scoring_scheme.b5) + ";" + str(np.round(np.mean(np.asarray(h_res[scoring_scheme.b5])), 2))+"\n"
         return res
+
+    def _display(self, final_data: str):
+        x_axis = []
+        y_axis = []
+        data_split = final_data.split("\n")
+        for line in data_split[1:]:
+            if len(line) > 1:
+                cols = line.split(";")
+                x_axis.append(float(cols[0]))
+                y_axis.append(float(cols[1]))
+        plt.xlabel("B5-B4")
+        plt.ylabel("average (  | top-20 consensus ∩ top-20 goldstandard | )")
+        plt.scatter(x_axis, y_axis)
+        plt.show()

@@ -142,15 +142,14 @@ class ScoringScheme:
     def get_fagin_score_for_complete_ranking(p: float):
         return ScoringScheme(penalties=[[0., 1., p, 0., 0., 0.], [p, p, 0., 0., 0., 0.]])
 
-    def is_equivalent_to(self, sc2: List[List[float or int]]) -> bool:
-        return self.__is_equivalent_to_generic(sc2, 6)
+    def is_equivalent_to(self, other) -> bool:
+        return self.__is_equivalent_to_generic(other, 6)
 
-    def is_equivalent_to_on_complete_rankings_only(self, sc2: List[List[float or int]]) -> bool:
-        return self.__is_equivalent_to_generic(sc2, 3)
+    def is_equivalent_to_on_complete_rankings_only(self, other) -> bool:
+        return self.__is_equivalent_to_generic(other, 3)
 
-    def __is_equivalent_to_generic(self, sc2: List[List[float or int]], stop: int) -> bool:
-        second_scoring_scheme = ScoringScheme(sc2)
-        pen2 = second_scoring_scheme.__penalty_vectors
+    def __is_equivalent_to_generic(self, other, stop: int) -> bool:
+        pen2 = other.__penalty_vectors
         pen1 = self.__penalty_vectors
         coefficient = float("nan")
         for i in range(stop):
@@ -167,3 +166,14 @@ class ScoringScheme:
                         if pen1[0][i] / pen2[0][i] != coefficient:
                             return False
         return True
+
+    def get_nickname(self) -> str:
+        if self.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(1.)):
+            return "UKSP"
+        elif self.is_equivalent_to(ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)):
+            return "GPDP"
+        elif self.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(1.)):
+            return "IGKS"
+        elif self.is_equivalent_to(ScoringScheme.get_extended_measure_scoring_scheme()):
+            return "EKS"
+        return self.__str__()

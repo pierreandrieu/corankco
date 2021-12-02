@@ -4,14 +4,13 @@ from corankco.experimentsVLDB.marksExperiment import MarksExperiment
 from corankco.dataset import DatasetSelector
 from corankco.scoringscheme import ScoringScheme
 from corankco.algorithms.algorithmChoice import get_algorithm, Algorithm
-from typing import Set, List
+from typing import Set, List, Tuple
 import random
 import numpy as np
-import sys
 
 
 # runs experiment 1 in research paper
-def run_bench_time_alg_exacts_vldb(path_dataset: str):
+def run_bench_time_alg_exacts_vldb(path_dataset: str, raw_data=False, figures=False):
     # get the scoring schemes (the KCFs)
     kcf1 = ScoringScheme.get_unifying_scoring_scheme_p(1.)
     kcf2 = ScoringScheme.get_extended_measure_scoring_scheme()
@@ -23,38 +22,32 @@ def run_bench_time_alg_exacts_vldb(path_dataset: str):
     ea = get_algorithm(alg=Algorithm.Exact, parameters={"optimize": False, "preprocess": False})
     ea_optim1 = get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True, "preprocess": False})
     ea_optim1_optim2 = get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True, "preprocess": True})
-
     algorithms_for_bench = [
         ea, ea_optim1, ea_optim1_optim2
     ]
-
-    # to select tuples of rankings with number of elements between 30 and 119 and at least 3 rankings
-    dataset_selector = DatasetSelector(nb_elem_min=30, nb_elem_max=69, nb_rankings_min=3)
-
     # run experiment for each scoring scheme (KCF)
     for kcf in kcfs:
-        bench = BenchTime(  # name of experiment (if result is stored)
-            name_exp="exp1_bench_time_exacts_algs",
-            # the path containing the dataset to consider
-            main_folder_path=path_dataset,
-            # the dataset to consider
-            dataset_folder="biological_dataset",
+        bench = BenchTime(
+            dataset_folder=path_dataset,
             # algorithms for the bench time
             algs=algorithms_for_bench,
             # the scoring scheme that is the kcf to consider
             scoring_scheme=kcf,
-            # the dataset selector for selection according to the size
-            dataset_selector_exp=dataset_selector,
+            # to select tuples of rankings with number of elements between 30 and 119 and at least 3 rankings
+            dataset_selector_exp=DatasetSelector(nb_elem_min=30, nb_elem_max=119, nb_rankings_min=3),
             # range of size of datasets for the output
             steps=10,
             # re-compute the consensus until final time computation > 1 sec.
             # the average time computation is then returned
-            repeat_time_computation_until=1)
-        bench.run_and_print()
+            repeat_time_computation_until=1.)
+
+        # run experiment and print results. If parameter is true: also print all parameters of experiment (readme)
+        # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+        bench.run(raw_data, figures=figures)
 
 
 # runs experiment 2 in research paper
-def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str):
+def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str, raw_data=False, figures=False):
     # get the scoring schemes (the KCFs)
     kcf1 = ScoringScheme.get_unifying_scoring_scheme_p(1.)
     kcf2 = ScoringScheme.get_extended_measure_scoring_scheme()
@@ -65,48 +58,36 @@ def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str):
     # optimize = optim1, preprocess = optim2
     ea_optim1_optim2 = get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True, "preprocess": True})
 
-    # to select tuples of rankings with number of elements between 30 and 119 and at least 3 rankings
-    dataset_selector = DatasetSelector(nb_elem_min=70, nb_elem_max=99, nb_rankings_min=3)
-
     # run experiment for each scoring scheme (KCF)
-    bench = BenchScalabilityScoringScheme(  # name of experiment (if result is stored)
-        name_exp="exp2_scalability_exact_optimized",
-        # the path containing the dataset to consider
-        main_folder_path=path_dataset,
-        # the dataset to consider
-        dataset_folder="biological_dataset",
+    bench = BenchScalabilityScoringScheme(
+        dataset_folder=path_dataset,
         # the algorithm to consider
         alg=ea_optim1_optim2,
         # the kcfs to consider
         scoring_schemes=kcfs,
         # the dataset selector for selection according to the size
-        dataset_selector_exp=dataset_selector,
+        dataset_selector_exp=DatasetSelector(nb_elem_min=130, nb_elem_max=300, nb_rankings_min=3),
         # range of size of datasets for the output
         steps=10,
         # max time computation allowed. for each kcf, the computation stops
         # when for a tuple of rankings the time computation is higher
         max_time=600,
-        # re-compute the consensus until final time computation > 1 sec.
-        # the average time computation is then returned
-        repeat_time_computation_until=1)
-    bench.run_and_print()
+        # re-compute the consensus until final time computation > 1 sec. The average time computation is then returned
+        repeat_time_computation_until=0)
+
+    # run experiment and print results. If parameter is true: also print all parameters of experiment (readme)
+    # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+    bench.run(raw_data, figures)
 
 
 # runs experiment 3 in research paper
-def run_count_subproblems_t_vldb(path_dataset: str):
-    # range of size of elements to consider
-    intervals_exp = [(30, 59), (60, 99), (100, 299), (300, 1121)]
-
+def run_count_subproblems_t_vldb(path_dataset: str, raw_data=False):
     kcfs = []
     penalties_t = [0.0, 0.25, 0.5, 0.75, 1.]
     for penalty in penalties_t:
         kcfs.append(ScoringScheme([[0., 1., 1., 0., 1., 0], [penalty, penalty, 0., penalty, penalty, penalty]]))
-    bench = BenchPartitioningScoringScheme(  # name of experiment (if result is stored)
-        name_exp="exp3_partitioning_t",
-        # the path containing the dataset to consider
-        main_folder_path=path_dataset,
-        # the dataset to consider
-        dataset_folder="biological_dataset",
+    bench = BenchPartitioningScoringScheme(
+        dataset_folder=path_dataset,
         # the kcfs to consider
         scoring_schemes_exp=kcfs,
         # all the files (tuples of rankings) are considered
@@ -114,14 +95,15 @@ def run_count_subproblems_t_vldb(path_dataset: str):
         # = T[1], for printing changing value of T
         changing_coeff=(1, 0),
         # range of number of elements to consider for the output
-        intervals=intervals_exp)
-    bench.run_and_print()
+        intervals=[(30, 59), (60, 99), (100, 299), (300, 1121)])
+
+    # run experiment and print results. If parameter is true: also print all parameters of experiment (readme)
+    # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+    bench.run(raw_data)
 
 
 # runs experiment 4 in research paper
-def run_count_subproblems_b6_vldb(path_dataset: str):
-    # range of size of elements to consider
-    intervals_exp = [(30, 59), (60, 99), (100, 299), (300, 1121)]
+def run_count_subproblems_b6_vldb(path_dataset: str, raw_data=False):
     kcfs = []
     # sets the values of b6 to consider (note that b4 is set to 0)
     penalties_6 = [0.0, 0.25, 0.5, 0.75, 1.]
@@ -129,12 +111,8 @@ def run_count_subproblems_b6_vldb(path_dataset: str):
     for penalty_6 in penalties_6:
         kcfs.append(ScoringScheme([[0., 1., 1., 0., 1., penalty_6], [1., 1., 0., 1., 1., 0.]]))
 
-    bench = BenchPartitioningScoringScheme(  # name of experiment
-        name_exp="exp4_partitioning_b5",
-        # the path containing the dataset to consider
-        main_folder_path=path_dataset,
-        # the dataset to consider
-        dataset_folder="biological_dataset",
+    bench = BenchPartitioningScoringScheme(
+        dataset_folder=path_dataset,
         # the kcfs to consider
         scoring_schemes_exp=kcfs,
         # all the files (tuples of rankings) are considered
@@ -142,14 +120,15 @@ def run_count_subproblems_b6_vldb(path_dataset: str):
         # = B[6], for printing changing value of B
         changing_coeff=(0, 5),
         # range of number of elements to consider for the output
-        intervals=intervals_exp)
+        intervals=[(30, 59), (60, 99), (100, 299), (300, 1121)])
 
-    # run experiment and print results
-    bench.run_and_print()
+    # run experiment and print results. If raw_data is true: also print all parameters of experiment (readme)
+    # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+    bench.run(raw_data)
 
 
 # runs experiment 5 in research paper
-def run_experiment_bio_orphanet(dataset_path: str):
+def run_experiment_bio_orphanet(dataset_path: str, raw_data=False, figures=False):
     # sets the values of b5-b4 to consider (note that b4 is set to 0)
     values_b5 = [0.0, 0.25, 0.5, 0.75, 1, 2]
     kcfs = []
@@ -157,23 +136,28 @@ def run_experiment_bio_orphanet(dataset_path: str):
     for value_b5 in values_b5:
         kcfs.append(ScoringScheme([[0., 1., 1., 0., value_b5, 0.], [1., 1., 0., value_b5, value_b5, 0]]))
 
-    # to select the datasets of size >= 100 with at least 3 rankings
-    dataset_selector_expe = DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
-    exp1 = ExperimentOrphanet(  # name of experiment (if result is stored)
-        name_experiment="exp5_goldstandard_bio",
-        # the path containing the dataset to consider
-        main_folder_path=dataset_path,
-        # the dataset to consider
-        dataset_folder="biological_dataset",
+    exp1 = ExperimentOrphanet(
+        dataset_folder=dataset_path,
         # the kcfs to consider
         scoring_schemes=kcfs,
-        # selects all the tuples of rankings
-        dataset_selector=dataset_selector_expe)
-    # run experiment and print results
-    exp1.run_and_print()
+        # the top-k to consider
+        top_k_to_test=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110],
+        # algorithm to compute the consensus
+        algo=get_algorithm(alg=Algorithm.ParCons, parameters={"bound_for_exact": 150,
+                                                              "auxiliary_algorithm":
+                                                                  get_algorithm(alg=Algorithm.BioConsert)}),
+        # selects all the tuples of rankings with at least 100 elements and 3 rankings
+        # dataset_selector=DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
+        dataset_selector=DatasetSelector(nb_elem_min=100, nb_rankings_min=3)
+
+    )
+
+    # run experiment and print results. If raw_data is true: also print all parameters of experiment (readme)
+    # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+    exp1.run(raw_data, figures=figures)
 
 
-def run_experiment_students_vldb(main_folder_path: str):
+def run_experiment_students_vldb(raw_data=False, figures=False):
     # seed 1 is set for python and numpy
     random.seed(1)
     np.random.seed(1)
@@ -189,10 +173,7 @@ def run_experiment_students_vldb(main_folder_path: str):
     2: choose uniformly 9 classes over the same 17. The marks obtained by students of track 1: N(10, 5*5) and by 
     students of track 2 : N(16, 4*4). Evaluation is made using top-20 of the consensuses
     """
-    exp = MarksExperiment(  # name of experiment
-        name_expe="exp6_goldstandard_student",
-        # folder containing the datasets, to store the output if needed
-        main_folder_path=main_folder_path,
+    exp = MarksExperiment(
         # number of tuples of rankings to create
         nb_years=100,
         # number of students in track1
@@ -216,48 +197,72 @@ def run_experiment_students_vldb(main_folder_path: str):
         # top-k to consider for the experiment (comparison consensus and overall average)
         topk=20,
         # kcfs to consider
-        scoring_schemes=kcfs)
-    # run experiment and print results
-    exp.run_and_print()
+        scoring_schemes=kcfs,
+        # algorithm to compute consensus
+        algo=get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150,
+                                                              "auxiliary_algorithm":
+                                                                  get_algorithm(alg=Algorithm.BioConsert)}))
+
+    # run experiment and print results. If raw_data is true: also print all parameters of experiment (readme)
+    # and the raw data that was used to compute the final data. If parameter is false, only final data is displayed
+    exp.run(raw_data, figures)
 
 
-def args_experiments_to_run(args: List[str]) -> Set[int]:
+def args_experiments_to_run(args: List[str]) -> Tuple[Set[int], bool, bool]:
+    display_all = False
+    figures_display = False
     experiments_set = set()
     for arg in args:
-        if arg == "all":
+        if arg == "--all":
             for i in range(6):
                 experiments_set.add(i+1)
+        elif arg == "--raw_data":
+            display_all = True
+        elif arg == "--figures":
+            figures_display = True
         else:
             arg_sep = arg.split("=")
             if len(arg_sep) != 2:
-                print("Invalid argument.")
+                print("Invalid argument. ")
                 print("Try exp=i,j,... without spaces, with i,j,... in {1, ..., 6}.")
                 print("For example, exp=3,4,6")
-                return set()
+                print("options = --raw_data --figures")
+                return set(), False, False
             type_arg = arg_sep[0]
             vals_arg = arg_sep[1]
             values_int = set()
             for val_arg in vals_arg.split(","):
                 if val_arg.isdigit():
                     values_int.add(int(val_arg))
-                if type_arg.lower() == "exp":
+                if type_arg.lower() == "exp" or type_arg.lower() == "-exp":
                     for value_int in values_int:
                         if 1 <= value_int <= 6:
                             experiments_set.add(value_int)
-                elif type_arg.lower() == "part":
+                        else:
+                            print("Error, \"exp\" argument can only be associated with integers between 1 and 6")
+                            return set(), False, False
+                elif type_arg.lower() == "part" or type_arg.lower() == "-part":
                     for value_int in values_int:
                         if 1 <= value_int <= 3:
                             experiments_set.add(2 * value_int)
                             experiments_set.add(2 * value_int - 1)
-    return experiments_set
+                        else:
+                            print("Error, \"part\" argument can onmy be associated with 1, 2 or 3")
+                            return set(), False, False
+                else:
+                    print("Invalid argument.")
+                    print("Try exp=i,j,... without spaces, with i,j,... in {1, ..., 6}.")
+                    print("For example, exp=3,4,6")
+                    return set(), False, False
+    return experiments_set, display_all, figures_display
 
 
 def display_manual():
     print("Program to reproduce the 6 experiments of VLDB2022 rank aggregation paper. One argument at least is needed.")
     print("There are 6 experiments: exp=1,2,3,4,5,6")
     print("Exp 1 and 2 form the part1 (bench time computation).")
-    print("Exp 3 and 4 form the part2 (evaluation of partitioning.")
-    print("Exp 5 and 6 form the part3 (evaluation of model with goldstandards.")
+    print("Exp 3 and 4 form the part2 (evaluation of partitioning).")
+    print("Exp 5 and 6 form the part3 (evaluation of model with goldstandards).")
     print("If you want to reproduce the two experiments of part 1: then the argument is \"part=1\"")
     print("If you want to reproduce the two experiments of part 1 and 2: then the argument is \"part=1,2\"")
     print("If you want to reproduce experiments 1, 4, 6: then the argument is \"exp=1,4,6\"")
@@ -268,29 +273,30 @@ def display_manual():
 if len(sys.argv) == 1:
     display_manual()
 else:
-    exp_to_run = args_experiments_to_run(sys.argv[1:])
-    path_datasets = "vldb_data"
+    exp_to_run, raw_data_display, figures_display = args_experiments_to_run(sys.argv[1:])
+    path_biological_dataset = "/home/pierre/vldb_data/datasets/biological_dataset"
+
     if 6 in exp_to_run:
         print("Run experiment students.")
         print("Estimated time: ~ 30 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_experiment_students_vldb(path_datasets)
-    if 5 in exp_to_run:
-        print("Run experiment goldstandard bio.")
-        print("Estimated time: ~ 90 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_experiment_bio_orphanet(path_datasets)
+        run_experiment_students_vldb(raw_data_display, figures_display)
     if 3 in exp_to_run:
         print("Run experiment subproblems t.")
         print("Estimated time: ~ 90 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_count_subproblems_t_vldb(path_datasets)
+        run_count_subproblems_t_vldb(path_biological_dataset, raw_data_display)
     if 4 in exp_to_run:
         print("Run experiment subproblems b5.")
         print("Estimated time: ~ 90 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_count_subproblems_b6_vldb(path_datasets)
+        run_count_subproblems_b6_vldb(path_biological_dataset, raw_data_display)
+    if 5 in exp_to_run:
+        print("Run experiment goldstandard bio.")
+        print("Estimated time: ~ 120 min on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
+        run_experiment_bio_orphanet(path_biological_dataset, raw_data_display, figures_display)
     if 2 in exp_to_run:
         print("Run experiment scalability of exact algorithm.")
         print("Estimated time: 24h on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_bench_exact_optimized_scoring_scheme_vldb(path_datasets)
+        run_bench_exact_optimized_scoring_scheme_vldb(path_biological_dataset, raw_data_display, figures_display)
     if 1 in exp_to_run:
-        print("Run bench")
+        print("Run bench time computation of EA, EA-optim1, EA-optim1-optim2")
         print("Estimated time: 36h on Intel Core i7-7820HQ CPU 2.9 GHz * 8")
-        run_bench_time_alg_exacts_vldb(path_datasets)
+        run_bench_time_alg_exacts_vldb(path_biological_dataset, raw_data_display, figures_display)

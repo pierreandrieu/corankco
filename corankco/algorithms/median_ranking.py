@@ -40,7 +40,7 @@ class MedianRanking:
                              dataset: Dataset,
                              scoring_scheme: ScoringScheme,
                              return_at_most_one_ranking: bool = False,
-                             lower_bound_time: int = 2) -> float:
+                             lower_bound_time: float = 2.) -> float:
         sum_time = 0
         nb_computation = 0
         while sum_time <= lower_bound_time:

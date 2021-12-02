@@ -3,31 +3,35 @@ from corankco.experimentsVLDB.orphanet_parser import OrphanetParser
 from corankco.experimentsVLDB.disease import Disease
 from corankco.dataset import DatasetSelector
 from corankco.algorithms.algorithmChoice import Algorithm, get_algorithm
+from corankco.algorithms.median_ranking import MedianRanking
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from corankco.utils import parse_ranking_with_ties_of_int
 from typing import List
-from corankco.utils import join_paths, name_file
+from corankco.utils import join_paths, name_file, get_parent_path
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class ExperimentOrphanet(ExperimentFromDataset):
 
     def __init__(self,
-                 name_experiment: str,
-                 main_folder_path: str,
                  dataset_folder: str,
                  scoring_schemes: List[ScoringScheme],
+                 top_k_to_test: List[int],
+                 algo: MedianRanking = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150}),
                  dataset_selector: DatasetSelector = None,
                  ):
-        super().__init__(name_experiment, main_folder_path, dataset_folder, dataset_selector)
-        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(join_paths(main_folder_path,
+        super().__init__(dataset_folder=dataset_folder, dataset_selector=dataset_selector)
+        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(join_paths(get_parent_path(
+                                                                                get_parent_path(dataset_folder)),
                                                                                   "supplementary_data"))
-        self.__algo = get_algorithm(Algorithm.ParCons, parameters={"bound_for_exact": 150})
+        self.__algo = algo
         self.__remove_useless_datasets()
         self.__scoring_schemes = []
         self.__consensus = {}
         self.__scoring_schemes = scoring_schemes
+        self.__top_k_to_test = top_k_to_test
 
     def __contains_mesh(self, mesh_term: str) -> bool:
         return self.__orphanetParser.contains_mesh(mesh_term)
@@ -71,16 +75,16 @@ class ExperimentOrphanet(ExperimentFromDataset):
 
         return res
 
-    def __get_consensus_from_files(self):
+    def __get_consensus_from_files(self, folder_consensus: str):
         for sc in self.__scoring_schemes:
             self.__consensus[sc] = []
             for dataset in self._datasets:
                 self.__consensus[sc].append(
                     (dataset, Consensus.get_consensus_from_file(
-                        join_paths(self._folder_last_output, "consensus", str(sc.b5), name_file(dataset.name)))))
+                        join_paths(folder_consensus, str(sc.b5), name_file(dataset.name)))))
 
     def _run_final_data(self, raw_data: str) -> str:
-        top_k_all = list(range(10, 111, 10))
+        top_k_all = self.__top_k_to_test
         res = "k"
         for scoring_scheme in self.__scoring_schemes:
             res += ";b5-b4=" + str(scoring_scheme.b5-scoring_scheme.b4)
@@ -117,3 +121,26 @@ class ExperimentOrphanet(ExperimentFromDataset):
             for dataset in self._datasets:
                 consensus = self.__algo.compute_consensus_rankings(dataset, sc, True)
                 self.__consensus[sc].append((dataset, consensus))
+
+    def _display(self, final_data: str):
+        x_axis = []
+        y_axis = []
+        for i in range(len(self.__scoring_schemes)):
+            y_axis.append([])
+        data_split = final_data.split("\n")
+        nb_columns = len(data_split[0].split(";"))
+        first_col_result = nb_columns-len(self.__scoring_schemes)
+        for line in data_split[1:]:
+            if len(line) > 1:
+                cols = line.split(";")
+                x_axis.append(float(cols[0]))
+                for i in range(first_col_result, nb_columns):
+                    y_axis[i-first_col_result].append(float(cols[i]))
+        plt.xlabel("B5-B4")
+        plt.ylabel("Sum of number of genes of the GS in top-k consensus")
+        colors = ["b", "g", "r", "m", "y", "k"]
+        id_col = 0
+        for y in y_axis:
+            plt.scatter(x_axis, y, edgecolors=colors[id_col])
+            id_col += 1
+        plt.show()

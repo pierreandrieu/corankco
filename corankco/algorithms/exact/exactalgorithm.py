@@ -51,13 +51,13 @@ class ExactAlgorithm(MedianRanking):
 
     def get_full_name(self) -> str:
         res = "Exact algorithm"
-        if self.__preprocess:
-            res += ", preprocess=" + str(self.__preprocess)
-            if self.__optimize:
-                res += ", optimize=" + str(self.__optimize)
+        if self.__optimize:
+            res += ", optim1"
+            if self.__preprocess:
+                res += ", optim2"
         else:
-            if self.__optimize:
-                res += ", optimize=" + str(self.__optimize)
+            if self.__preprocess:
+                res += ", optim2"
         return res
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:

@@ -10,17 +10,15 @@ import numpy as np
 class BenchTime(ExperimentFromDataset):
 
     def __init__(self,
-                 name_exp: str or int,
-                 main_folder_path: str,
                  dataset_folder: str,
                  algs: List[MedianRanking],
                  scoring_scheme: ScoringScheme,
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
                  max_time: float = float('inf'),
-                 repeat_time_computation_until: int = 2):
+                 repeat_time_computation_until: float = 1.):
 
-        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
+        super().__init__(dataset_folder, dataset_selector_exp)
         self.__algs = algs
         self.__scoring_scheme = scoring_scheme
         self.__steps = steps
@@ -33,8 +31,7 @@ class BenchTime(ExperimentFromDataset):
             res += ";" + alg.get_full_name()
         res += "\n"
         must_run = [True] * len(self.__algs)
-        for dataset in sorted(self.get_datasets()):
-            print("\t" + dataset.name + " " + str(dataset.n))
+        for dataset in sorted(self.datasets):
             res += dataset.name + ";" + str(dataset.n)
             id_alg = 0
             for alg in self.__algs:
@@ -98,17 +95,15 @@ class BenchTime(ExperimentFromDataset):
 class BenchScalabilityScoringScheme(ExperimentFromDataset):
 
     def __init__(self,
-                 name_exp: str or int,
-                 main_folder_path: str,
                  dataset_folder: str,
                  alg: MedianRanking,
                  scoring_schemes: List[ScoringScheme],
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
                  max_time: float = float('inf'),
-                 repeat_time_computation_until: int = 2):
+                 repeat_time_computation_until: int = 1):
 
-        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
+        super().__init__(dataset_folder, dataset_selector_exp)
         self.__alg = alg
         self.__scoring_schemes = scoring_schemes
         self.__steps = steps
@@ -118,32 +113,38 @@ class BenchScalabilityScoringScheme(ExperimentFromDataset):
     def _run_raw_data(self) -> str:
         res = "dataset;nb_elements"
         for scoring_scheme in self.__scoring_schemes:
-            res += ";" + str(scoring_scheme.penalty_vectors)
+            res += ";" + scoring_scheme.get_nickname()
         res += "\n"
-        flag = True
-        for dataset in sorted(self.get_datasets()):
-            print("\t" + dataset.name + " " + str(dataset.n))
+        flag = [True] * len(self.__scoring_schemes)
+        for dataset in sorted(self.datasets):
+            print(dataset.name + " " + str(dataset.n))
             res += dataset.name + ";" + str(dataset.n)
+            id_scoring_scheme = 0
             for scoring_scheme in self.__scoring_schemes:
-                if flag:
+                if flag[id_scoring_scheme]:
                     time_computation = self.__alg.bench_time_consensus(dataset, scoring_scheme, True)
                     if time_computation > self.__max_time:
-                        flag = False
+                        flag[id_scoring_scheme] = False
                 else:
                     time_computation = float('inf')
                 res += ";" + str(time_computation)
+                id_scoring_scheme += 1
             res += "\n"
-        # print(res)
-
+        print(res)
         return res
 
     def _run_final_data(self, raw_data: str) -> str:
-        res = ""
+        res = "size_datasets"
+        for sc in self.__scoring_schemes:
+            res += ";"+sc.get_nickname() + "_mean_time"
+        res += "\n"
         h_res = {}
         mapping_nb_elements_group = {}
         cpt = 0
         key_mapping = 0
-        h_res[0] = []
+        h_res[0] = {}
+        for sc in self.__scoring_schemes:
+            h_res[0][sc] = []
         tuples_groups = []
         for i in range(self._dataset_selector.nb_elem_min, self._dataset_selector.nb_elem_max+1):
             cpt += 1
@@ -152,35 +153,37 @@ class BenchScalabilityScoringScheme(ExperimentFromDataset):
             if cpt == self.__steps:
                 key_mapping += 1
                 cpt = 0
-                h_res[key_mapping] = []
-
+                h_res[key_mapping] = {}
+                for sc in self.__scoring_schemes:
+                    h_res[key_mapping][sc] = []
         for i in range(self._dataset_selector.nb_elem_min, self._dataset_selector.nb_elem_max+1, self.__steps):
             tuples_groups.append((i, i+self.__steps-1))
         for line in raw_data.split("\n")[1:]:
             if len(line) > 1:
                 cols = line.split(";")
                 nb_elements = int(cols[1])
-                time_computation = cols[2]
-                h_res[mapping_nb_elements_group[nb_elements]].append(float(time_computation))
-
+                col_first_sc = len(cols) - len(self.__scoring_schemes)
+                for j in range(col_first_sc, len(cols)):
+                    h_res[mapping_nb_elements_group[nb_elements]][self.__scoring_schemes[j-col_first_sc]].append(float(cols[j]))
         for i in range(len(tuples_groups)):
-            res += str(tuples_groups[i]) \
-                   + ";"+str(np.mean(np.asarray(h_res[i]))) + ";" + str(np.max(np.asarray(h_res[i]))) + "\n"
+            tuple_i = tuples_groups[i]
+            res += str(tuple_i)
+            for sc in self.__scoring_schemes:
+                res += ";" + str(np.mean(np.asarray(h_res[i][sc])))
+            res += "\n"
         return res
 #######################################################################################################################
 
 
 class BenchPartitioningScoringScheme(ExperimentFromDataset):
     def __init__(self,
-                 name_exp: str or int,
-                 main_folder_path: str,
                  dataset_folder: str,
                  scoring_schemes_exp: List[ScoringScheme],
                  changing_coeff: Tuple[int, int],
                  intervals: List[Tuple[int, int]] = None,
                  dataset_selector_exp: DatasetSelector = None,
                  ):
-        super().__init__(name_exp, main_folder_path, dataset_folder, dataset_selector_exp)
+        super().__init__(dataset_folder, dataset_selector_exp)
         self.__scoring_schemes = scoring_schemes_exp
         self.__alg = get_algorithm(alg=Algorithm.ParCons, parameters={"bound_for_exact": 0,
                                                                       "auxiliary_algorithm":
@@ -203,8 +206,7 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
         for scoring_scheme in self.__scoring_schemes:
             res += str(scoring_scheme.penalty_vectors) + ";"
         res += "\n"
-        for dataset in sorted(self.get_datasets()):
-            print(dataset.name + " " + str(dataset.n))
+        for dataset in sorted(self.datasets):
             res += dataset.name + ";" + str(dataset.n)+";"
             for scoring_scheme in self.__scoring_schemes:
                 consensus = self.__alg.compute_consensus_rankings(dataset, scoring_scheme, True)
@@ -214,7 +216,6 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                         biggest_scc = len(bucket)
                 res += str(biggest_scc) + ";"
             res += "\n"
-        # print(res)
         return res
 
     def _run_final_data(self, raw_data: str) -> str:

@@ -1,0 +1,6 @@
+Foot Deformity Congenital:[[3236]]
+Foot anomalies:[[8626], [348], [4851], [4233], [1605], [7480], [23586], [8314], [57167], [1399], [889]]
+Foot Deformities Congenital:[[4359], [8506], [127833]]
+Congenital deformity of foot:[[7040], [3236]]
+Congenital deformities of feet:[[]]
+Congenital deformity of feet unspecified:[[]]

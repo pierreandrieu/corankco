@@ -1,0 +1,6 @@
+Bacterial infection caused by Pseudomonas:[[1080], [3576], [7099], [7097], [4153], [3586], [114548], [4582], [5806], [3685]]
+Pseudomonas Infections:[[]]
+Pseudomonas infections:[[]]
+Pseudomonas Infection:[[10673], [6590]]
+Pseudomonas infection:[[10673], [6590]]
+Bacterial infection due to Pseudomonas:[[1080], [7097], [7099], [3586], [3576], [4153], [4582], [114548], [5806], [3685], [1673], [1667]]

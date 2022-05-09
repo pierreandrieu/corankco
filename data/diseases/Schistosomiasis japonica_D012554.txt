@@ -1,0 +1,8 @@
+Schistosoma japonicum Infection:[[6774], [7157], [5133], [1026], [1490]]
+Schistosoma japonicum infection:[[6774], [7157], [5133], [1026], [1490]]
+Schistosomiasis japonica:[[7040], [3586], [3458], [90865], [1490], [84868], [3567], [871], [79109]]
+Asiatic schistosomiasis:[[1432]]
+Schistosomiasis japonicum:[[]]
+Schistosomiasis due to Schistosoma japonicum:[[1490]]
+Schistosomiasis due to schistosoma japonicum:[[1490]]
+Schistosoma japonicum Infections:[[7157], [6774], [5133]]

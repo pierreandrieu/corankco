@@ -1,0 +1,6 @@
+Yersinia pseudotuberculosis Infections:[[]]
+Pseudotuberculoses Pasteurella:[[7124], [8651], [5292], [382]]
+Infection by Pasteurella pseudotuberculosis:[[]]
+Infection by Yersinia pseudotuberculosis:[[207], [5879], [3077], [387], [30835], [5578], [998], [5579]]
+Pseudotuberculosis Pasteurella:[[]]
+Pseudotuberculosis:[[207], [3077], [5879], [387], [5578], [998], [7253], [30835], [5579], [5335], [55277], [5606]]

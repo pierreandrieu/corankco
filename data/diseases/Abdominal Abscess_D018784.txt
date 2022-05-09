@@ -1,0 +1,7 @@
+Intra-Abdominal Abscess:[[]]
+Intra-Abdominal Abscesses:[[]]
+Intra-abdominal abscess:[[]]
+Abscesses Abdominal:[[3586], [929]]
+Abscess Abdominal:[[7124], [1401], [100507436], [7099], [3553], [3953], [796], [5806]]
+Abdominal abscess:[[]]
+Abscess Intra Abdominal:[[7124], [1401], [100507436], [3553], [796], [3953], [5806]]

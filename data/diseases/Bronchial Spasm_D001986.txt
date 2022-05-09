@@ -1,0 +1,5 @@
+Bronchospasm:[[154], [1906], [1604], [55107], [5553], [55876]]
+Bronchospasms:[[]]
+Spasm Bronchial:[[4524], [387], [5468], [624]]
+Bronchial spasm:[[]]
+Spasms Bronchial:[[2908], [9863]]

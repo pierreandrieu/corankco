@@ -1,0 +1,8 @@
+Compression of spinal cord:[[7422], [348], [4318], [4524], [351], [6622], [23411], [4982], [10891], [407040], [6285], [1634], [7471]]
+SCC - Spinal cord compression:[[]]
+Myelopathy Compressive:[[]]
+Spinal Cord Compression Extramedullary:[[]]
+Spinal Cord Compression:[[348], [6285]]
+Spinal cord compression:[[348], [6285]]
+Unspecified cord compression:[[7422], [348], [351], [4088], [7471], [633]]
+Spinal Cord Compressions:[[]]

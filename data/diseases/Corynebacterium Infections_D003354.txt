@@ -1,0 +1,4 @@
+Infection caused by Corynebacterium:[[4790], [64127], [2260]]
+Infection due to Corynebacterium:[[4790], [64127], [2260]]
+Infection Corynebacterium:[[4790], [64127], [2260]]
+Infections Corynebacterium:[[4790], [64127]]

@@ -1,0 +1,7 @@
+Finding of snoring:[[348], [3952], [1401]]
+Snorings:[[]]
+Snoring:[[348], [1401], [3952], [4879]]
+Snoring symptoms:[[348], [1401], [3952], [4879]]
+Observation of snoring:[[348], [1401]]
+Snores:[[]]
+Snoring symptom:[[348], [1401], [3952]]

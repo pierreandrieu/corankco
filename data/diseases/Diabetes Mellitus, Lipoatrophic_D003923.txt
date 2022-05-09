@@ -1,0 +1,5 @@
+Lipoatrophic Diabete:[[9370]]
+Lipoatrophic Diabetes:[[9370]]
+Lipoatrophic diabetes:[[9370]]
+Lipodystrophic diabetes:[[5468], [9370], [3553], [4000], [3953], [255738], [4312], [9927], [26580]]
+Lipoatrophic Diabetes Mellitus:[[]]

@@ -1,0 +1,4 @@
+Nutrition Disorder Fetal:[[]]
+Nutrition Disorders Fetal:[[]]
+Disorder of fetal nutrition:[[6532], [7124], [3569], [7422], [7157], [3553], [3952], [9370], [3479], [1401], [351], [26291], [6347], [23411], [3630], [406991], [5054], [5465], [3992], [4925], [9415]]
+Disorder of foetal nutrition:[[7422], [1401], [3553], [3630]]

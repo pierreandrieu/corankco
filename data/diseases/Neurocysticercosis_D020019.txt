@@ -1,0 +1,5 @@
+Neurocoenurosis:[[]]
+Neurocysticercosis:[[7099], [3586], [2944], [2952], [2950], [3383], [2670], [727], [7185], [2947]]
+Cerebral cysticercosis:[[7099]]
+Neurocoenuroses:[[]]
+Neurocysticercoses:[[]]

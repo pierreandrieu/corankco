@@ -1,0 +1,6 @@
+Abdominal desmoid tumour:[[324], [1029], [7040], [1499], [7422], [3815], [5054], [1490], [1000], [2191]]
+Mesenteric fibromatosis:[[]]
+Fibromatoses Abdominal:[[1499]]
+Abdominal desmoid tumor:[[1029], [324], [3815], [7040], [1499], [7422], [5054], [1490], [1000], [2191]]
+Abdominal fibromatosis:[[1499]]
+Fibromatosis Abdominal:[[1029], [7040], [1499], [324], [5054], [3815], [7048], [1490]]

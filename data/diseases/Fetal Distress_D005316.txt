@@ -1,0 +1,6 @@
+Nonreassuring Fetal Status:[[5069]]
+Foetal distress:[[7422], [4790], [1401], [3553], [355], [4582]]
+Nonreassuring foetal status:[[]]
+Fetal distress:[[4879], [3784], [551], [5788], [3291], [7349]]
+Nonreassuring fetal status:[[5069]]
+Fetal Distress:[[4879], [3784], [551], [5788], [3291], [7349]]

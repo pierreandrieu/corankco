@@ -1,0 +1,6 @@
+Blood streaked sputum:[[]]
+Coughing up blood:[[]]
+Hemoptyses:[[]]
+Haemoptysis:[[]]
+Hemoptysis:[[1636], [4846], [659]]
+Hemoptysis unspecified:[[]]

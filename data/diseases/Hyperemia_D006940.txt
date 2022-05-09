@@ -1,0 +1,6 @@
+Hyperemia:[[4846], [9370], [356], [2784], [153], [155], [5327], [4842], [6915], [3269], [3274]]
+Hyperemias:[[]]
+Local congestion:[[57817], [2532]]
+Vascular engorgement:[[]]
+Engorgement:[[]]
+Hyperaemia:[[335], [1559], [7442], [100], [3778], [6869]]

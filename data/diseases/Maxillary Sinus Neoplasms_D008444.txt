@@ -1,0 +1,7 @@
+Neoplasm Maxillary Sinus:[[3815], [5156]]
+Tumor of maxillary sinus:[[8600], [4982], [3815], [1080], [5156], [2130], [6892], [51135], [466]]
+Neoplasms Maxillary Sinus:[[3815], [1080], [8600], [4982], [5156], [2130], [466]]
+Neoplasm of maxillary sinus:[[3815], [5156]]
+Tumor of maxillary antrum:[[]]
+Tumour of maxillary antrum:[[]]
+Tumour of maxillary sinus:[[3815], [1080], [4982], [8600], [5156], [2130]]

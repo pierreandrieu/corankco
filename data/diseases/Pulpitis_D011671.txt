@@ -1,0 +1,4 @@
+Pulpitides:[[]]
+Pulpitis:[[4318], [407008], [9260], [55870]]
+Inflammation Endodontic:[[1401], [3569], [7099], [929], [2212], [2214], [2215]]
+Inflammations Endodontic:[[]]

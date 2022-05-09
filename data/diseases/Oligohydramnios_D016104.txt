@@ -1,0 +1,5 @@
+Deficient liquor:[[3688], [3383]]
+Oligohydramnios:[[4879], [3135], [1906], [358], [360]]
+Scanty liquor:[[3383], [3688], [2938]]
+Oligohydramnios unspecified trimester:[[]]
+Reduced liquor volume:[[3383]]

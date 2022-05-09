@@ -1,0 +1,7 @@
+Oropharynx Neoplasm:[[]]
+Oropharyngeal Neoplasms:[[]]
+Tumor of oropharynx:[[1029], [7124], [7157], [355], [356], [4193], [3586], [7040], [841], [836], [3552], [1869], [2067], [4194], [2264], [7030], [1870], [10961]]
+Oropharynx Neoplasms:[[]]
+Tumour of oropharynx:[[7157], [1029], [7124], [7040], [3586], [4193], [1869], [355], [836], [3552], [841], [356], [4194]]
+Neoplasm of oropharynx:[[7157], [1029], [7124], [3586], [4193], [7030]]
+Oropharyngeal Neoplasm:[[]]

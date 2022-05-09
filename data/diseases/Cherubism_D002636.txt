@@ -1,0 +1,8 @@
+CRBM:[[6452]]
+Familial Multilocular Cystic Disease of the Jaws:[[]]
+Fibrous dysplasia of jaw:[[7157], [6452], [4288]]
+Familial fibrous dysplasia of jaw:[[7157]]
+CHERUBISM:[[7124], [6714], [2261], [4772], [6452], [9098]]
+Familial Benign Giant-Cell Tumor of the Jaw:[[7157], [7422]]
+Familial Fibrous Dysplasia of Jaw:[[7157]]
+Cherubism:[[7124], [6714], [2261], [4772], [6452], [9098]]

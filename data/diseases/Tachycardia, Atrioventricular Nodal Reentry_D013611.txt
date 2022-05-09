@@ -1,0 +1,6 @@
+AV nodal re-entry tachycardia:[[]]
+Atrioventricular nodal reentrant tachycardia:[[6331], [6336], [6324]]
+Atrioventricular nodal re-entry tachycardia:[[]]
+Atrioventricular Nodal Reentrant Tachycardia:[[6331], [6336], [6324]]
+Tachycardia AV Nodal Reentrant:[[6331], [6336], [6324]]
+Tachycardia Atrioventricular Nodal Reentry:[[]]

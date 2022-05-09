@@ -1,0 +1,4 @@
+State Decerebrate:[[]]
+States Decerebrate:[[]]
+Decerebrate rigidity:[[]]
+Rigidity Decerebrate:[[]]

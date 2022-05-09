@@ -1,0 +1,6 @@
+Echolalia:[[3690]]
+Reaction Echo:[[7157], [1401], [4288]]
+Echophrasia:[[]]
+Speech Echo:[[]]
+Reactions Echo:[[7157], [1401], [4288]]
+Echo speech:[[]]

@@ -1,0 +1,4 @@
+Bursitis:[[3553], [6387]]
+Inflammation of bursa:[[3553], [6387], [650], [652], [6863], [655]]
+Bursitides:[[]]
+Bursitis NOS:[[]]

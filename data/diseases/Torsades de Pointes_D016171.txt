@@ -1,0 +1,6 @@
+de Pointes Torsades:[[2589], [406963], [55197], [3757], [3784], [6331], [83608], [3753], [287]]
+Torsade de pointes:[[1565]]
+de Pointes Torsade:[[1565]]
+Twisting spikes:[[]]
+Torsades de pointes:[[3757], [6331], [3784], [2589], [406963], [3753], [55197], [287], [83608]]
+Ventricular tachycardia polymorphic with Q-T prolongation:[[]]

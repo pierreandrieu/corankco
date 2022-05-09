@@ -1,0 +1,4 @@
+Tachycardia Ectopic Atrial:[[6331], [3569], [3958], [1906], [10021], [6696], [3315], [8490]]
+Atrial tachycardia ectopic:[[6331], [3569], [3958], [1906], [10021], [6696], [3315], [8490]]
+Ectopic atrial tachycardia:[[]]
+Tachycardias Ectopic Atrial:[[]]

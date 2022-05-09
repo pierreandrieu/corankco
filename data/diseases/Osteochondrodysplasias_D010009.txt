@@ -1,0 +1,5 @@
+Osteochondrodysplasia unspecified:[[]]
+Osteochondrodysplasia syndrome:[[2317], [54808], [10060], [632], [249], [50515]]
+Osteochondrodysplasias:[[3479], [1311], [8838], [54808]]
+Osteochondrodysplasia:[[10060], [1836], [632], [249], [50515], [2317], [202018], [54808], [10861]]
+OSTEOCHONDRODYSPLASIA:[[10060], [1836], [632], [249], [50515], [2317], [202018], [54808], [10861]]

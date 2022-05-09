@@ -1,0 +1,4 @@
+Hemangioendothelioma Epithelioid:[[10413], [25937], [60], [5228], [10630], [10643], [23261], [2354]]
+Hemangioendotheliomas Epithelioid:[[943], [23261]]
+Epithelioid haemangioendothelioma:[[2022], [25937], [5175], [23261], [2354]]
+Epithelioid hemangioendothelioma:[[5228], [25937], [10643], [23261]]

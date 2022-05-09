@@ -4,7 +4,7 @@ from numpy import vdot, count_nonzero, shape, array
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import Consensus, ConsensusFeature
+from corankco.consensus import ConsensusSingleRanking, ConsensusFeature
 
 
 class CopelandMethod(MedianRanking):
@@ -15,7 +15,7 @@ class CopelandMethod(MedianRanking):
             scoring_scheme: ScoringScheme,
             return_at_most_one_ranking=False,
             bench_mode=False
-    ) -> Consensus:
+    ) -> ConsensusSingleRanking:
         """
         :param dataset: A dataset containing the rankings to aggregate
         :type dataset: Dataset (class Dataset in package 'datasets')
@@ -58,9 +58,11 @@ class CopelandMethod(MedianRanking):
         cost_after = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
                             cost_before[5]])
         id_scores = {}                                      # dictionnaire pour retrouver le score d'un element
+        id_nb_victoires = {}
         # a partir de son id
         for i in range(0, n, 1):                # initialisation du dictionnaire
             id_scores[i] = 0
+            id_nb_victoires[i] = [0, 0, 0] # victoires, nul, defaites
         for id_el1 in range(0, n, 1):
             mem = positions[id_el1]             # tableau de rangs de el1
             d = count_nonzero(mem == -1)    # nombre de fois ou seulement el1 est absent
@@ -73,17 +75,42 @@ class CopelandMethod(MedianRanking):
                 put_before = vdot(relative_positions, cost_before)  # cout de placer el1 avant el2
                 put_after = vdot(relative_positions, cost_after)    # cout de placer el1 apres el2
                 put_tied = vdot(relative_positions, cost_tied)      # cout de placer el1 a egalite avec el2
-                if put_before < put_after and put_before < put_tied:
+
+                """"
+                if put_before < put_after and put_before <= put_tied:
                     id_scores[id_el1] += 1
-                    id_scores[id_el2] -= 1
-                elif put_after < put_before and put_after < put_tied:
-                    id_scores[id_el1] -= 1
+                elif put_after < put_before and put_after <= put_tied:
                     id_scores[id_el2] += 1
+                else:
+                    id_scores[id_el1] += 0.5
+                    id_scores[id_el2] += 0.5
+
+                """
+
+                if put_before < put_after:
+                    id_scores[id_el1] += 1
+                    id_nb_victoires[id_el1][0] += 1
+                    id_nb_victoires[id_el2][2] += 1
+                elif put_after < put_before:
+                    id_scores[id_el2] += 1
+                    id_nb_victoires[id_el1][2] += 1
+                    id_nb_victoires[id_el2][0] += 1
+                else:
+                    id_scores[id_el1] += 0.5
+                    id_scores[id_el2] += 0.5
+                    id_nb_victoires[id_el1][1] += 1
+                    id_nb_victoires[id_el2][1] += 1
+
         sorted_ids = CopelandMethod.sorted_dictionary_keys(id_scores)  # liste des cles du dictionnaire trie par
+        scores_elements = {}
+        victories_elements = {}
         # valeurs decroissantes
         bucket = []
         previous_id = sorted_ids[0]
         for id_elem in sorted_ids:
+            scores_elements[id_elements.get(id_elem)] = id_scores.get(id_elem)
+            victories_elements[id_elements.get(id_elem)] = id_nb_victoires.get(id_elem)
+
             if id_scores.get(previous_id) == id_scores.get(id_elem):  # si l'elem actuel a le meme score que l'element
                 # precedent
                 bucket.append(id_elements.get(id_elem))                  # on le place dans le meme bucket que celui ci
@@ -91,12 +118,14 @@ class CopelandMethod(MedianRanking):
                 res.append(bucket)                                  # sinon, on concatene le bucket a la liste resultat
                 bucket = [id_elements.get(id_elem)]                 # on reinitialise le bucket avec le candidat actuel
             previous_id = id_elem
-        res.append(bucket)                  # on concatene le dernier bucket a la liste resultat
-        return Consensus(consensus_rankings=[res],
+        res.append(bucket)
+        return ConsensusSingleRanking(consensus_rankings=[res],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att={
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name(),
+                              ConsensusFeature.CopelandScores: scores_elements,
+                              ConsensusFeature.CopelandVictories: victories_elements
                               }
                          )
 

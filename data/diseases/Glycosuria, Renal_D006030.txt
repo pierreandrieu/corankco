@@ -1,0 +1,8 @@
+Renal Glycosuria:[[6927], [6524]]
+GLYCOSURIA RENAL:[[2759], [6927], [6524]]
+Renal glucosuria:[[2759], [6524], [387700]]
+Renal Glucosuria:[[2759], [6524], [387700]]
+Renal glycosuria:[[6927], [6524]]
+GLYS:[[]]
+RENAL GLUCOSURIA:[[2759], [6524], [387700]]
+GLYS1:[[2759]]

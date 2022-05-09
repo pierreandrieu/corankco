@@ -1,0 +1,8 @@
+Hemorrhage Choroid:[[7157], [7040], [351], [3091], [3075], [332], [335], [177], [7276], [2670], [387715], [197], [4852], [358], [5654]]
+Choroidal hemorrhage unspecified:[[]]
+Choroidal hemorrhage:[[]]
+Choroidal haemorrhage:[[4318], [7097]]
+Unspecified choroidal hemorrhage unspecified eye:[[]]
+Hemorrhage Choroidal:[[7422], [4318], [1401], [2099], [3075], [3091], [5728], [4313], [3146], [1906], [335], [5654], [1071], [948], [387715], [2006], [6376], [1524], [3371], [4015], [7439], [2053], [5049]]
+Unspecified choroidal hemorrhage:[[]]
+Choroidal Hemorrhages:[[]]

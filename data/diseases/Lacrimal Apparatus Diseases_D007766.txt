@@ -1,0 +1,7 @@
+Lacrimal Apparatus Diseases:[[]]
+Lacrimal Apparatus Disease:[[]]
+Disorder of lacrimal system:[[673], [2263], [6662], [4851], [4353], [4282], [4853], [50616], [6750], [192343]]
+Disorder of lacrimal system unspecified:[[673]]
+Lachrymal system disorders:[[3569], [356]]
+Unspecified disorder of lacrimal system:[[673]]
+Disorders of lacrimal system:[[1029], [8626], [673], [6662], [4851], [2263], [332], [4353], [4282], [50616], [1118], [6750], [192343]]

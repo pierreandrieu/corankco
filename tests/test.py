@@ -37,9 +37,10 @@ print(consensus.description())
 
 algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
                          get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
+                         get_algorithm(alg=Algorithm.CopelandMethod),
                          get_algorithm(alg=Algorithm.ParCons, parameters={"bound_for_exact": 90,
                                                                           "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
-                         get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
+                         get_algorithm(alg=Algorithm.Exact, parameters={})
                          ]
 
 for alg in algorithms_to_execute:

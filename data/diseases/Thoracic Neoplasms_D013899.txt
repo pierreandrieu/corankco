@@ -1,0 +1,5 @@
+Tumor of thorax:[[7490], [5781], [5606], [10409]]
+Tumour of thorax:[[7490], [5781]]
+Thoracic Neoplasm:[[]]
+Neoplasm of thorax:[[7490]]
+Thoracic Neoplasms:[[6597]]

@@ -1,0 +1,5 @@
+Neoplasm of pleura:[[3845], [29126], [6598]]
+Pleural Neoplasms:[[]]
+Tumour of pleura:[[3845], [29126], [3481], [6598], [94025], [10232], [8912], [1848]]
+Pleural Neoplasm:[[]]
+Tumor of pleura:[[6598], [94025], [3481], [29126], [3845], [10232], [1848]]

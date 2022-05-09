@@ -1,0 +1,3 @@
+Hyperphosphatemia:[[1401], [4846], [5468], [2475], [23411], [6696], [3725], [8074], [9365], [5741], [6470], [2591]]
+Hyperphosphataemia:[[2591]]
+Hyperphosphatemias:[[]]

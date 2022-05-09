@@ -1,0 +1,8 @@
+Chondrodysplasia calcificans:[[1300], [10682], [415], [5745], [10013], [4322], [100820762], [100302058], [4882], [5830], [2261], [6023], [5191], [1280], [8540], [10033], [5744], [8443], [8200], [3339], [55733], [658], [54928], [8838], [1836], [1297], [5264], [55670], [54870]]
+Dysplasia Epiphysialis Punctata:[[]]
+Chondrodysplasia Punctata:[[10682], [415], [5830], [5191], [8540], [10033], [8443], [5264], [55670]]
+Chondrodysplasia punctata:[[10682], [415], [5830], [5191], [8540], [10033], [8443], [5264], [55670]]
+Chondrodysplasia punctata (stippled epiphyses) group:[[]]
+Stippled Epiphyses:[[]]
+Chondrodysplasia punctata congenita:[[]]
+Chondrodystrophia Calcificans Congenita:[[]]

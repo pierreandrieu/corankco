@@ -1,0 +1,5 @@
+Syphilis CNS:[[3586], [3123], [3458]]
+Neurosyphilis unspecified:[[]]
+Syphilis Central Nervous System:[[3586], [3605], [3458], [50943]]
+Syphilis of central nervous system:[[3586], [3605], [3458], [50943]]
+Neurosyphilis:[[3586], [3576], [3605], [7097], [3627], [10563], [7096], [10333], [643]]

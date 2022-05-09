@@ -1,0 +1,5 @@
+Ventricular Fibrillation:[[6331], [3569], [4879], [1804], [775], [4625], [2740], [6262], [488], [442890], [406922], [23493], [2281], [55800], [23630]]
+Ventricular fibrillation:[[6331], [3569], [4879], [1804], [775], [4625], [2740], [6262], [488], [442890], [406922], [23493], [2281], [55800], [23630]]
+Cardiac arrest - ventricular fibrillation:[[6331], [4879], [6262]]
+Ventricular Fibrillations:[[]]
+VF - Ventricular fibrillation:[[6331], [6262]]

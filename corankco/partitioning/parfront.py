@@ -1,6 +1,7 @@
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
-from typing import Tuple, List, Set
+from corankco.partitioning.orderedPartition import OrderedPartition
+from typing import Tuple, Set
 from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray
 from igraph import Graph
 
@@ -14,7 +15,7 @@ class ParFront:
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme
-    ) -> List[Set]:
+    ) -> OrderedPartition:
         """
         :param dataset: A dataset containing the rankings to aggregate
         :type dataset: Dataset (class Dataset in package 'datasets')
@@ -68,7 +69,8 @@ class ParFront:
             res.append(g)
             for elem in group:
                 g.add(id_elements[elem])
-        return res
+
+        return OrderedPartition(res)
 
     @staticmethod
     def __graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray, Set[Tuple]]:

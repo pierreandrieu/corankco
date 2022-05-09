@@ -1,0 +1,8 @@
+Vision Defect Color:[[2064], [5956], [1756], [611], [2652]]
+Color vision deficiencies:[[]]
+Colour vision deficiency:[[2064]]
+Color vision defects:[[]]
+Color vision deficiency:[[1756], [611]]
+Vision Deficiencies Color:[[]]
+Vision Defects Color:[[2064], [1756], [6010], [5956], [1261], [611], [2652], [84839]]
+Vision Deficiency Color:[[2064], [1756], [611]]

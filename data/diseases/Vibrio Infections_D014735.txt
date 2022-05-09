@@ -1,0 +1,8 @@
+Vibrio Infections:[[]]
+Infection caused by Vibrio:[[3576], [5594], [1432], [7097], [5595], [3685], [5879], [820], [6868], [5340]]
+Vibriosis:[[]]
+Vibrio Illnesses:[[5594], [5595]]
+Infection due to Vibrio:[[3576], [7097], [5594], [1432], [3685], [5879], [5595], [820], [998], [6868], [10392], [1672], [5340], [10333], [92747]]
+Vibrio Infection:[[]]
+Vibrioses:[[]]
+Vibrio Illness:[[]]

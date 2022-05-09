@@ -1,0 +1,5 @@
+AVM (Arteriovenous Malformation) Intracranial:[[3569], [4318], [6772]]
+Intracranial Arteriovenous Malformations Congenital:[[]]
+Malformation Intracranial Arteriovenous:[[2050], [3569], [3845], [7422], [4318], [64321], [4313], [673], [3553], [627], [2022], [4314], [6772], [6285], [7048], [51129], [1281], [3339], [9722]]
+Malformations Intracranial Arteriovenous:[[1029], [100048912], [3845], [7422], [2050], [7124], [348], [64321], [7040], [673], [2022], [3553], [3690], [5932], [3685], [2006], [4854], [7941], [90627], [51129], [1910], [54805]]
+Arteriovenous malformation of brain NOS:[[7422], [6774], [9722]]

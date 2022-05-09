@@ -1,0 +1,7 @@
+Spasms Laryngeal:[[5243], [3717], [7249]]
+Laryngospasm:[[6329]]
+Laryngospasms:[[]]
+Spasm Laryngeal:[[4524], [7298], [7249], [2324]]
+Laryngeal spasm:[[4524], [7298], [7249], [2324]]
+Laryngeal spasms:[[5243], [3717], [7249]]
+Laryngismus:[[]]

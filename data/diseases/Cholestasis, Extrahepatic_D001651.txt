@@ -1,0 +1,5 @@
+Extrahepatic Cholestasis:[[9965]]
+Extrahepatic Biliary Stasis:[[]]
+Extrahepatic cholestasis:[[9965]]
+Bile Duct Obstruction Extrahepatic:[[]]
+Extrahepatic obstructive biliary disease:[[3569], [7124], [7040], [1956], [3383], [9370], [5468], [182], [29126], [1026], [857], [332], [8743], [581], [5244]]

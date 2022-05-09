@@ -1,0 +1,6 @@
+Hemolytic Anemia Congenital Nonspherocytic:[[2539], [2821], [5313]]
+Congenital nonspherocytic haemolytic anaemia:[[5313]]
+Congenital nonspherocytic hemolytic anemia:[[]]
+Hereditary nonspherocytic haemolytic anaemia:[[5313]]
+Hereditary nonspherocytic hemolytic anemia:[[2539], [2821], [5313]]
+HNSHA:[[226], [5313]]

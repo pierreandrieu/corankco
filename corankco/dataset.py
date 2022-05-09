@@ -1,4 +1,4 @@
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Tuple
 import numpy as np
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, \
     dump_ranking_with_ties_to_str, name_file
@@ -11,15 +11,18 @@ class EmptyDatasetException(Exception):
 
 class Dataset:
     def __init__(self, rankings: str or List[List[List or Set[int or str]]]):
-        self.__nb_rankings = -1
-        self.__nb_elements = -1
-        self.__is_complete = None
-        self.__with_ties = None
+        self.__mapping_elements_id = {}
+        self.__rankings, self.__is_complete, self.__with_ties = self.__analyse_rankings(rankings)
+        self.__name = ""
+
+    def __analyse_rankings(self,
+                           rankings: List[List[List or Set[int or str]]]) \
+            -> Tuple[List[List[List or Set[int or str]]], bool, bool]:
+
         if type(rankings) == str:
             rankings_list = dump_ranking_with_ties_to_str(rankings)
         else:
             rankings_list = rankings
-        self.__name = "manual"
         if len(rankings_list) == 0:
             raise EmptyDatasetException
 
@@ -40,7 +43,14 @@ class Dataset:
             id_ranking += 1
 
         if not all_integers:
-            rankings_final = rankings_list
+            rankings_final = []
+            for ranking_l in rankings_list:
+                ranking_final = []
+                for bucket_l in ranking_l:
+                    bucket_final = set()
+                    bucket_final.update(bucket_l)
+                    ranking_final.append(bucket_final)
+                rankings_final.append(ranking_final)
 
         else:
             rankings_final = []
@@ -60,10 +70,71 @@ class Dataset:
                 rankings_final.append(ranking_int)
                 id_ranking += 1
 
-        # updates previous values with right values for n, m and complete
-        self.__set_rankings_and_update_properties(rankings=rankings_final)
-        if self.n == 0:
-            raise EmptyDatasetException("Datast must not be empty")
+        # check if rankings are complete or not, and with or without ties
+
+        with_ties = False
+        complete = True
+        elements_appearance = {}
+        for ranking in rankings_final:
+            nb_elements = 0
+            for bucket in ranking:
+                nb_elements += len(bucket)
+                if len(bucket) > 1:
+                    with_ties = True
+                for element in bucket:
+                    if element not in elements_appearance:
+                        elements_appearance[element] = 1
+                    else:
+                        elements_appearance[element] += 1
+
+        if len(elements_appearance) == 0:
+            raise EmptyDatasetException("Dataset must not be empty")
+
+        id_element = 0
+        for key in elements_appearance.keys():
+            self.__mapping_elements_id[key] = id_element
+            id_element += 1
+            if elements_appearance[key] != len(rankings_final):
+                complete = False
+        return rankings_final, complete, with_ties
+
+    def remove_empty_rankings(self):
+        rankings_new = []
+        for ranking in self.rankings:
+            if len(ranking) > 0:
+                rankings_new.append(ranking)
+        self.__rankings, self.__is_complete, self.__with_ties = self.__analyse_rankings(rankings_new)
+
+    def remove_elements_rate_presence_lower_than(self, rate_presence: float):
+        presence = {}
+        for element in self.elements:
+            presence[element] = 0
+        for ranking in self.__rankings:
+            for bucket in ranking:
+                for element in bucket:
+                    presence[element] += 1
+        elements_to_remove = set()
+        for element, nb_rankings_present in presence.items():
+            if nb_rankings_present / self.nb_rankings < rate_presence:
+                elements_to_remove.add(element)
+        self.remove_elements(elements_to_remove)
+
+    def remove_elements(self, elements_to_remove: Set):
+        new_rankings = []
+        for old_ranking in self.rankings:
+            new_ranking = []
+            for old_bucket in old_ranking:
+                new_bucket = []
+                for old_element in old_bucket:
+                    if old_element not in elements_to_remove:
+                        new_bucket.append(old_element)
+                if len(new_bucket) > 0:
+                    new_ranking.append(new_bucket)
+            if len(new_ranking) > 0:
+                new_rankings.append(new_ranking)
+        for element_to_remove in elements_to_remove:
+            self.__mapping_elements_id.pop(element_to_remove)
+        self.__rankings, self.__is_complete, self.__with_ties = self.__analyse_rankings(new_rankings)
 
     @staticmethod
     def get_ranking_from_file(path: str):
@@ -75,13 +146,13 @@ class Dataset:
         return self.__rankings
 
     def __get_nb_elements(self) -> int:
-        return self.__nb_elements
+        return len(self.__mapping_elements_id)
 
     def __get_path(self) -> str:
         return self.__name
 
     def __get_nb_rankings(self) -> int:
-        return self.__nb_rankings
+        return len(self.__rankings)
 
     def __get_is_complete(self) -> bool:
         return self.__is_complete
@@ -89,90 +160,41 @@ class Dataset:
     def __get_with_ties(self) -> bool:
         return self.__with_ties
 
-    def __set_nb_elements(self, n: int):
-        self.__nb_elements = n
-
-    def __set_nb_rankings(self, m: int):
-        self.__nb_rankings = m
-
-    def __set_is_complete(self, complete: bool):
-        self.__is_complete = complete
-
-    def __set_with_ties(self, with_ties: bool):
-        self.__with_ties = with_ties
+    def __get_elements(self) -> Set:
+        return set(self.__mapping_elements_id)
 
     def __set_path(self, path: str):
         self.__name = path
 
-    def __set_rankings_and_update_properties(self, rankings: List[List[List or Set[int or str]]]):
-        self.__rankings = rankings
-        self.__nb_rankings = len(rankings)
-        self.__is_complete = self.__check_if_rankings_complete_and_update_n()
-
     # number of elements
-    n = property(__get_nb_elements, __set_nb_elements)
+    nb_elements = property(__get_nb_elements)
     # number of rankings
-    m = property(__get_nb_rankings, __set_nb_rankings)
+    nb_rankings = property(__get_nb_rankings)
     # input rankings
-    rankings = property(__get_rankings, __set_rankings_and_update_properties)
+    rankings = property(__get_rankings)
     # boolean: True iif all the rankings are on the same set of elements
-    is_complete = property(__get_is_complete, __set_is_complete)
+    is_complete = property(__get_is_complete)
     # boolean: True iif there exists at least a bucket of size >= 2
-    with_ties = property(__get_with_ties, __set_with_ties)
+    with_ties = property(__get_with_ties)
     # name of the dataset
     name = property(__get_path, __set_path)
+    # universe of the rankings i.e. elements appearing in at least one ranking
+    elements = property(__get_elements)
 
     def __str__(self) -> str:
         return str(self.rankings)
 
     def description(self) -> str:
-        return "Dataset description:\n\telements:"+str(self.n)+"\n\trankings:"+str(self.m)+"\n\tcomplete:"\
-               + str(self.is_complete) + "\n\twith ties: "+str(self.with_ties) + "\n\t"+"rankings:\n"\
+        return "Dataset description:\n\telements:" + str(self.nb_elements) + "\n\trankings:" + str(self.nb_rankings) \
+               + "\n\tcomplete:" \
+               + str(self.is_complete) + "\n\twith ties: " + str(self.with_ties) + "\n\t" \
+               + "rankings:\n" \
                + "\n".join("\t\tr"+str(i+1)+" = "+str(self.rankings[i]) for i in range(len(self.rankings)))
-
-    # to update properties
-    def __check_if_rankings_complete_and_update_n(self):
-        self.with_ties = False
-        if len(self.rankings) == 0:
-            self.n = 0
-            self.m = 0
-        else:
-            elements = {}
-
-            for ranking in self.rankings:
-                nb_elements = 0
-                for bucket in ranking:
-                    nb_elements += len(bucket)
-                    if len(bucket) > 1:
-                        self.with_ties = True
-                    for element in bucket:
-                        if element not in elements:
-                            elements[element] = 1
-                        else:
-                            elements[element] += 1
-            self.n = len(elements)
-            self.m = len(self.rankings)
-            for key in elements.keys():
-                if elements[key] != self.m:
-                    return False
-        return True
-
-    # map each element with {1, ..., n} (bijection)
-    def map_elements_id(self) -> Dict[int or str, int]:
-        h = {}
-        id_elem = 0
-        for ranking in self.rankings:
-            for bucket in ranking:
-                for elem in bucket:
-                    if elem not in h:
-                        h[elem] = id_elem
-                        id_elem += 1
-        return h
 
     # returns a numpy ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
     def get_positions(self, elements_id: Dict[str or int, int]) -> np.ndarray:
-        n = self.n
-        m = self.m
+        n = self.nb_elements
+        m = self.nb_rankings
         positions = np.zeros((n, m)) - 1
         id_ranking = 0
         for ranking in self.rankings:
@@ -186,8 +208,8 @@ class Dataset:
 
     # returns the pairwise cost matrix
     def pairs_relative_positions(self, positions: np.ndarray) -> np.ndarray:
-        n = self.n
-        m = self.m
+        n = self.nb_elements
+        m = self.nb_rankings
         matrix = np.zeros((n * n, 6))
         for e1 in range(n-1, -1, -1):
             ind1 = n * e1 + e1
@@ -254,22 +276,26 @@ class Dataset:
         return Dataset(path_file)
 
     def __lt__(self, other):
-        return self.n < other.n or (self.n == other.n and self.m < other.m)
+        return self.nb_elements < other.nb_elements or \
+               (self.nb_elements == other.nb_elements and self.nb_rankings < other.nb_rankings)
 
     def __le__(self, other):
-        return self.n <= other.n or (self.n == other.n and self.m <= other.m)
+        return self.nb_elements <= other.nb_elements or \
+               (self.nb_elements == other.nb_elements and self.nb_rankings <= other.nb_rankings)
 
     def __eq__(self, other):
-        return self.n == other.n and self.m == other.m
+        return self.nb_elements == other.nb_elements and self.nb_rankings == other.nb_rankings
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __gt__(self, other):
-        return self.n > other.n or (self.n == other.n and self.m > other.m)
+        return self.nb_elements > other.nb_elements or \
+               (self.nb_elements == other.nb_elements and self.nb_rankings > other.nb_rankings)
 
     def __ge__(self, other):
-        return self.n >= other.n or (self.n == other.n and self.m >= other.m)
+        return self.nb_elements >= other.nb_elements or \
+               (self.nb_elements == other.nb_elements and self.nb_rankings >= other.nb_rankings)
 
     def __repr__(self):
         return str(self.rankings)
@@ -315,8 +341,8 @@ class DatasetSelector:
     def select_datasets(self, list_datasets: List) -> List:
         res = []
         for dataset in list_datasets:
-            if self.__nb_elem_min <= dataset.n <= self.__nb_elem_max:
-                if self.__nb_rankings_min <= dataset.m <= self.__nb_rankings_max:
+            if self.__nb_elem_min <= dataset.nb_elements <= self.__nb_elem_max:
+                if self.__nb_rankings_min <= dataset.nb_rankings <= self.__nb_rankings_max:
                     res.append(dataset)
         return res
 

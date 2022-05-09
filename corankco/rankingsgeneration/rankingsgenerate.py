@@ -1,5 +1,5 @@
 from typing import Set, List
-from random import randint, shuffle  # seed
+from random import randint, shuffle, seed
 import numpy as np
 
 

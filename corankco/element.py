@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Type
 
 
 class Element:
@@ -25,24 +25,96 @@ class Element:
             raise ValueError("Value must be int or str")
         self._value = value
 
-    def __eq__(self, other) -> bool:
+    def _get_value(self) -> Union[int, str]:
         """
-        To compare two instances of Element
+        returns the value of the instance
+        :return: value of the instance
+        :rtype: Union[int, str]
+        """
+        return self._value
 
-        :return: True iif they have same type and value
+    def _get_type(self) -> Type:
+        """
+        returns the type of the instance
+        :return: type of the instance
+        :rtype: Type
+        """
+        return self._type
+
+    value = property(_get_value)
+    type = property(_get_type)
+
+    def __eq__(self, other: 'Element') -> bool:
+        """
+        Checks if two elements are equal.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if both elements have the same value, False otherwise.
         :rtype: bool
         """
         if not isinstance(other, Element):
             return False
         return self._value == other._value
 
-    def __ne__(self, other):
+    def __ne__(self, other: 'Element') -> bool:
         """
-        To compare if instance is different to another Element
-        :return: True iif they have different type or different value
+        Checks if two elements are not equal.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if elements have different values, False otherwise.
         :rtype: bool
         """
         return not self.__eq__(other)
+
+    def __lt__(self, other: 'Element') -> bool:
+        """
+        Checks if this element is less than the other element.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if this element is less than the other element, False otherwise.
+        :rtype: bool
+        """
+        assert(self._type == other._type)
+        return self._value < other._value
+
+    def __le__(self, other: 'Element') -> bool:
+        """
+        Checks if this element is less than or equal to the other element.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if this element is less than or equal to the other element, False otherwise.
+        :rtype: bool
+        """
+        assert(self._type == other._type)
+        return self._value <= other._value
+
+    def __gt__(self, other: 'Element') -> bool:
+        """
+        Checks if this element is greater than the other element.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if this element is greater than the other element, False otherwise.
+        :rtype: bool
+        """
+        assert(self._type == other._type)
+        return self._value > other._value
+
+    def __ge__(self, other: 'Element') -> bool:
+        """
+        Checks if this element is greater than or equal to the other element.
+
+        :param other: Another element to compare.
+        :type other: Element
+        :return: True if this element is greater than or equal to the other element, False otherwise.
+        :rtype: bool
+        """
+        assert(self._type == other._type)
+        return self._value >= other._value
 
     def __repr__(self) -> str:
         """
@@ -51,7 +123,8 @@ class Element:
         :return: A string representation of the Element instance
         :rtype: str
         """
-
-        return f"Element('{self._value}')"
-
+        if self._type is int:
+            return f"Element({self._value})"
+        else:
+            return f"Element('{self._value}')"
 

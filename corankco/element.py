@@ -17,10 +17,32 @@ class Element:
         :type value: Union[int, str]
         :raises TypeError: If value is not an integer or a string
         """
-        if isinstance(value, (int, str)):
-            self._value = value
+        if isinstance(value, int):
+            self._type = int
+        elif isinstance(value, str):
+            self._type = str
         else:
-            raise TypeError("Value must be of type int or str")
+            raise ValueError("Value must be int or str")
+        self._value = value
+
+    def __eq__(self, other) -> bool:
+        """
+        To compare two instances of Element
+
+        :return: True iif they have same type and value
+        :rtype: bool
+        """
+        if not isinstance(other, Element):
+            return False
+        return self._value == other._value
+
+    def __ne__(self, other):
+        """
+        To compare if instance is different to another Element
+        :return: True iif they have different type or different value
+        :rtype: bool
+        """
+        return not self.__eq__(other)
 
     def __repr__(self) -> str:
         """
@@ -29,4 +51,7 @@ class Element:
         :return: A string representation of the Element instance
         :rtype: str
         """
-        return str(self._value)
+
+        return f"Element('{self._value}')"
+
+

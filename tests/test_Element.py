@@ -6,7 +6,7 @@ class TestElement(unittest.TestCase):
 
     def test_creation_from_str(self):
         elem = Element("A")
-        self.assertEqual(elem._value, "A")
+        self.assertEqual(elem._value, 'A')
 
     def test_creation_from_int(self):
         elem = Element(1)
@@ -29,10 +29,12 @@ class TestElement(unittest.TestCase):
     def test_str(self):
         elem = Element("A")
         self.assertEqual(str(elem), "A")
+        elem = Element(1)
+        self.assertEqual(str(elem), "1")
 
     def test_repr(self):
         elem = Element("A")
-        self.assertEqual(repr(elem), "Element('A')")
+        self.assertEqual(repr(elem), 'A')
 
     def test_type(self):
         elem1 = Element(1)
@@ -71,9 +73,14 @@ class TestElement(unittest.TestCase):
         self.assertFalse(elem1 == elem2)
         self.assertTrue(elem1 != elem2)
 
+    def test_can_be_int(self):
+        elem1 = Element('A')
+        elem2 = Element('1')
+        elem3 = Element(1)
+        self.assertFalse(elem1.can_be_int())
+        self.assertTrue(elem2.can_be_int())
+        self.assertTrue(elem3.can_be_int())
 
 if __name__ == '__main__':
     unittest.main()
 
-if __name__ == '__main__':
-    unittest.main()

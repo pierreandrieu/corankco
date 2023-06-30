@@ -1,4 +1,4 @@
-from typing import List, Dict, Set, Tuple, Union
+from typing import List, Dict, Set, Tuple, Union, Iterator
 import numpy as np
 import copy
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, name_file
@@ -294,7 +294,7 @@ class Dataset:
     def description(self) -> str:
         return "Dataset description:\n\telements:" + str(self.nb_elements) + "\n\trankings:" + str(self.nb_rankings) \
                + "\n\tcomplete:" \
-               + str(self.is_complete) + "\n\twith ties: " + str(self.with_ties) + "\n\t" \
+               + str(self.is_complete) + "\n\twithout ties: " + str(self.without_ties) + "\n\t" \
                + "rankings:\n" \
                + "\n".join("\t\tr"+str(i+1)+" = "+str(self.rankings[i]) for i in range(len(self.rankings)))
 
@@ -399,6 +399,17 @@ class Dataset:
                         return True
         return False
 
+    def __iter__(self) -> Iterator[Ranking]:
+        """
+        Returns an iterator over the rankings buckets in the Dataset.
+
+        This allows the Dataset to be iterated over using a for loop,
+        yielding each ranking in turn.
+
+        Returns:
+            An iterator over the rankings in the Dataset.
+        """
+        return iter(self._rankings)
 
 class DatasetSelector:
     def __init__(self,

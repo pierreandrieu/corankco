@@ -45,7 +45,7 @@ class Gene:
         return same_val / crossref_in_both_db, crossref_in_both_db
 
     def has_same_name(self, gene) -> bool:
-        return self.__name == gene.__name and self.__symbol == gene.__symbol
+        return self.__name == gene._name and self.__symbol == gene.__symbol
 
     def __str__(self) -> str:
         return self.__id_gene + " (" + self.__database_from + "):  " + self.__name + " (" + self.__symbol + ")" \

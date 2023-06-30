@@ -22,7 +22,7 @@ class Element:
         elif isinstance(value, str):
             self._type = str
         else:
-            raise ValueError("Value must be int or str")
+            raise TypeError("Value must be int or str")
         self._value = value
 
     def _get_value(self) -> Union[int, str]:
@@ -44,7 +44,10 @@ class Element:
     value = property(_get_value)
     type = property(_get_type)
 
-    def __eq__(self, other: 'Element') -> bool:
+    def can_be_int(self):
+        return self._type == int or self._value.isdigit()
+
+    def __eq__(self, other: Union['Element', str, int]) -> bool:
         """
         Checks if two elements are equal.
 
@@ -53,9 +56,14 @@ class Element:
         :return: True if both elements have the same value, False otherwise.
         :rtype: bool
         """
-        if not isinstance(other, Element):
+        if isinstance(other, Element):
+            return self.type == other.type and self.value == other.value
+        elif isinstance(other, str):
+            return self.type == str and self.value == other
+        elif isinstance(other, int):
+            return self._type == int and self._value == other
+        else:
             return False
-        return self._value == other._value
 
     def __ne__(self, other: 'Element') -> bool:
         """
@@ -116,7 +124,10 @@ class Element:
         assert(self._type == other._type)
         return self._value >= other._value
 
-    def __repr__(self) -> str:
+    def __hash__(self):
+        return hash(self._value)
+
+    def __str__(self) -> str:
         """
         Returns a string representation of the Element instance.
 
@@ -124,7 +135,16 @@ class Element:
         :rtype: str
         """
         if self._type is int:
-            return f"Element({self._value})"
+            return f"{self._value}"
         else:
-            return f"Element('{self._value}')"
+            return f"{self._value}"
+
+    def __repr__(self) -> str:
+        """
+        Returns a string representation of the Element instance.
+
+        :return: A string representation of the Element instance
+        :rtype: str
+        """
+        return f"{self._value}"
 

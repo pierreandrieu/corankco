@@ -12,6 +12,10 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], Element]) -
     """
     ranking = ranking.strip().split(":")[-1].strip()
 
+    # to handle [[A], [B, C]] format and [{A}, {B,C}] format
+    ranking = ranking.replace('{', '[').replace('}', ']')
+
+    # to handle an old format with empty ranking is denoted [[]]
     if len(ranking[ranking.find('[') + 1:ranking.rfind(']')].strip()) == 0 or ranking.endswith("[[]]"):
         return []
 
@@ -21,16 +25,21 @@ def parse_ranking_with_ties(ranking: str, converter: Callable[[str], Element]) -
     ranking_end = ranking.rfind(']')
     old_en = en
 
+    # error if nonempty string after closure of ranking
     if ranking[ranking_end + 1:] != "":
         raise ValueError(f"remaining chars at the end: '{ranking[ranking_end + 1:]}'")
 
+    # filling the ranking: for each bucket
     while st != -1 and en != -1:
+        # empty bucket
         bucket = set()
+        # for each element of the bucket
         for s in ranking[st + 1:  en].split(","):
             elt_str = s.strip()
             if elt_str == "":
                 print(f"ranking with problem : {ranking}")
                 raise ValueError(f"Empty element in `{ranking[st + 1:  en]}` between chars {st + 1} and {en}")
+            # add the element in the bucket after checking the element exists
             bucket.add(converter(elt_str))
         ret.append(bucket)
         st = ranking.find('[', en + 1, ranking_end)
@@ -61,9 +70,13 @@ def get_rankings_from_file(file: str) -> List[List[Set[Element]]]:
 
     with open(file, "r") as file_rankings:
         lines = file_rankings.read().replace("\\\n", "")
-
-    return [parse_ranking_with_ties_of_str(line)
-            for line in lines.split("\n") if len(line) > 2 and line[0] not in ignore_lines]
+    try:
+        res = [parse_ranking_with_ties_of_int(line)
+               for line in lines.split("\n") if len(line) > 2 and line[0] not in ignore_lines]
+    except ValueError:
+        res = [parse_ranking_with_ties_of_str(line)
+               for line in lines.split("\n") if len(line) > 2 and line[0] not in ignore_lines]
+    return res
 
 
 def get_rankings_from_folder(folder: str) -> List[Tuple[List[List[Set[Element]]], str]]:
@@ -101,11 +114,10 @@ def import_rankings_from_url(url_path: str) -> List[List[Set[Element]]]:
 def write_rankings(rankings: List[List[Set[Element]]], path: str):
     if not os.path.isdir(path) and not os.path.isfile(path):
         if os.path.isdir(os.path.abspath(os.path.join(path, os.pardir))):
-            file = open(path, "w")
-            for ranking in rankings:
-                file.write(str(ranking))
-                file.write("\n")
-            file.close()
+            with open(path, "w") as file:
+                for ranking in rankings:
+                    file.write(str(ranking))
+                    file.write("\n")
 
 
 def write_file(path_file: str, text: str):

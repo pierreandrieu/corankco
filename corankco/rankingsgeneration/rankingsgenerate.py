@@ -3,11 +3,12 @@ from random import randint, shuffle, seed
 import numpy as np
 
 
-def uniform_permutation(nb_elem: int, nb_rankings: int) -> List[List[List[int]]]:
+def uniform_permutations(nb_elem: int, nb_rankings: int) -> List[List[Set[int]]]:
     rankings = []
     for i in range(nb_rankings):
-        ranking = list(range(1, nb_elem+1))
-        shuffle(ranking)
+        ranking_random = list(range(1, nb_elem+1))
+        shuffle(ranking_random)
+        ranking = [{x} for x in ranking_random]
         rankings.append(ranking)
     return rankings
 

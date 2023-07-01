@@ -67,5 +67,14 @@ class TestDataset(unittest.TestCase):
         for ranking in dataset.rankings:
             self.assertNotEqual(len(ranking), 0, "Empty ranking found in dataset.")
 
+    def test_dataset_getitem(self):
+        ranking1 = Ranking.from_list([{1, 2, 3}])
+        ranking2 = Ranking.from_list([{4, 5, 6}])
+        ranking3 = Ranking.from_list([{7, 8, 9}])
+        dataset = Dataset([ranking1, ranking2, ranking3])
+        assert dataset[0] == ranking1
+        assert dataset[1] == ranking2
+        assert dataset[2] == ranking3
+
 if __name__ == "__main__":
     unittest.main()

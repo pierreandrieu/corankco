@@ -2,11 +2,22 @@ from corankco.algorithms.median_ranking import MedianRanking, ScoringSchemeNotHa
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
+from corankco.element import Element
+from typing import Dict, List, Tuple
+from corankco.ranking import Ranking
+from itertools import groupby
 
 
 class BordaCount(MedianRanking):
     def __init__(self,  use_bucket_id=False):
-        self.useBucketIdAndNotBucketSize = use_bucket_id
+        """
+        Initialize the BordaCount object.
+
+        :param use_bucket_id: If True, an element e gets a score based on its bucket_id in each input ranking,
+                              otherwise it gets a score based on the number of elements ranked strictly before e.
+        :type use_bucket_id: bool
+        """
+        self._useBucketIdAndNotBucketSize = use_bucket_id
 
     def compute_consensus_rankings(
             self,
@@ -16,61 +27,61 @@ class BordaCount(MedianRanking):
             bench_mode=False
     ) -> Consensus:
         """
-        :param dataset: A dataset containing the rankings to aggregate
-        :type dataset: Dataset (class Dataset in package 'datasets')
-        :param scoring_scheme: The penalty vectors to consider
-        :type scoring_scheme: ScoringScheme (class ScoringScheme in package 'distances')
-        :param return_at_most_one_ranking: the algorithm should not return more than one ranking
+        Calculate and return the consensus rankings based on the given dataset and scoring scheme.
+
+        :param dataset: The dataset of rankings to be aggregated.
+        :type dataset: Dataset
+        :param scoring_scheme: The scoring scheme to be used for calculating consensus.
+        :type scoring_scheme: ScoringScheme
+        :param return_at_most_one_ranking: If True, the algorithm should return at most one ranking.
         :type return_at_most_one_ranking: bool
-        :param bench_mode: is bench mode activated. If False, the algorithm may return more information
+        :param bench_mode: If True, the algorithm may return additional information for benchmarking purposes.
         :type bench_mode: bool
-        :return one or more rankings if the underlying algorithm can find several equivalent consensus rankings
-        If the algorithm is not able to provide multiple consensus, or if return_at_most_one_ranking is True then, it
-        should return a list made of the only / the first consensus found.
-        In all scenario, the algorithm returns a list of consensus rankings
-        :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
-        implementation of the algorithm does not fit with the scoring scheme
+        :return: Consensus rankings. If the algorithm is unable to provide multiple consensuses or
+                 return_at_most_one_ranking is True, a single consensus ranking is returned.
+        :rtype: Consensus
+        :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
+                                                 implementation does not support the given scoring scheme.
         """
 
         if not dataset.is_complete and not self.is_scoring_scheme_relevant_when_incomplete_rankings(scoring_scheme):
             raise ScoringSchemeNotHandledException
 
-        if scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme().penalty_vectors) or \
-                scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5).penalty_vectors):
+        if scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme()) or \
+                scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5)):
             rankings_to_use = dataset.unified_rankings()
         else:
             rankings_to_use = dataset.rankings
 
-        points = {}
+        # for a given element e, points[e][0] = number of points of e with borda count and points[e][1] =
+        # number of rankings such that e is ranked
+
+        points: Dict[Element, List[int]] = {}
         for ranking in rankings_to_use:
-            id_bucket = 1
+            id_bucket: int = 0
             for bucket in ranking:
                 for elem in bucket:
                     if elem not in points:
-                        points[elem] = {}
-                        points[elem][0] = 0
-                        points[elem][1] = 0
-
+                        points[elem]: List[int] = [0, 0]
                     points[elem][0] += id_bucket
                     points[elem][1] += 1
-                if self.useBucketIdAndNotBucketSize:
+                if self._useBucketIdAndNotBucketSize:
                     id_bucket += 1
                 else:
                     id_bucket += len(bucket)
-        lis = []
-        for elem in points.keys():
-            lis.append((elem, points[elem][0] * 1.0 / points[elem][1]))
-        tri = sorted(lis, key=lambda col: col[1])
-        consensus = []
-        bucket = []
-        last = -1
-        for duo in tri:
-            if duo[1] != last:
-                last = duo[1]
-                bucket = []
-                consensus.append(bucket)
-            bucket.append(duo[0])
-        return Consensus(consensus_rankings=[consensus],
+
+        elements_scores: List[Tuple[Element, float]] = \
+            [(elem, points[elem][0] * 1.0 / points[elem][1]) for elem in points.keys()]
+        # now, sort the elements by increasing order of score
+        sorted_elements_scores_by_score = sorted(elements_scores, key=lambda col: col[1])
+
+        # construct the consensus bucket by bucket
+        consensus_list = []
+        for score, group in groupby(sorted_elements_scores_by_score, lambda x: x[1]):
+            bucket = {elem for elem, _ in group}
+            consensus_list.append(bucket)
+
+        return Consensus(consensus_rankings=[Ranking(consensus_list)],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att={
@@ -79,10 +90,29 @@ class BordaCount(MedianRanking):
                          )
 
     def get_full_name(self) -> str:
+        """
+        Return the full name of the algorithm.
+
+        :return: The string 'BordaCount'.
+        :rtype: str
+        """
         return "BordaCount"
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
-        return scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme().penalty_vectors) or \
-               scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme().penalty_vectors) or \
-               scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(0.5).penalty_vectors)\
-               or scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5).penalty_vectors)
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True if the scoring scheme is equivalent to one of the following:
+                 - induced measure scoring scheme
+                 - unifying scoring scheme
+                 - induced measure scoring scheme with p=0.5
+                 - unifying scoring scheme with p=0.5
+                 Otherwise, False.
+        :rtype: bool
+        """
+        return scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme()) or \
+               scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme()) or \
+               scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(0.5))\
+               or scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5))

@@ -46,13 +46,17 @@ class TestElement(unittest.TestCase):
         elem_int = Element(1)
         elem_str = Element('A')
         with self.assertRaises(AssertionError):
-            elem_int < elem_str
+            if elem_int < elem_str:
+                pass
         with self.assertRaises(AssertionError):
-            elem_int > elem_str
+            if elem_int > elem_str:
+                pass
         with self.assertRaises(AssertionError):
-            elem_int <= elem_str
+            if elem_int <= elem_str:
+                pass
         with self.assertRaises(AssertionError):
-            elem_int >= elem_str
+            if elem_int >= elem_str:
+                pass
 
     def test_comparison(self):
         elem1 = Element(1)
@@ -81,6 +85,6 @@ class TestElement(unittest.TestCase):
         self.assertTrue(elem2.can_be_int())
         self.assertTrue(elem3.can_be_int())
 
+
 if __name__ == '__main__':
     unittest.main()
-

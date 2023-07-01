@@ -18,13 +18,13 @@ class Ranking:
         :type buckets: List[Set[Element]]
         :raises ValueError: If buckets are not disjoint
         """
-        self._buckets = buckets
+        self._buckets: List[Set[Element]] = buckets
 
         # Initialize element_positions
-        self._positions = dict()
+        self._positions: Dict[Element, int] = dict()
 
         # Check if buckets are disjoint and populate element_positions
-        position = 1
+        position: int = 1
         for bucket in buckets:
             for element in bucket:
                 if element in self._positions:
@@ -42,7 +42,7 @@ class Ranking:
         :return: A Ranking instance
         :rtype: Ranking
         """
-        buckets = parse_ranking_with_ties_of_str(ranking_str)
+        buckets: List[Set[Element]] = parse_ranking_with_ties_of_str(ranking_str)
         return cls(buckets)
 
     @classmethod
@@ -55,7 +55,7 @@ class Ranking:
         :return: A Ranking instance
         :rtype: Ranking
         """
-        buckets = [set([Element(elem) for elem in bucket]) for bucket in ranking_list]
+        buckets: List[Set[Element]] = [set([Element(elem) for elem in bucket]) for bucket in ranking_list]
         return cls(buckets)
 
     @classmethod
@@ -69,7 +69,7 @@ class Ranking:
         :rtype: Ranking
         """
         with open(file_path, 'r') as f:
-            ranking_str = f.read()
+            ranking_str: str = f.read()
         return cls.from_string(ranking_str)
 
     @property
@@ -82,7 +82,8 @@ class Ranking:
         """
         return self._buckets
 
-    def _positions(self) -> Dict[Element, int]:
+    @property
+    def positions(self) -> Dict[Element, int]:
         """
         Returns the positions of the elements in the ranking.
 
@@ -91,8 +92,7 @@ class Ranking:
         """
         return self._positions
 
-    positions = property(_positions)
-
+    @property
     def domain(self) -> Set[Element]:
         """
         Returns the set of all elements in the Ranking.
@@ -104,6 +104,7 @@ class Ranking:
         """
         return set(self._positions.keys())
 
+    @property
     def nb_elements(self) -> int:
         """
         Returns the number of unique elements in the Ranking.
@@ -113,7 +114,7 @@ class Ranking:
         Returns:
             An integer which is the number of unique elements in the Ranking.
         """
-        return len(self.domain())
+        return len(self.domain)
 
     def can_be_of_int(self) -> bool:
         """
@@ -188,3 +189,27 @@ class Ranking:
         :rtype: str
         """
         return str([{elem.value for elem in bucket} for bucket in self._buckets])
+
+    def __getitem__(self, index: int) -> Set[Element]:
+        """
+        Retrieve the bucket at the given index.
+
+        :param index: The index of the bucket to retrieve.
+        :type index: int
+        :returns: The bucket at the given index.
+        :rtype: Set[Element]
+        """
+        return self.buckets[index]
+
+    def __eq__(self, other):
+        """
+        Check if this Ranking is equal to another Ranking.
+
+        :param other: Other Ranking to compare with.
+        :returns: True if both Rankings are equal, False otherwise.
+        :rtype: bool
+        """
+        if not isinstance(other, Ranking):
+            return NotImplemented
+
+        return self.buckets == other.buckets

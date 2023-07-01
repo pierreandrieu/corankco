@@ -1,4 +1,5 @@
 from typing import List, Dict, Set, Tuple, Union, Iterator
+from collections import Counter
 import numpy as np
 import copy
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, name_file
@@ -127,6 +128,7 @@ class Dataset:
             if nb_occur_elements_in_rankings[key] != len(rankings_final):
                 complete = False
         return rankings_final, complete, without_ties
+
     def remove_empty_rankings(self):
         """
         Remove empty rankings from the dataset.
@@ -339,7 +341,7 @@ class Dataset:
         all_elements = set(self._mapping_elements_id.keys())
 
         for ranking in copy_rankings:
-            missing_elements = all_elements - ranking.domain()
+            missing_elements = all_elements - ranking.domain
             if missing_elements:
                 ranking.buckets.append(missing_elements)
 
@@ -358,34 +360,12 @@ class Dataset:
 
     @staticmethod
     def get_random_dataset_markov(nb_elem: int, nb_rankings: int, step, complete: bool = False):
-        return Dataset(create_rankings(nb_elem, nb_rankings, step, complete))
+        return Dataset.from_raw_list(create_rankings(nb_elem, nb_rankings, step, complete))
 
     @staticmethod
     def get_datasets_from_folder(path_folder: str) -> List:
         return [Dataset._from_raw_list_with_elements
                 (rankings, name=file_path) for rankings, file_path in get_rankings_from_folder(path_folder)]
-
-    def __lt__(self, other):
-        return self.nb_elements < other.nb_elements or \
-               (self.nb_elements == other.nb_elements and self.nb_rankings < other.nb_rankings)
-
-    def __le__(self, other):
-        return self.nb_elements <= other.nb_elements or \
-               (self.nb_elements == other.nb_elements and self.nb_rankings <= other.nb_rankings)
-
-    def __eq__(self, other):
-        return self.nb_elements == other.nb_elements and self.nb_rankings == other.nb_rankings
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __gt__(self, other):
-        return self.nb_elements > other.nb_elements or \
-               (self.nb_elements == other.nb_elements and self.nb_rankings > other.nb_rankings)
-
-    def __ge__(self, other):
-        return self.nb_elements >= other.nb_elements or \
-               (self.nb_elements == other.nb_elements and self.nb_rankings >= other.nb_rankings)
 
     def __repr__(self):
         return str(self.rankings)
@@ -410,6 +390,34 @@ class Dataset:
             An iterator over the rankings in the Dataset.
         """
         return iter(self._rankings)
+
+    def __getitem__(self, index: int) -> Ranking:
+        """
+        Retrieve the ranking at the given index.
+
+        :param index: The index of the ranking to retrieve.
+        :type index: int
+        :returns: The ranking at the given index.
+        :rtype: Ranking
+        """
+        return self.rankings[index]
+
+    def __eq__(self, other):
+        """
+        Check if this Dataset is equivalent to another Dataset, regardless of the order of the Rankings.
+
+        :param other: Other Dataset to compare with.
+        :returns: True if both Datasets are equivalent, False otherwise.
+        :rtype: bool
+        """
+        if not isinstance(other, Dataset):
+            return NotImplemented
+
+        self_str_rankings = [str(ranking).strip().replace(" ", "") for ranking in self.rankings]
+        other_str_rankings = [str(ranking).strip().replace(" ", "") for ranking in other.rankings]
+
+        return Counter(self_str_rankings) == Counter(other_str_rankings)
+
 
 class DatasetSelector:
     def __init__(self,

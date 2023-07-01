@@ -1,6 +1,8 @@
-from typing import List, Set, Dict, Iterable
+from typing import List, Set, Dict, Iterable, Union, Any, Iterator
 from corankco.kemeny_computation import KemenyComputingFactory
 from corankco.dataset import Dataset
+from corankco.element import Element
+from corankco.ranking import Ranking
 from corankco.scoringscheme import ScoringScheme
 from enum import Enum, unique
 
@@ -19,116 +21,123 @@ class ConsensusFeature(Enum):
 
 
 class Consensus:
-    def __init__(self, consensus_rankings: List[List[List or Set[int or str]]],
+    def __init__(self, consensus_rankings: List[Ranking],
                  dataset: Dataset = None,
                  scoring_scheme: ScoringScheme = None,
-                 att: Dict[ConsensusFeature, str or int or float or bool or List] = None):
-        self.__att = att
-        if self.__att is None:
-            self.__att = {}
+                 att: Dict[ConsensusFeature, Any] = None):
+        self._att: Dict[ConsensusFeature, Any] = att
 
-        self.__consensus = consensus_rankings
+        # dict of attributes to be associated with the consensus
+        if self._att is None:
+            self._att: Dict[ConsensusFeature, Any] = {}
 
-        self.__dataset = dataset
-        self.__scoring_scheme = scoring_scheme
+        # the consensus rankings. Note that there must be several rankings if they have same score.
+        self._consensus_rankings: List[Ranking] = consensus_rankings
 
-        if self.__dataset is not None:
-            self.__elements = self.associated_dataset.elements
+        # the initial dataset that the Consensus object represents
+        self._dataset: Dataset = dataset
+        self._scoring_scheme: ScoringScheme = scoring_scheme
+
+        # the elements associated with the Dataset
+        if self._dataset is not None:
+            self._elements: Set[Element] = self.associated_dataset.elements
         else:
-            self.__elements = set()
-            for bucket_cons in consensus_rankings[0]:
-                self.__elements.update(bucket_cons)
+            self._elements: Set[Element] = set()
+            for ranking in self._consensus_rankings:
+                self._elements.update(ranking.domain)
 
-        if ConsensusFeature.KemenyScore not in self.__att:
-            self.__att[ConsensusFeature.KemenyScore] = -1.
-        if ConsensusFeature.CopelandScores not in self.__att:
-            self.__att[ConsensusFeature.CopelandScores] = {}
-        if ConsensusFeature.CopelandVictories not in self.__att:
-            self.__att[ConsensusFeature.CopelandVictories] = {}
-        if ConsensusFeature.IsNecessarilyOptimal not in self.__att:
-            self.__att[ConsensusFeature.IsNecessarilyOptimal] = False
-        self.__elem_position = {}
+        # initialization of the features, with default values
 
-        id_consensus = 0
+        # Kemeny score. Default = -1 (not computed. Recall: Kemeny Score is necessarily >= 0)
+        if ConsensusFeature.KemenyScore not in self._att:
+            self._att[ConsensusFeature.KemenyScore]: float = -1.
+        # Dict that associate to each element its Copeland Score, generalized as in Andrieu et al., IJAR2022
+        if ConsensusFeature.CopelandScores not in self._att:
+            self._att[ConsensusFeature.CopelandScores]: Dict[Element, float] = {}
+        # Dict that associate to each element x its number of victories, that is
+        if ConsensusFeature.CopelandVictories not in self._att:
+            self._att[ConsensusFeature.CopelandVictories]: Dict[Element, int] = {}
+        # true iif the consensus is for sure optimal in the sense of the KCF, see Andrieu et al., IJAR2022
+        if ConsensusFeature.IsNecessarilyOptimal not in self._att:
+            self._att[ConsensusFeature.IsNecessarilyOptimal]: bool = False
+        # Dict that associates for each Element its position in each consensus ranking of the list
+        self._elem_position: Dict[Element, List[int]] = {}
+
+        id_consensus: int = 0
         for consensus in consensus_rankings:
-            position = 1
+            position: int = 1
             for bucket in consensus:
                 for elem in bucket:
-                    if elem not in self.__elem_position:
+                    if elem not in self._elem_position:
 
-                        self.__elem_position[elem] = [-1] * self.nb_elements
-                        self.__elem_position[elem][id_consensus] = position
+                        self._elem_position[elem] = [-1] * self.nb_elements
+                        self._elem_position[elem][id_consensus] = position
                 position += len(bucket)
             id_consensus += 1
 
-    def __get_consensus(self) -> List[List[List or Set[int or str]]]:
-        return self.__consensus
+    @classmethod
+    def from_raw_lists(cls, rankings: List[List[Set[Union[int, str]]]]) -> 'Consensus':
+        """
+        Constructs a Consensus instance from a List[List[Set[Union[int, str]]]]
+        For instance: [[{1, 2}, {3}], [{1}, {3}, {2}]] contains two consensus rankings
+        :param rankings: A list of raw rankings i.e. List of Set of either int or str
+        :type rankings: List[List[Set[Union[int, str]]]
+        :return: A Consensus instance
+        :rtype: Consensus
+        """
+        return cls([Ranking.from_list(ranking) for ranking in rankings])
 
-    def __get_necessarily_optimal(self) -> bool:
-        return self.__att[ConsensusFeature.IsNecessarilyOptimal]
+    @property
+    def consensus_rankings(self) -> List[Ranking]:
+        return self._consensus_rankings
 
-    def __get_nb_consensus(self) -> int:
+    @property
+    def necessarily_optimal(self) -> bool:
+        return self._att[ConsensusFeature.IsNecessarilyOptimal]
+
+    @property
+    def nb_consensus(self) -> int:
         return len(self.consensus_rankings)
 
-    def __get_associated_score(self) -> float:
-        if self.__att[ConsensusFeature.KemenyScore] == -1 and \
-                self.__dataset is not None and \
-                self.__scoring_scheme is not None:
-            self.score = KemenyComputingFactory(self.__scoring_scheme).get_kemeny_score(self.consensus_rankings[0],
-                                                                                        self.__dataset.rankings)
-        return self.__att[ConsensusFeature.KemenyScore]
+    def __calculate_score(self):
+        if self._att[ConsensusFeature.KemenyScore] == -1 and \
+                self._dataset is not None and \
+                self._scoring_scheme is not None:
+            self._att[ConsensusFeature.KemenyScore] = KemenyComputingFactory(
+                self._scoring_scheme).get_kemeny_score(self.consensus_rankings[0], self._dataset.rankings)
 
-    def __get_associated_copeland_scores(self) -> Dict[int or str, int]:
-        return self.__att[ConsensusFeature.CopelandScores]
+    @property
+    def kemeny_score(self) -> float:
+        self.__calculate_score()
+        return self._att[ConsensusFeature.KemenyScore]
 
-    def __get_associated_copeland_victories(self) -> Dict[int or str, List[int]]:
-        return self.__att[ConsensusFeature.CopelandVictories]
+    @property
+    def copeland_scores(self) -> Dict[int or str, int]:
+        return self._att[ConsensusFeature.CopelandScores]
 
-    def __get_associated_dataset(self) -> Dataset:
-        return self.__dataset
+    @property
+    def copeland_victories(self) -> Dict[int or str, List[int]]:
+        return self._att[ConsensusFeature.CopelandVictories]
 
-    def __get_associated_scoring_scheme(self) -> ScoringScheme:
-        return self.__scoring_scheme
+    @property
+    def associated_dataset(self) -> Dataset:
+        return self._dataset
 
-    def __get_att(self) -> Dict[ConsensusFeature, str or int or float or bool or List]:
-        return self.__att
+    @property
+    def associated_scoring_scheme(self) -> ScoringScheme:
+        return self._scoring_scheme
 
-    def __get_elements(self) -> Set[int or str]:
-        return self.__elements
+    @property
+    def features(self) -> Dict[ConsensusFeature, Any]:
+        return self._att
 
-    def __get_nb_elements(self) -> int:
-        return len(self.__elements)
+    @property
+    def elements(self) -> Set[Element]:
+        return self._elements
 
-    def __set_necessarily_optimal(self, optimal: bool):
-        self.__att[ConsensusFeature.IsNecessarilyOptimal] = optimal
-
-    def __set_consensus(self, r: List[List[List or Set[int or str]]]):
-        self.__consensus = r
-        self.__nb_consensus = len(r)
-
-    def __set_nb_consensus(self, nb_consensus: int):
-        self.__nb_consensus = nb_consensus
-
-    def __set_score(self, score: float):
-        self.__att[ConsensusFeature.KemenyScore] = score
-
-    def __set_associated_copeland_scores(self, copeland_scores: Dict[int or str, int]):
-        self.__att[ConsensusFeature.CopelandScores] = copeland_scores
-
-    def __set_associated_copeland_scores(self, copeland_victories: Dict[int or str, List[int]]):
-        self.__att[ConsensusFeature.CopelandVictories] = copeland_victories
-
-    consensus_rankings = property(__get_consensus, __set_consensus)
-    nb_consensus = property(__get_nb_consensus, __set_nb_consensus)
-    necessarily_optimal = property(__get_necessarily_optimal, __set_necessarily_optimal)
-    score = property(__get_associated_score, __set_score)
-    associated_dataset = property(__get_associated_dataset)
-    associated_scoring_scheme = property(__get_associated_scoring_scheme)
-    copeland_scores = property(__get_associated_copeland_scores, __set_associated_copeland_scores)
-    copeland_victories = property(__get_associated_copeland_victories, __set_associated_copeland_scores)
-    attributes = property(__get_att)
-    nb_elements = property(__get_nb_elements)
-    elements = property(__get_elements)
+    @property
+    def nb_elements(self) -> int:
+        return len(self._elements)
 
     def __str__(self) -> str:
         return str(self.consensus_rankings)
@@ -136,10 +145,13 @@ class Consensus:
     def __repr__(self) -> str:
         return self.__str__()
 
+    def __len__(self) -> int:
+        return len(self.consensus_rankings)
+
     def description(self) -> str:
-        self.__get_associated_score()
+        self.__calculate_score()
         return "Consensus description:" + "".join("\n\t" + str(key.value)
-                                                  + str(self.attributes[key]) for key in self.attributes) \
+                                                  + str(self.features[key]) for key in self.features) \
                                         + "\n\tconsensus:" + "".join("\n\t\tc"+str(i+1) + " = "
                                                                      + str(self.consensus_rankings[i]) for i in
                                                                      range(len(self.consensus_rankings)))
@@ -166,28 +178,62 @@ class Consensus:
         res = set()
         nb_elements_seen = 0
         id_bucket = 0
-        consensus = self.consensus_rankings[0]
-        while nb_elements_seen < top_k and id_bucket < len(consensus):
-            nb_elements_seen += len(consensus[id_bucket])
+        consensus_first = self.consensus_rankings[0]
+        while nb_elements_seen < top_k and id_bucket < len(consensus_first):
+            nb_elements_seen += len(consensus_first[id_bucket])
             if nb_elements_seen <= top_k:
-                res.update(consensus[id_bucket])
+                res.update(consensus_first[id_bucket])
             id_bucket += 1
         return res
 
     def positions_element(self, element: int or str) -> List[int]:
-        return self.__elem_position[element]
+        return self._elem_position[element]
 
     @staticmethod
     def get_consensus_from_file(path: str):
-        return Consensus(Dataset(path).rankings)
+        return Consensus(Dataset.from_file(path).rankings)
+
+    def __iter__(self) -> Iterator[Ranking]:
+        """
+        Returns an iterator over the rankings buckets in the Dataset.
+
+        This allows the Dataset to be iterated over using a for loop,
+        yielding each ranking in turn.
+
+        Returns:
+            An iterator over the rankings in the Dataset.
+        """
+        return iter(self._consensus_rankings)
+
+    def __getitem__(self, index):
+        """
+        Retrieve the consensus ranking at the given index.
+
+        :param index: The index of the consensus ranking to retrieve.
+        :type index: int
+        :returns: The consensus ranking at the given index.
+        :rtype: Ranking
+        """
+        return self.consensus_rankings[index]
 
 
 class ConsensusSingleRanking(Consensus):
-    def __init__(self, consensus_rankings: List[List[List or Set[int or str]]],
+    def __init__(self, consensus_ranking: Ranking,
                  dataset: Dataset = None,
                  scoring_scheme: ScoringScheme = None,
                  att: Dict[ConsensusFeature, str or int or float or bool or List] = None):
-        super().__init__(consensus_rankings, dataset, scoring_scheme, att)
+        super().__init__([consensus_ranking], dataset, scoring_scheme, att)
 
-    def position_element(self, element: int or str) -> int:
+    @classmethod
+    def from_raw_lists(cls, ranking: List[Set[Union[int, str]]]) -> 'Consensus':
+        """
+        Constructs a ConsensusSingleRanking instance from a raw ranking i.e. a List of Set of either int or str objects.
+        :param ranking: A list of rankings
+        :type ranking: List[Set[Union[int, str]]]
+        :return: A ConsensusSingleRanking instance
+        :rtype: ConsensusSingleRanking
+        """
+        return cls(Ranking.from_list(ranking))
+
+    def position_element(self, element: Element) -> int:
         return self.positions_element(element)[0]

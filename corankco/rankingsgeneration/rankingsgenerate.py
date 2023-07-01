@@ -4,18 +4,18 @@ import numpy as np
 
 
 def uniform_permutations(nb_elem: int, nb_rankings: int) -> List[List[Set[int]]]:
-    rankings = []
+    rankings: List[List[Set[int]]] = []
     for i in range(nb_rankings):
-        ranking_random = list(range(1, nb_elem+1))
+        ranking_random: List[int] = list(range(1, nb_elem+1))
         shuffle(ranking_random)
-        ranking = [{x} for x in ranking_random]
+        ranking: List[Set[int]] = [{x} for x in ranking_random]
         rankings.append(ranking)
     return rankings
 
 
 def __add_left(ranking: np.ndarray, elem: int):
     # id of bucket of elem
-    bucket_elem = ranking[elem]
+    bucket_elem: int = ranking[elem]
     # if elem alone in its bucket: nothing to do. Otherwise
     # all the elements placed after or tied with elem have their bucket id +1
     if np.sum(ranking == bucket_elem) > 1:
@@ -25,7 +25,7 @@ def __add_left(ranking: np.ndarray, elem: int):
 
 def __add_right(ranking: np.ndarray, elem: int):
     # id of bucket of elem
-    bucket_elem = ranking[elem]
+    bucket_elem: int = ranking[elem]
     # if a most two elements in the bucket of elem: nothing to do. Otherwise
     # all the elements placed afterelem have their bucket id +1, same for elem
     if np.sum(ranking == bucket_elem) > 2:
@@ -34,8 +34,8 @@ def __add_right(ranking: np.ndarray, elem: int):
 
 
 def __change_left(ranking: np.ndarray, elem: int):
-    bucket_elem = ranking[elem]
-    size_bucket_elem = np.sum(ranking == bucket_elem)
+    bucket_elem: int = ranking[elem]
+    size_bucket_elem: int = np.sum(ranking == bucket_elem)
     if bucket_elem != 0:
         if size_bucket_elem == 1:
             ranking[ranking > bucket_elem] -= 1
@@ -43,10 +43,10 @@ def __change_left(ranking: np.ndarray, elem: int):
 
 
 def __change_right(ranking: np.ndarray, elem: int):
-    bucket_elem = ranking[elem]
-    size_bucket_elem = np.sum(ranking == bucket_elem)
-    size_bucket_following = np.sum(ranking == bucket_elem+1)
-    id_last_bucket = np.max(ranking)
+    bucket_elem: int = ranking[elem]
+    size_bucket_elem: int = np.sum(ranking == bucket_elem)
+    size_bucket_following: int = np.sum(ranking == bucket_elem+1)
+    id_last_bucket: int = np.max(ranking)
     if bucket_elem != id_last_bucket and (size_bucket_elem > 1 or size_bucket_following > 1):
         ranking[elem] += 1
         if size_bucket_elem == 1:
@@ -55,8 +55,8 @@ def __change_right(ranking: np.ndarray, elem: int):
 
 def __remove_element(ranking: np.ndarray, elem: int):
     # id of bucket of elem
-    bucket_elem = ranking[elem]
-    size_bucket_elem = np.sum(ranking == bucket_elem)
+    bucket_elem: int = ranking[elem]
+    size_bucket_elem: int = np.sum(ranking == bucket_elem)
     if size_bucket_elem == 1:
         ranking[ranking > bucket_elem] -= 1
 
@@ -69,7 +69,7 @@ def __put_element_first(ranking: np.ndarray, elem: int):
 
 
 def step_element_incomplete(ranking: np.ndarray, elem: int, missing_elements: Set[int]):
-    alea = randint(1, 5)
+    alea: int = randint(1, 5)
     if elem in missing_elements:
         if alea == 5:
             __put_element_first(ranking, elem)
@@ -97,7 +97,7 @@ def __change_ranking_complete(ranking: np.ndarray, steps: int, nb_elements: int)
 
 
 def __step_element_complete(ranking: np.ndarray, elem: int):
-    alea = randint(1, 4)
+    alea: int = randint(1, 4)
     if alea == 1:
         __add_left(ranking, elem)
     elif alea == 2:
@@ -115,26 +115,35 @@ def __change_ranking_incomplete(ranking: np.ndarray, steps: int, nb_elements: in
         step_element_incomplete(ranking, randint(0, nb_elements-1), missing_elements)
 
 
-def create_rankings(nb_elements: int, nb_rankings: int, steps: int, complete=False):
-    rankings_list = []
+def create_rankings(nb_elements: int, nb_rankings: int, steps: int, complete=False) -> List[List[Set[int]]]:
+    # the list of rankings to return, as a raw list
+    rankings_list: List[List[Set[int]]] = []
 
-    rankings = np.zeros((nb_rankings, nb_elements), dtype=int)
+    # generates the list of rankings as a ndarray(nb_rankings, nb_elements)
+    rankings: np.ndarray = np.zeros((nb_rankings, nb_elements), dtype=int)
+    # initially, each ranking = [0, 1, ..., nb_elements-1]
     for i in range(nb_rankings):
         rankings[i] = np.arange(nb_elements)
+
+    # each ranking is modified
     for ranking in rankings:
-        missing_elements = set()
+        missing_elements: Set[int] = set()
+
+        # according to the number of steps in the markov chain
         if not complete:
             __change_ranking_incomplete(ranking, steps, nb_elements, missing_elements)
         else:
             __change_ranking_complete(ranking, steps, nb_elements)
-        ranking_list = []
-        nb_buckets = np.max(ranking)+1
+
+        # when rankings are modified, they are returned as a List of Set of integers
+        ranking_list: List[Set[int]] = []
+        nb_buckets: int = np.max(ranking)+1
         for i in range(nb_buckets):
-            ranking_list.append([])
+            ranking_list.append(set())
         for elem in range(nb_elements):
-            bucket_elem = ranking[elem]
+            bucket_elem: int = ranking[elem]
             if bucket_elem >= 0:
-                ranking_list[bucket_elem].append(elem)
+                ranking_list[bucket_elem].add(elem)
         if len(ranking_list) > 0:
             rankings_list.append(ranking_list)
     return rankings_list

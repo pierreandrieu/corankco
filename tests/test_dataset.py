@@ -19,7 +19,6 @@ class TestDataset(unittest.TestCase):
     def test_from_file(self):
         # Test from_file method with a test file
         dataset = Dataset.from_file("dataset_example")
-        print(dataset)
         self.assertEqual(len(dataset.rankings), 2)
         # Add other assertions based on the expected content of the file
 
@@ -36,7 +35,6 @@ class TestDataset(unittest.TestCase):
         self.assertEqual(dataset.nb_elements, 4)
         self.assertEqual(dataset.nb_rankings, 5)
         dataset.remove_elements_rate_presence_lower_than(0.5)
-        print("dataset = " + str(dataset))
         self.assertEqual(dataset.nb_elements, 2)
         self.assertEqual(dataset.nb_rankings, 4)
     # Add more methods to test the other methods in your Dataset class

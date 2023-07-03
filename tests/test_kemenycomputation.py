@@ -1,9 +1,8 @@
 import unittest
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import Consensus
 from corankco.dataset import Dataset
 from corankco.ranking import Ranking
-from corankco.kemeny_computation_these_for_article import KemenyComputation
+from corankco.kemeny_score_computation import KemenyComputingFactory
 from corankco.rankingsgeneration.rankingsgenerate import create_rankings
 from random import seed
 
@@ -16,18 +15,18 @@ class TestKemenyComputation(unittest.TestCase):
         self._sc3 = ScoringScheme.get_unifying_scoring_scheme_p(0.5)
 
         # Creation of three instances to compute Kemeny scores given a scoring scheme
-        self._kemeny1 = KemenyComputation(self._sc1)
-        self._kemeny2 = KemenyComputation(self._sc2)
-        self._kemeny3 = KemenyComputation(self._sc3)
+        self._kemeny1 = KemenyComputingFactory(self._sc1)
+        self._kemeny2 = KemenyComputingFactory(self._sc2)
+        self._kemeny3 = KemenyComputingFactory(self._sc3)
 
     def test_kemeny_score(self):
         dataset = Dataset.from_raw_list(([[{1}], [{1}], [{1}]]))
-        consensus = Consensus.from_raw_lists([[{1}]])
-        score: float = self._kemeny1.kemeny_score(consensus, dataset)
+        consensus: Ranking = Ranking.from_list([{1}])
+        score: float = self._kemeny1.get_kemeny_score(consensus, dataset)
         self.assertEqual(score, 0.)
         dataset: Dataset = Dataset.from_raw_list(([[{2}, {1}], [{1}, {2}], [{2}, {1}]]))
-        consensus: Consensus = Consensus.from_raw_lists([[{1}, {2}]])
-        score: float = self._kemeny1.kemeny_score(consensus, dataset)
+        consensus: Ranking = Ranking.from_list([{1}, {2}])
+        score: float = self._kemeny1.get_kemeny_score(consensus, dataset)
         self.assertEqual(score, 2.)
         self.assertEqual(TestKemenyComputation.naive_score_implementation(consensus, dataset, self._sc1), 2.)
 
@@ -35,27 +34,27 @@ class TestKemenyComputation(unittest.TestCase):
         for i in range(100):
             dataset_test = Dataset.from_raw_list(
                 create_rankings(nb_elements=8, nb_rankings=5, steps=300, complete=False))
-            consensus = Consensus.from_raw_lists(create_rankings(20, 1, 1000, complete=True))
+            consensus = Ranking.from_list(create_rankings(20, 1, 1000, complete=True)[0])
 
             # test with sc 1
-            score_nlogn = self._kemeny1.kemeny_score(consensus, dataset_test)
+            score_nlogn = self._kemeny1.get_kemeny_score(consensus, dataset_test)
             score_nsquare = TestKemenyComputation.naive_score_implementation(consensus, dataset_test, self._sc1)
             self.assertEqual(score_nlogn, score_nsquare)
 
             # test with sc 2
-            score_nlogn = self._kemeny2.kemeny_score(consensus, dataset_test)
+            score_nlogn = self._kemeny2.get_kemeny_score(consensus, dataset_test)
             score_nsquare = TestKemenyComputation.naive_score_implementation(consensus, dataset_test, self._sc2)
             self.assertEqual(score_nlogn, score_nsquare)
 
             # test with sc 3
-            score_nlogn = self._kemeny3.kemeny_score(consensus, dataset_test)
+            score_nlogn = self._kemeny3.get_kemeny_score(consensus, dataset_test)
             score_nsquare = TestKemenyComputation.naive_score_implementation(consensus, dataset_test, self._sc3)
             self.assertEqual(score_nlogn, score_nsquare)
 
     @staticmethod
-    def naive_score_implementation(consensus: Consensus, dataset: Dataset, sc: ScoringScheme) -> float:
+    def naive_score_implementation(consensus: Ranking, dataset: Dataset, sc: ScoringScheme) -> float:
         # the consensus ranking as target for the computation of the score
-        r_cons: Ranking = consensus[0]
+        r_cons: Ranking = consensus
         # its number of buckets
         nb_buckets_cons = len(r_cons)
         # score of the consensus

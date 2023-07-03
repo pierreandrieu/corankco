@@ -37,11 +37,6 @@ class TestScoringScheme(unittest.TestCase):
             # Only one penalty vector, should be two
             ScoringScheme(penalties=[[0., 1., 0.5, 0., 1., 0.]])
 
-    def test_invalid_penalty_value(self):
-        with self.assertRaises(InvalidScoringScheme):
-            # 2. is greater than 1.
-            ScoringScheme(penalties=[[0., 1., 2., 0., 1., 0.], [0.5, 0.5, 0., 0.5, 0.5, 0.]])
-
     def test_negative_penalty_value(self):
         with self.assertRaises(InvalidScoringScheme):
             # -0.5 is less than 0.

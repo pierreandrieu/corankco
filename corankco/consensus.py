@@ -1,5 +1,5 @@
 from typing import List, Set, Dict, Iterable, Union, Any, Iterator
-from corankco.kemeny_computation import KemenyComputingFactory
+from corankco.kemeny_score_computation import KemenyComputingFactory
 from corankco.dataset import Dataset
 from corankco.element import Element
 from corankco.ranking import Ranking

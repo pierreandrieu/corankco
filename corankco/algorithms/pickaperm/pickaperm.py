@@ -2,7 +2,7 @@ from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
-from corankco.kemeny_computation import KemenyComputingFactory
+from corankco.kemeny_score_computation import KemenyComputingFactory
 
 
 class InompleteRankingsIncompatibleWithScoringSchemeException(Exception):

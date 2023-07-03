@@ -57,6 +57,11 @@ class ScoringScheme:
                 raise InvalidScoringScheme("Scoring scheme must be 2 List or Tuple or ndarray of 6 reals each")
             penalties_copy: List[List[float]] = [[], []]
             for pen in penalties[0]:
+                pen_split_point = decimal_part = str(pen).split(".")
+                if len(pen_split_point) != 2:
+                    raise InvalidScoringScheme("Coefficients must be real values")
+                if not pen_split_point[0].isdigit() or not pen_split_point[1].isdigit():
+                    raise InvalidScoringScheme("Coefficients must be real values")
                 if float(pen) < 0:
                     raise InvalidScoringScheme("Coefficients must be >= 0")
 

@@ -71,8 +71,8 @@ class MedianRanking:
         :return: The average computation time.
         :rtype: float
         """
-        sum_time = 0
-        nb_computation = 0
+        sum_time: float = 0
+        nb_computation: int = 0
         while sum_time <= lower_bound_time:
             begin = time()
             self.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, True)

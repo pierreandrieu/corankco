@@ -70,9 +70,9 @@ class TestDataset(unittest.TestCase):
         ranking2 = Ranking.from_list([{4, 5, 6}])
         ranking3 = Ranking.from_list([{7, 8, 9}])
         dataset = Dataset([ranking1, ranking2, ranking3])
-        self.assertEqual(dataset[0] == ranking1)
-        self.assertEqual(dataset[1] == ranking2)
-        self.assertEqual(dataset[2] == ranking3)
+        self.assertEqual(dataset[0], ranking1)
+        self.assertEqual(dataset[1], ranking2)
+        self.assertEqual(dataset[2], ranking3)
 
     def test_dataset_contains(self):
         ranking1 = Ranking.from_list([{1, 2, 3}, {4, 5}])

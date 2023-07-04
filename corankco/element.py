@@ -148,3 +148,58 @@ class Element:
         """
         return f"{self._value}"
 
+
+class PairwiseElementComparison:
+    """
+    Class to encapsulate the cost of the different relative orders for two elements in a consensus ranking within a
+    Kemeny prism
+    """
+    def __init__(self, x: Element, y: Element, x_before_y: float, x_after_y: float, x_tied_y: float):
+        self._x: Element = x
+        self._y: Element = y
+        self._x_before_y: float = x_before_y
+        self._x_after_y: float = x_after_y
+        self._x_tied_y: float = x_tied_y
+
+    @property
+    def x(self) -> Element:
+        """
+        Property to get the x element
+        :return: x
+        """
+        return self._x
+
+    @property
+    def y(self) -> Element:
+        """
+        Property to get the y element
+        :return: y
+        """
+        return self._y
+
+    @property
+    def x_before_y(self) -> float:
+        """
+        Property to get the cost to place x before y in a consensus in a Kemeny prism
+        :return: cost to place x before y in the consensus in a Kemeny prism
+        """
+        return self._x_before_y
+
+    @property
+    def x_after_y(self) -> float:
+        """
+        Property to get the cost to place x after y in a consensus in a Kemeny prism
+        :return: cost to place x after y in a consensus in a Kemeny prism
+        """
+        return self._x_after_y
+
+    @property
+    def x_tied_y(self) -> float:
+        """
+        Property to get the cost to tie x and y in a consensus in a Kemeny prism
+        :return: cost to tie x and y in a consensus in a Kemeny prism
+        """
+        return self._x_tied_y
+
+    def __hash__(self):
+        return hash(str(self._x) + "-" + str(self._y))

@@ -50,7 +50,7 @@ class KwikSortAbs(MedianRanking):
         self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme)
         return ConsensusSingleRanking(consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=
         dataset, scoring_scheme=scoring_scheme, att=
-        {ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
+                                      {ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
 
     def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
                    scoring_scheme: ScoringScheme) -> Element:
@@ -63,6 +63,7 @@ class KwikSortAbs(MedianRanking):
         :return: an Element as pivot
         """
         raise NotImplementedError("The method not implemented")
+
     # public abstract V getPivot(List < V > elements, U var);
 
     def _where_should_it_be(self, pos_pivot_rankings: ndarray, pos_other_element_rankings: ndarray, sc: ndarray) -> int:
@@ -77,6 +78,7 @@ class KwikSortAbs(MedianRanking):
         in the consensus
         """
         raise NotImplementedError("The method not implemented")
+
     # public abstract int whereShouldItBe(V element, V pivot, List < V > elements, U var);
 
     def _kwik_sort(self, consensus: List[List[Element]], remaining_elements: List[Element],
@@ -85,12 +87,14 @@ class KwikSortAbs(MedianRanking):
         before: List[Element] = []
         pivot: Element = Element(-1)
         if len(mapping_element_id) > 0:
-            pivot = self._get_pivot(mapping_element_id, positions)
+            pivot = self._get_pivot(mapping_element_id, remaining_elements, positions, scoring_scheme)
         same: List[Element] = [pivot]
+        positions_pivot = mapping_element_id.get(pivot)
 
         for element in remaining_elements:
             if element != pivot:
-                pos = self._where_should_it_be(scoring_scheme)
+                positions_element = mapping_element_id.get(element)
+                pos = self._where_should_it_be(positions_pivot, positions_element, scoring_scheme)
                 if pos < 0:
                     before.append(element)
                 elif pos > 0:

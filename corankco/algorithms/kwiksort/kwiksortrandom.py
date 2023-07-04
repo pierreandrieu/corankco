@@ -1,5 +1,5 @@
-from typing import List, Set, Dict
-from numpy import zeros, count_nonzero, vdot, ndarray
+from typing import List, Dict
+from numpy import count_nonzero, vdot, ndarray
 from random import choice
 from corankco.algorithms.kwiksort.kwiksortabs import KwikSortAbs
 from corankco.element import Element
@@ -26,9 +26,9 @@ class KwikSortRandom(KwikSortAbs):
         defined by the same way, returns -1, 1, 0 if the element should be respectively before, after or tied with
         the pivot in the consensus.
 
-        :param pos_pivot_rankings: the nb_rankings positions of the pivot in a ndarray
-        :param pos_other_element_rankings: the nb_rankings positions of the target element in a ndarray
-        :param sc: the ScoringScheme
+        :param pos_pivot: the nb_rankings positions of the pivot in a ndarray
+        :param pos_other_element: the nb_rankings positions of the target element in a ndarray
+        :param scoring_scheme_numpy: the ScoringScheme as a numpy ndarray
         :return: returns 0 if the cost of tying the pivot and the element is minimal (not necessarily the unique minimal
         cost), -1 if the cost of having the element before the pivot in the consensus is minimal and the cost of tying
         them is not, 1 otherwise
@@ -39,7 +39,7 @@ class KwikSortRandom(KwikSortAbs):
         d: int = count_nonzero(pos_other_element == -1)
         e: int = count_nonzero(pos_other_element < pos_pivot)
 
-        comp: List[int] = [e-d+a, len(pos_pivot) -e-b-c+a, b-a, c-a, d-a, a]
+        comp: List[int] = [e-d+a, len(pos_pivot)-e-b-c+a, b-a, c-a, d-a, a]
         cost_before = vdot(scoring_scheme_numpy[0], comp)
         cost_same = vdot(scoring_scheme_numpy[1], comp)
         cost_after = vdot(scoring_scheme_numpy[0], [len(pos_pivot)-e-b-c+a,  e-d+a, b-a, d-a, c-a, a])

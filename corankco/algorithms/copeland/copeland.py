@@ -1,14 +1,24 @@
-import operator
-from numpy import vdot, count_nonzero, shape, array
-
+from collections import defaultdict
+from typing import List, Dict
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
+from corankco.ranking import Ranking
+from corankco.consensus import Consensus
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import ConsensusSingleRanking, ConsensusFeature
+from corankco.element import Element
 
 
 class CopelandMethod(MedianRanking):
-
+    """
+    Copeland's method is one of the most famous electoral system published in :
+    A. H. Copeland, A reasonable social welfare function, seminar on Applications of Mathematics to the social
+    sciences, University of Michigan, 1951.
+    Complexity: O(nb_elements² * nb_rankings)
+    This method can be easily adapted to incomplete rankings with ties using the framework of Andrieu et al., 2023
+    A victory for x against y becomes before(x,y) < before(y,x), score += 1 for x and += 0 for y
+    An equality for x against y becomes before(x,y) = before(y,x), score += 0.5 for both x and y
+    """
     def compute_consensus_rankings(
             self,
             dataset: Dataset,
@@ -17,131 +27,92 @@ class CopelandMethod(MedianRanking):
             bench_mode=False
     ) -> ConsensusSingleRanking:
         """
-        :param dataset: A dataset containing the rankings to aggregate
-        :type dataset: Dataset (class Dataset in package 'datasets')
-        :param scoring_scheme: The penalty vectors to consider
-        :type scoring_scheme: ScoringScheme (class ScoringScheme in package 'distances')
-        :param return_at_most_one_ranking: the algorithm should not return more than one ranking
+        Calculate and return the consensus rankings based on the given dataset and scoring scheme.
+
+        :param dataset: The dataset of rankings to be aggregated.
+        :type dataset: Dataset
+        :param scoring_scheme: The scoring scheme to be used for calculating consensus.
+        :type scoring_scheme: ScoringScheme
+        :param return_at_most_one_ranking: If True, the algorithm should return at most one ranking.
         :type return_at_most_one_ranking: bool
-        :param bench_mode: is bench mode activated. If False, the algorithm may return more information
+        :param bench_mode: If True, the algorithm may return additional information for benchmarking purposes.
         :type bench_mode: bool
-        :return one or more rankings if the underlying algorithm can find several equivalent consensus rankings
-        If the algorithm is not able to provide multiple consensus, or if return_at_most_one_ranking is True then, it
-        should return a list made of the only / the first consensus found.
-        In all scenario, the algorithm returns a list of consensus rankings
-        :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
-        implementation of the algorithm does not fit with the scoring scheme
+        :return: Consensus rankings. If the algorithm is unable to provide multiple consensuses or
+        return_at_most_one_ranking is True, a single consensus ranking is returned.
+        :rtype: Consensus
+        :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
+        implementation does not support the given scoring scheme.
         """
 
-        sc = scoring_scheme.penalty_vectors
+        # associates for each element its generalized Copeland score within the Kemeny prism
+        mapping_elem_score: Dict[Element, float] = {}
 
-        res = []
-        elem_id = {}
-        id_elements = {}
-        id_elem = 0
-        for ranking in dataset.rankings:
-            for bucket in ranking:
-                for element in bucket:
-                    if element not in elem_id:
-                        elem_id[element] = id_elem          # dictionnaire pour retrouver l'id a partir d'un element
-                        # (id commence a 0)
-                        id_elements[id_elem] = element      # dictionnaire pour retrouver l'element a partir de son id
-                        id_elem += 1
+        # associates for each element its number of victories - equality - defeat against other elements
+        mapping_elem_victories: Dict[Element, List[int]] = {}
 
-        # nb_elements = len(elem_id)
+        # iterates on elements to initialize the two dicts
+        for element in dataset.universe:
+            # initially, elements have a score of 0.
+            mapping_elem_score[element] = 0.
+            # and no victories, equalities, defeats
+            mapping_elem_victories[element] = [0, 0, 0]
 
-        positions = dataset.get_positions(elem_id)
-        n = shape(positions)[0]  # nombre d'elements
-        m = shape(positions)[1]  # nombre de classements
-        cost_before = sc[0]     # definition des differents couts
-        cost_tied = sc[1]
-        cost_after = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
-                            cost_before[5]])
-        id_scores = {}                                      # dictionnaire pour retrouver le score d'un element
-        id_nb_victoires = {}
-        # a partir de son id
-        for i in range(0, n, 1):                # initialisation du dictionnaire
-            id_scores[i] = 0
-            id_nb_victoires[i] = [0, 0, 0] # victoires, nul, defaites
-        for id_el1 in range(0, n, 1):
-            mem = positions[id_el1]             # tableau de rangs de el1
-            d = count_nonzero(mem == -1)    # nombre de fois ou seulement el1 est absent
-            for id_el2 in range(id_el1 + 1, n, 1):
-                a = count_nonzero(mem + positions[id_el2] == -2)  # nombre de fois ou el1 et el2 sont absents
-                b = count_nonzero(mem == positions[id_el2])     # nombre de fois ou el1 et el2 sont en egalites
-                c = count_nonzero(positions[id_el2] == -1)      # nombre de fois ou seulement el2 est absent
-                e = count_nonzero(mem < positions[id_el2])      # nombre de fois ou el1 est avant el2
-                relative_positions = array([e - d + a, m - e - b - c + a, b - a, c - a, d - a, a])  # vecteur omega
-                put_before = vdot(relative_positions, cost_before)  # cout de placer el1 avant el2
-                put_after = vdot(relative_positions, cost_after)    # cout de placer el1 apres el2
-                put_tied = vdot(relative_positions, cost_tied)      # cout de placer el1 a egalite avec el2
+        # now, update the two dicts: computes for each element the number of victories, equalities, defeats
+        # for each pair of elements
+        for pairwise_comparison in dataset.penalties_relative_positions(scoring_scheme):
+            el1: Element = pairwise_comparison.x
+            el2: Element = pairwise_comparison.y
 
-                """"
-                if put_before < put_after and put_before <= put_tied:
-                    id_scores[id_el1] += 1
-                elif put_after < put_before and put_after <= put_tied:
-                    id_scores[id_el2] += 1
-                else:
-                    id_scores[id_el1] += 0.5
-                    id_scores[id_el2] += 0.5
+            put_before: float = pairwise_comparison.x_before_y
+            put_after: float = pairwise_comparison.x_after_y
 
-                """
-
-                if put_before < put_after:
-                    id_scores[id_el1] += 1
-                    id_nb_victoires[id_el1][0] += 1
-                    id_nb_victoires[id_el2][2] += 1
-                elif put_after < put_before:
-                    id_scores[id_el2] += 1
-                    id_nb_victoires[id_el1][2] += 1
-                    id_nb_victoires[id_el2][0] += 1
-                else:
-                    id_scores[id_el1] += 0.5
-                    id_scores[id_el2] += 0.5
-                    id_nb_victoires[id_el1][1] += 1
-                    id_nb_victoires[id_el2][1] += 1
-
-        sorted_ids = CopelandMethod.sorted_dictionary_keys(id_scores)  # liste des cles du dictionnaire trie par
-        scores_elements = {}
-        victories_elements = {}
-        # valeurs decroissantes
-        bucket = []
-        previous_id = sorted_ids[0]
-        for id_elem in sorted_ids:
-            scores_elements[id_elements.get(id_elem)] = id_scores.get(id_elem)
-            victories_elements[id_elements.get(id_elem)] = id_nb_victoires.get(id_elem)
-
-            if id_scores.get(previous_id) == id_scores.get(id_elem):  # si l'elem actuel a le meme score que l'element
-                # precedent
-                bucket.append(id_elements.get(id_elem))                  # on le place dans le meme bucket que celui ci
+            if put_before < put_after:
+                mapping_elem_score[el1] += 1
+                mapping_elem_victories[el1][0] += 1
+                mapping_elem_victories[el2][2] += 1
+            elif put_after < put_before:
+                mapping_elem_score[el2] += 1
+                mapping_elem_victories[el1][2] += 1
+                mapping_elem_victories[el2][0] += 1
             else:
-                res.append(bucket)                                  # sinon, on concatene le bucket a la liste resultat
-                bucket = [id_elements.get(id_elem)]                 # on reinitialise le bucket avec le candidat actuel
-            previous_id = id_elem
-        res.append(bucket)
-        return ConsensusSingleRanking(consensus_rankings=[res],
-                         dataset=dataset,
-                         scoring_scheme=scoring_scheme,
-                         att={
+                mapping_elem_score[el1] += 0.5
+                mapping_elem_score[el2] += 0.5
+                mapping_elem_victories[el1][1] += 1
+                mapping_elem_victories[el2][1] += 1
+
+        # construction of Copeland ranking, sorting the elements by decreasing score
+        d: defaultdict = defaultdict(set)
+        for key, value in mapping_elem_score.items():
+            d[value].add(key)
+
+        # Trier par valeurs et convertir les valeurs en ensembles
+        copeland_ranking = [value for key, value in sorted(d.items(), reverse=True)]
+        return ConsensusSingleRanking(Ranking(copeland_ranking),
+                                      dataset=dataset,
+                                      scoring_scheme=scoring_scheme,
+                                      att={
                               ConsensusFeature.AssociatedAlgorithm: self.get_full_name(),
-                              ConsensusFeature.CopelandScores: scores_elements,
-                              ConsensusFeature.CopelandVictories: victories_elements
+                              ConsensusFeature.CopelandScores: mapping_elem_score,
+                              ConsensusFeature.CopelandVictories: mapping_elem_victories
                               }
                          )
 
-    # tri du dictionnaire dans l'ordre decroissant des scores, tri "timsort" par defaut. Complexite O(nlog n)
-    # au pire des cas
-    # retourne la liste des cles ordonnées par valeurs decroissantes
-    @staticmethod
-    def sorted_dictionary_keys(d):
-        d = (sorted(d.items(), key=operator.itemgetter(1), reverse=True))
-        res = []
-        for (k, v) in d:
-            res.append(k)
-        return res
-
     def get_full_name(self) -> str:
+        """
+        Return the full name of the algorithm.
+
+        :return: The string 'CopelandMethod'.
+        :rtype: str
+        """
         return "CopelandMethod"
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True as CopelandMethod can handle any ScoringScheme
+        :rtype: bool
+        """
         return True

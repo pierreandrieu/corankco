@@ -9,6 +9,14 @@ from enum import Enum, unique
 
 @unique
 class ConsensusFeature(Enum):
+    """
+    Enumeration of possible consensus features that might be stored in a Consensus object.
+    All the features are not computed by each algorithm. For example, the Copeland scores are not
+    computed of the algorithm who returned the Consensus object was not CopelandMethod.
+    Note that the Kemeny score can be accessed whatever the rank aggregation algorithm was
+    IsNecessarilyOptimal: If true, then the ranking is a Kemeny optimal ranking regarding the scoring scheme. If false,
+    the ranking may be or not be a Kemeny optimal ranking regarding the scoring scheme
+    """
     AssociatedDataset = "dataset:"
     AssociatedScoringScheme = "scoring scheme:"
     AssociatedAlgorithm = "computed by:"
@@ -21,10 +29,23 @@ class ConsensusFeature(Enum):
 
 
 class Consensus:
+    """
+    Class to represent the Consensus. A Consensus object is defined by a list of rankings.
+    The dataset of input rankings and scoring scheme associated to the Consensus object may also be stored.
+    Finally, a Consensus object can store several features from the ConsensusFeature enumeration
+    """
     def __init__(self, consensus_rankings: List[Ranking],
                  dataset: Dataset = None,
                  scoring_scheme: ScoringScheme = None,
                  att: Dict[ConsensusFeature, Any] = None):
+        """
+        Constructs a Consensus object.
+        :param consensus_rankings:
+        :param dataset: the dataset for which the Consensus object is a consensus ranking
+        :param scoring_scheme: the scoring scheme used to compute the consensus of the rankings of the dataset
+        :param att: a dictionary containing additional information on the consensus. Keys are features among the ones
+        defined in the enum ConsensusFeature, and the values are the values associated with the different features.
+        """
         self._att: Dict[ConsensusFeature, Any] = att
 
         # dict of attributes to be associated with the consensus
@@ -40,7 +61,7 @@ class Consensus:
 
         # the elements associated with the Dataset
         if self._dataset is not None:
-            self._elements: Set[Element] = self.associated_dataset.elements
+            self._elements: Set[Element] = self.associated_dataset.universe
         else:
             self._elements: Set[Element] = set()
             for ranking in self._consensus_rankings:
@@ -56,7 +77,7 @@ class Consensus:
             self._att[ConsensusFeature.CopelandScores]: Dict[Element, float] = {}
         # Dict that associate to each element x its number of victories, that is
         if ConsensusFeature.CopelandVictories not in self._att:
-            self._att[ConsensusFeature.CopelandVictories]: Dict[Element, int] = {}
+            self._att[ConsensusFeature.CopelandVictories]: Dict[Element, List[int]] = {}
         # true iif the consensus is for sure optimal in the sense of the KCF, see Andrieu et al., IJAR2022
         if ConsensusFeature.IsNecessarilyOptimal not in self._att:
             self._att[ConsensusFeature.IsNecessarilyOptimal]: bool = False
@@ -87,68 +108,158 @@ class Consensus:
         """
         return cls([Ranking.from_list(ranking) for ranking in rankings])
 
+    @classmethod
+    def get_consensus_from_file(cls, path: str) -> 'Consensus':
+        """
+        Constructs a Consensus object from a file containing the rankings to store in the Consensus object
+        :param path: the path of the file
+        :return: a Consensus object whose associated rankings are the rankings stored in the file
+        """
+        return Consensus(Dataset.from_file(path).rankings)
+
     @property
     def consensus_rankings(self) -> List[Ranking]:
+        """
+
+        :return: the consensus rankings associated with the Consensus object as a List of Ranking objects
+        """
         return self._consensus_rankings
 
     @property
     def necessarily_optimal(self) -> bool:
+        """
+
+        :return: True if we know that the consensus is necessarily a Kemeny optimal consensus regarding the scoring
+        scheme associated with the consensus. If false, the consensus might be optimal or not.
+        """
         return self._att[ConsensusFeature.IsNecessarilyOptimal]
 
     @property
     def nb_consensus(self) -> int:
+        """
+
+        :return: the number of consensus ranking objects. Several algorithm can return more than one equivalent
+        consensus ranking in a same Consensus object.
+        """
         return len(self.consensus_rankings)
 
-    def __calculate_score(self):
+    def __calculate_score(self) -> None:
+        """
+        Private method to compute the Kemeny score regarding the scoring scheme of the Consensus object
+        between the consensus ranking and the input rankings in the associated Dataset object.
+        Note that if the Consensus object contains several consensus rankings, we use the first one to compute the score
+        Note also that the score is computed in O(nb_rankings * nb_elements * log(nb_elements)) and saved after the
+        first call to the function
+        :return: None
+        """
         if self._att[ConsensusFeature.KemenyScore] == -1 and \
                 self._dataset is not None and \
                 self._scoring_scheme is not None:
             self._att[ConsensusFeature.KemenyScore] = KemenyComputingFactory(
-                self._scoring_scheme).get_kemeny_score(self.consensus_rankings[0], self._dataset.rankings)
+                self._scoring_scheme).get_kemeny_score(self.consensus_rankings[0], self._dataset)
 
     @property
     def kemeny_score(self) -> float:
+        """
+        Returns the Kemeny score regarding the scoring scheme of the Consensus object
+        between the consensus ranking and the input rankings in the associated Dataset object.
+        Note that if the Consensus object contains several consensus rankings, we use the first one to compute the score
+        Note also that the score is computed in O(nb_rankings * nb_elements * log(nb_elements)) and saved after the
+        first call to the function
+        :return: the Kemeny score between the first input ranking of the Consensus object and the input rankings of the
+        Dataset associated to the Consensus object, regarding the ScoringScheme associated to the Consensus object
+        """
         self.__calculate_score()
         return self._att[ConsensusFeature.KemenyScore]
 
     @property
-    def copeland_scores(self) -> Dict[int or str, int]:
+    def copeland_scores(self) -> Dict[Element, float]:
+        """
+        The Copeland scores of the elements of the universe.
+        :return: A dictionary whose keys are the elements and the values are the Copeland score of the elements.
+        See CopelandMethod class for more information on the computation of the scores
+        """
         return self._att[ConsensusFeature.CopelandScores]
 
     @property
     def copeland_victories(self) -> Dict[int or str, List[int]]:
+        """
+        The Copeland number of victories, defeats, equalities for each element
+        :return: A dictionary whose keys are the elements are the values are a list of 3 integers:
+        the number of victories, defeats, equalities of the associated elements
+        See CopelandMethod class for more information
+        """
         return self._att[ConsensusFeature.CopelandVictories]
 
     @property
     def associated_dataset(self) -> Dataset:
+        """
+
+        :return: the Dataset object associated to the Consensus object. Can be None if the Consensus object has not been
+         created during a rank aggregation process
+        """
         return self._dataset
 
     @property
     def associated_scoring_scheme(self) -> ScoringScheme:
+        """
+
+        :return: the ScoringScheme associated to the Consensus object. Can be None if the Consensus object has not been
+        created during a rank aggregation process
+        """
         return self._scoring_scheme
 
     @property
     def features(self) -> Dict[ConsensusFeature, Any]:
+        """
+
+        :return: The features of the Consensus object. The features can vary according to the
+        rank aggregation algorithm that computed the Consensus object.
+        """
         return self._att
 
     @property
     def elements(self) -> Set[Element]:
+        """
+
+        :return: the set of elements that are ranked in the consensus rankings
+        """
         return self._elements
 
     @property
     def nb_elements(self) -> int:
+        """
+
+        :return: the number of elements that appear in the consensus rankings
+        """
         return len(self._elements)
 
     def __str__(self) -> str:
+        """
+        A string description of the object
+        :return: the list of the consensus rankings of the datasets as a string
+        """
         return str(self.consensus_rankings)
 
     def __repr__(self) -> str:
+        """
+        A string description of the object
+        :return: the list of the consensus rankings of the datasets as a string
+        """
         return self.__str__()
 
     def __len__(self) -> int:
+        """
+
+        :return: the number of consensus rankings in the Consensus object
+        """
         return len(self.consensus_rankings)
 
     def description(self) -> str:
+        """
+
+        :return: A textual and complete description of the Consensus object which includes the associated features
+        """
         self.__calculate_score()
         return "Consensus description:" + "".join("\n\t" + str(key.value)
                                                   + str(self.features[key]) for key in self.features) \
@@ -189,10 +300,6 @@ class Consensus:
     def positions_element(self, element: int or str) -> List[int]:
         return self._elem_position[element]
 
-    @staticmethod
-    def get_consensus_from_file(path: str):
-        return Consensus(Dataset.from_file(path).rankings)
-
     def __iter__(self) -> Iterator[Ranking]:
         """
         Returns an iterator over the rankings buckets in the Dataset.
@@ -205,7 +312,7 @@ class Consensus:
         """
         return iter(self._consensus_rankings)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> Ranking:
         """
         Retrieve the consensus ranking at the given index.
 
@@ -218,10 +325,22 @@ class Consensus:
 
 
 class ConsensusSingleRanking(Consensus):
+    """
+    Class to represent a Consensus defined by only one consensus ranking. All the remaining features of the Consensus
+    objects remain available.
+    """
     def __init__(self, consensus_ranking: Ranking,
                  dataset: Dataset = None,
                  scoring_scheme: ScoringScheme = None,
-                 att: Dict[ConsensusFeature, str or int or float or bool or List] = None):
+                 att: Dict[ConsensusFeature, Any] = None):
+        """
+        Constructs a ConsensusSingleRanking object.
+        :param consensus_ranking: the single consensus ranking
+        :param dataset: the dataset for which the Consensus object is a consensus ranking
+        :param scoring_scheme: the scoring scheme used to compute the consensus of the rankings of the dataset
+        :param att: a dictionary containing additional information on the consensus. Keys are features among the ones
+        defined in the enum ConsensusFeature, and the values are the values associated with the different features.
+        """
         super().__init__([consensus_ranking], dataset, scoring_scheme, att)
 
     @classmethod
@@ -236,4 +355,9 @@ class ConsensusSingleRanking(Consensus):
         return cls(Ranking.from_list(ranking))
 
     def position_element(self, element: Element) -> int:
+        """
+        Returns the position of the given target element in the consensus ranking
+        :param element: the target element
+        :return: the position of the given target element in the consensus ranking
+        """
         return self.positions_element(element)[0]

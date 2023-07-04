@@ -1,6 +1,5 @@
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.borda.borda import BordaCount
-from corankco.scoringscheme import ScoringScheme
 
 
 class BioCo(BioConsert):
@@ -26,4 +25,3 @@ class BioCo(BioConsert):
         :return: Bioco (BioConsert with [BordaCount] as starter algorithms)
         """
         return "Bioco (" + super().get_full_name() + ")"
-

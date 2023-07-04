@@ -15,8 +15,8 @@ class BioConsert(MedianRanking):
     BioConsert is a heuristics for Kemeny-Young rank aggregation published in
     Cohen-Boulakia, Sarah & Denise, Alain & Hamel, Sylvie. (2011). Using Medians to Generate Consensus Rankings for
     Biological Data. 6809. 73-90. 10.1007/978-3-642-22351-8_5.
-    Complexity: O(nb_elements²)
-    Had best quality results on bechmark (complete rankings) presented in Brancotte et al. (2015). Rank aggregation with
+    Complexity: O(nb_elements² * nb_rankings) on empirical results (not proved)
+    Had best quality results on benchmark (complete rankings) in Brancotte et al. (2015). Rank aggregation with
     ties: Experiments and Analysis.
     For time computation reasons, a part of this algorithm is written in C
     """
@@ -52,28 +52,17 @@ class BioConsert(MedianRanking):
         """
 
         scoring_scheme_ndarray: ndarray = asarray(scoring_scheme.penalty_vectors)
-        rankings: List[Ranking] = dataset.rankings
 
         res: List[Ranking] = []
 
         # associates a unique id to each element
-        elem_id: Dict[Element, int] = {}
+        elem_id: Dict[Element, int] = dataset.mapping_elem_id
         # for a given id, gives the associated element
-        id_elements: Dict[int, Element] = {}
+        id_elements: Dict[int, Element] = dataset.mapping_id_elem
+        nb_elements: int = dataset.nb_elements
+        nb_rankings: int = dataset.nb_rankings
 
-        id_elem: int = 0
-        nb_rankings: int = len(rankings)
-
-        for ranking in rankings:
-            for bucket in ranking:
-                for element in bucket:
-                    if element not in elem_id:
-                        elem_id[element] = id_elem
-                        id_elements[id_elem] = element
-                        id_elem += 1
-        nb_elements: int = len(elem_id)
-
-        positions: ndarray = BioConsert.__get_positions(rankings, elem_id)
+        positions: ndarray = dataset.get_positions()
         (departure, dst_res) = self.__departure_rankings(dataset, positions, elem_id, scoring_scheme)
 
         departure_c: ndarray = array(departure.flatten(), dtype=int32)
@@ -94,7 +83,7 @@ class BioConsert(MedianRanking):
 
         # at the end, all the computed rankings do not necessarily have the same score.
         # now we retain only the rankings with minimal score
-        ranking_dict = {}
+        ranking_dict: Dict[int, Set[Element]] = {}
 
         # minimal kemeny score
         lowest_distance: float = amin(dst_res)
@@ -112,7 +101,7 @@ class BioConsert(MedianRanking):
         # for each best ranking in terms of kemeny score
         for ranking_result in best_rankings:
             # get the str view of the ranking to be hashed in the set
-            st_ranking = str(ranking_result)
+            st_ranking: str = str(ranking_result)
 
             # the ranking must be added iif not already seen
             if st_ranking not in distinct_rankings:
@@ -151,24 +140,6 @@ class BioConsert(MedianRanking):
                               ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
                               }
                          )
-
-    @staticmethod
-    def __get_positions(rankings: List[Ranking], elements_id: Dict[Element, int]) -> ndarray:
-        m: int = len(rankings)
-        n: int = len(elements_id)
-
-        # positions[i][j] = position of element whose id is i in jth ranking, -1 if non-ranked
-        positions: ndarray = zeros((n, m), dtype=int32) - 1
-
-        id_ranking: int = 0
-        for ranking in rankings:
-            id_bucket: int = 0
-            for bucket in ranking:
-                for element in bucket:
-                    positions[elements_id.get(element)][id_ranking] = id_bucket
-                id_bucket += 1
-            id_ranking += 1
-        return positions
 
     def __departure_rankings(self, dataset: Dataset, positions: ndarray, elements_id: Dict[Element, int],
                              scoring_scheme: ScoringScheme) -> Tuple[ndarray, ndarray]:
@@ -218,7 +189,8 @@ class BioConsert(MedianRanking):
                 i += 1
 
             # compute the initial distance for the departure ranking where all elements are tied
-            dst_ini.append(KemenyComputingFactory(scoring_scheme).get_kemeny_score(Ranking([dataset.elements]), dataset))
+            dst_ini.append(
+                KemenyComputingFactory(scoring_scheme).get_kemeny_score(Ranking([dataset.universe]), dataset))
 
             # first, all elements are tied in all departure rankings
             departure = zeros((len(list_distinct_id_rankings)+1, len(elements_id)), dtype=int32)

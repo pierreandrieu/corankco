@@ -70,9 +70,23 @@ class TestDataset(unittest.TestCase):
         ranking2 = Ranking.from_list([{4, 5, 6}])
         ranking3 = Ranking.from_list([{7, 8, 9}])
         dataset = Dataset([ranking1, ranking2, ranking3])
-        assert dataset[0] == ranking1
-        assert dataset[1] == ranking2
-        assert dataset[2] == ranking3
+        self.assertEqual(dataset[0] == ranking1)
+        self.assertEqual(dataset[1] == ranking2)
+        self.assertEqual(dataset[2] == ranking3)
+
+    def test_dataset_contains(self):
+        ranking1 = Ranking.from_list([{1, 2, 3}, {4, 5}])
+        ranking2 = Ranking.from_list([{9, 5, 6}])
+        ranking3 = Ranking.from_list([{7, 8, 9}])
+        dataset = Dataset([ranking1, ranking2, ranking3])
+        self.assertTrue(dataset.contains_element(1))
+        self.assertTrue(dataset.contains_element(5))
+        self.assertTrue(dataset.contains_element(9))
+        self.assertTrue(dataset.contains_element(6))
+        self.assertFalse(dataset.contains_element(10))
+        self.assertFalse(dataset.contains_element(0))
+        self.assertFalse(dataset.contains_element(45))
+
 
 if __name__ == "__main__":
     unittest.main()

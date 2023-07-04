@@ -1,53 +1,48 @@
-from typing import List
+from typing import List, Set, Dict
 from numpy import zeros, count_nonzero, vdot, ndarray
 from random import choice
 from corankco.algorithms.kwiksort.kwiksortabs import KwikSortAbs
+from corankco.element import Element
+from corankco.scoringscheme import ScoringScheme
 
 
 class KwikSortRandom(KwikSortAbs):
 
-    def prepare_internal_vars(self, elements_translated_target: List, rankings: List[List[List[int]]]):
-        elements = {}
-        id_element = 0
-        for ranking in rankings:
-            for bucket in ranking:
-                for element in bucket:
-                    if element not in elements:
-                        elements_translated_target.append(element)
-                        elements[element] = id_element
-                        id_element += 1
-
-        positions = zeros((len(elements), len(rankings)), dtype=int)-1
-
-        id_ranking = 0
-        for ranking in rankings:
-            id_bucket = 0
-            for bucket in ranking:
-                for element in bucket:
-                    positions[elements.get(element)][id_ranking] = id_bucket
-                id_bucket += 1
-            id_ranking += 1
-        tup = (elements, positions)
-        return tup
-
-    def get_pivot(self, elements: List[int], var):
+    def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
+                   scoring_scheme: ScoringScheme) -> Element:
+        """
+        Private function, returns the pivot. The pivot is chosen randomly in the elements List
+        :param mapping_elements_id: the dictionary whose keys are the elements and the values their unique int ID
+        :param elements: the list of remaining elements to put in the consensus
+        :param positions: ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
+        :param scoring_scheme: the scoring scheme that may be used (or not) to choose a pivot
+        :return: an Element as pivot, randomly
+        """
         return choice(elements)
 
-    def where_should_it_be(self, element: int, pivot: int, elements: List[int], var, scoring_scheme: ndarray):
-        pivot_var = var[1][var[0].get(pivot)]
-        element_var = var[1][var[0].get(element)]
-        m = len(pivot_var)
+    def _where_should_it_be(self, pos_pivot: ndarray, pos_other_element: ndarray, scoring_scheme_numpy: ndarray) -> int:
+        """
+        Given the pivot defined by its ranks in the input rankings as a ndarray and another element
+        defined by the same way, returns -1, 1, 0 if the element should be respectively before, after or tied with
+        the pivot in the consensus.
 
-        a = count_nonzero(pivot_var + element_var == -2)
-        b = count_nonzero(pivot_var == element_var)
-        c = count_nonzero(pivot_var == -1)
-        d = count_nonzero(element_var == -1)
-        e = count_nonzero(element_var < pivot_var)
+        :param pos_pivot_rankings: the nb_rankings positions of the pivot in a ndarray
+        :param pos_other_element_rankings: the nb_rankings positions of the target element in a ndarray
+        :param sc: the ScoringScheme
+        :return: returns 0 if the cost of tying the pivot and the element is minimal (not necessarily the unique minimal
+        cost), -1 if the cost of having the element before the pivot in the consensus is minimal and the cost of tying
+        them is not, 1 otherwise
+        """
+        a: int = count_nonzero(pos_pivot + pos_other_element == -2)
+        b: int = count_nonzero(pos_pivot == pos_other_element)
+        c: int = count_nonzero(pos_pivot == -1)
+        d: int = count_nonzero(pos_other_element == -1)
+        e: int = count_nonzero(pos_other_element < pos_pivot)
 
-        comp = [e-d+a, m-e-b-c+a, b-a, c-a, d-a, a]
-        cost_before = vdot(scoring_scheme[0], comp)
-        cost_same = vdot(scoring_scheme[1], comp)
-        cost_after = vdot(scoring_scheme[0], [m-e-b-c+a,  e-d+a, b-a, d-a, c-a, a])
+        comp: List[int] = [e-d+a, len(pos_pivot) -e-b-c+a, b-a, c-a, d-a, a]
+        cost_before = vdot(scoring_scheme_numpy[0], comp)
+        cost_same = vdot(scoring_scheme_numpy[1], comp)
+        cost_after = vdot(scoring_scheme_numpy[0], [len(pos_pivot)-e-b-c+a,  e-d+a, b-a, d-a, c-a, a])
 
         if cost_same <= cost_before:
             if cost_same <= cost_after:
@@ -59,4 +54,21 @@ class KwikSortRandom(KwikSortAbs):
         return 1
 
     def get_full_name(self) -> str:
+        """
+        Return the full name of the algorithm.
+
+        :return: The string 'KwikSortRandom'.
+        :rtype: str
+        """
         return "KwikSortRandom"
+
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True as KwikSort can handle any ScoringScheme
+        :rtype: bool
+        """
+        return True

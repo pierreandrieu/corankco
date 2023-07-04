@@ -1,12 +1,21 @@
-from typing import List
+from typing import List, Dict
 from numpy import ndarray, asarray
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import Consensus, ConsensusFeature
+from corankco.consensus import ConsensusSingleRanking, ConsensusFeature
+from corankco.element import Element
+from corankco.ranking import Ranking
 
 
 class KwikSortAbs(MedianRanking):
+    """
+    Interface for KwikSort algorithms. KwikSort is a heuristics designed for Kemeny-Young method.
+    QuickSort based algorithm: pick a pivot, find the set of elements shat should be ranked after pivot,
+    then before pivot, then tied with pivot, and recursively go on with the before and after sets
+    complexity: mean: O(nb_rankings * nb_elements * log2(nb_elements)) if choice of pivot is O(1)
+    complexity: worst: 0(nb_ranking * nb_elements²) if pivot divides elements in groups of size 1 and n-1
+    """
 
     def compute_consensus_rankings(
             self,
@@ -14,59 +23,74 @@ class KwikSortAbs(MedianRanking):
             scoring_scheme: ScoringScheme,
             return_at_most_one_ranking=False,
             bench_mode=False
-    ) -> Consensus:
+    ) -> ConsensusSingleRanking:
         """
-        :param dataset: A dataset containing the rankings to aggregate
-        :type dataset: Dataset (class Dataset in package 'datasets')
-        :param scoring_scheme: The penalty vectors to consider
-        :type scoring_scheme: ScoringScheme (class ScoringScheme in package 'distances')
-        :param return_at_most_one_ranking: the algorithm should not return more than one ranking
+        Calculate and return the consensus rankings based on the given dataset and scoring scheme.
+
+        :param dataset: The dataset of rankings to be aggregated.
+        :type dataset: Dataset
+        :param scoring_scheme: The scoring scheme to be used for calculating consensus.
+        :type scoring_scheme: ScoringScheme
+        :param return_at_most_one_ranking: If True, the algorithm should return at most one ranking.
         :type return_at_most_one_ranking: bool
-        :param bench_mode: is bench mode activated. If False, the algorithm may return more information
+        :param bench_mode: If True, the algorithm may return additional information for benchmarking purposes.
         :type bench_mode: bool
-        :return one or more rankings if the underlying algorithm can find several equivalent consensus rankings
-        If the algorithm is not able to provide multiple consensus, or if return_at_most_one_ranking is True then, it
-        should return a list made of the only / the first consensus found.
-        In all scenario, the algorithm returns a list of consensus rankings
-        :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
-        implementation of the algorithm does not fit with the scoring scheme
+        :return: Consensus rankings. If the algorithm is unable to provide multiple consensuses or
+        return_at_most_one_ranking is True, a single consensus ranking is returned.
+        :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
+        implementation does not support the given scoring scheme.
         """
-        sc = asarray(scoring_scheme.penalty_vectors)
 
-        consensus = []
-        elements_translated_target = []
-        var = self.prepare_internal_vars(elements_translated_target, dataset.rankings)
-        self.kwik_sort(consensus, elements_translated_target, var, sc)
-        return Consensus(consensus_rankings=[consensus],
-                         dataset=dataset,
-                         scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.AssociatedAlgorithm: self.get_full_name()}
-                         )
+        scoring_scheme: ndarray = asarray(scoring_scheme.penalty_vectors)
 
-    def prepare_internal_vars(self, elements_translated_target: List, rankings: List[List[List[int]]]):
-        raise NotImplementedError("The method not implemented")
-    # protected abstract U prepareInternalVars(
-    # List < V > elementsTranslatedTarget, Collection < List < Collection < T >> > rankings);
+        consensus_list: List[List[Element]] = []
+        mapping_elements_id: Dict[Element, int] = dataset.mapping_elem_id
+        positions = dataset.get_positions()
 
-    def get_pivot(self, elements: List[int], var):
+        self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme)
+        return ConsensusSingleRanking(consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=
+        dataset, scoring_scheme=scoring_scheme, att=
+        {ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
+
+    def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
+                   scoring_scheme: ScoringScheme) -> Element:
+        """
+        Private function, returns the pivot. The choice of the pivot is set by the programmer in daughter classes
+        :param mapping_elements_id: the dictionary whose keys are the elements and the values their unique int ID
+        :param elements: the list of remaining elements to put in the consensus
+        :param positions: ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
+        :param scoring_scheme: the scoring scheme that may be used (or not) to choose a pivot
+        :return: an Element as pivot
+        """
         raise NotImplementedError("The method not implemented")
     # public abstract V getPivot(List < V > elements, U var);
 
-    def where_should_it_be(self, element: int, pivot: int, elements: List[int], var, scoring_scheme: ndarray):
+    def _where_should_it_be(self, pos_pivot_rankings: ndarray, pos_other_element_rankings: ndarray, sc: ndarray) -> int:
+        """
+        Private method. Given the pivot defined by its ranks in the input rankings as a ndarray and another element
+        defined by the same way, returns -1, 1, 0 if the element should be respectively before, after or tied with
+        the pivot in the consensus
+        :param pos_pivot_rankings: the nb_rankings positions of the pivot in a ndarray
+        :param pos_other_element_rankings: the nb_rankings positions of the target element in a ndarray
+        :param sc: the ScoringScheme
+        :return: returns -1, 1, 0 if the element should be respectively before, after or tied with the pivot
+        in the consensus
+        """
         raise NotImplementedError("The method not implemented")
     # public abstract int whereShouldItBe(V element, V pivot, List < V > elements, U var);
 
-    def kwik_sort(self, consensus: List[List[int]], elements: List[int], var, scoring_scheme: ndarray):
-        after = []
-        before = []
-        same = []
-        pivot = -1
-        if len(elements) > 0:
-            pivot = self.get_pivot(elements, var)
-            same.append(pivot)
-        for element in elements:
+    def _kwik_sort(self, consensus: List[List[Element]], remaining_elements: List[Element],
+                   mapping_element_id: Dict[Element, int], positions: ndarray, scoring_scheme: ndarray):
+        after: List[Element] = []
+        before: List[Element] = []
+        pivot: Element = Element(-1)
+        if len(mapping_element_id) > 0:
+            pivot = self._get_pivot(mapping_element_id, positions)
+        same: List[Element] = [pivot]
+
+        for element in remaining_elements:
             if element != pivot:
-                pos = self.where_should_it_be(element, pivot, elements, var, scoring_scheme)
+                pos = self._where_should_it_be(scoring_scheme)
                 if pos < 0:
                     before.append(element)
                 elif pos > 0:
@@ -77,16 +101,30 @@ class KwikSortAbs(MedianRanking):
         if len(before) == 1:
             consensus.append(before)
         elif len(before) > 0:
-            self.kwik_sort(consensus, before, var, scoring_scheme)
+            self._kwik_sort(consensus, before, mapping_element_id, positions, scoring_scheme)
         if len(same) > 0:
             consensus.append(same)
         if len(after) == 1:
             consensus.append(after)
         elif len(after) > 0:
-            self.kwik_sort(consensus, after, var, scoring_scheme)
+            self._kwik_sort(consensus, after, mapping_element_id, positions, scoring_scheme)
 
     def get_full_name(self) -> str:
-        return "KwikSortAbs"
+        """
+        Return the full name of the algorithm.
+
+        :return: name of the algorithm, must be defined in daughter classes.
+        :rtype: str
+        """
+        raise NotImplementedError("The method not implemented")
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
-        return True
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True as KwikSort can handle any ScoringScheme
+        :rtype: bool
+        """
+        raise NotImplementedError("The method not implemented")

@@ -155,11 +155,18 @@ class PairwiseElementComparison:
     Kemeny prism
     """
     def __init__(self, x: Element, y: Element, x_before_y: float, x_after_y: float, x_tied_y: float):
-        self._x: Element = x
-        self._y: Element = y
-        self._x_before_y: float = x_before_y
-        self._x_after_y: float = x_after_y
-        self._x_tied_y: float = x_tied_y
+        if x <= y:
+            self._x: Element = x
+            self._y: Element = y
+            self._x_before_y: float = x_before_y
+            self._x_after_y: float = x_after_y
+            self._x_tied_y: float = x_tied_y
+        else:
+            self._x: Element = y
+            self._y: Element = x
+            self._x_before_y: float = x_after_y
+            self._x_after_y: float = x_before_y
+            self._x_tied_y: float = x_tied_y
 
     @property
     def x(self) -> Element:
@@ -201,5 +208,15 @@ class PairwiseElementComparison:
         """
         return self._x_tied_y
 
+    def x_before_y_is_minimal(self) -> bool:
+        return self.x_before_y <= self.x_after_y and self.x_before_y <= self._x_tied_y
+
+    def y_before_x_is_minimal(self) -> bool:
+        return self.x_after_y <= self.x_before_y and self.x_after_y <= self.x_tied_y
+
+    def x_tied_y_is_minimal(self) -> bool:
+        return self.x_tied_y <= self.x_before_y and self.x_tied_y <= self.x_after_y
+
     def __hash__(self):
-        return hash(str(self._x) + "-" + str(self._y))
+        return hash((self._x, self._y))
+

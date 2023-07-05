@@ -89,11 +89,11 @@ class KwikSortAbs(MedianRanking):
         if len(mapping_element_id) > 0:
             pivot = self._get_pivot(mapping_element_id, remaining_elements, positions, scoring_scheme)
         same: List[Element] = [pivot]
-        positions_pivot = mapping_element_id.get(pivot)
+        positions_pivot = positions[mapping_element_id.get(pivot)]
 
         for element in remaining_elements:
             if element != pivot:
-                positions_element = mapping_element_id.get(element)
+                positions_element = positions[mapping_element_id.get(element)]
                 pos = self._where_should_it_be(positions_pivot, positions_element, scoring_scheme)
                 if pos < 0:
                     before.append(element)

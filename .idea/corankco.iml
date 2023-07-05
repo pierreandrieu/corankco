@@ -13,7 +13,6 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/corankco/algorithms" />
-        <option value="$MODULE_DIR$/corankco/experimentsVLDB" />
         <option value="$MODULE_DIR$/corankco/rankingsgeneration" />
         <option value="$MODULE_DIR$/corankco/partitioning" />
       </list>

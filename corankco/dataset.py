@@ -400,7 +400,7 @@ class Dataset:
                 # e = number of rankings such that el1 is before el2 or el1 is non-ranked whereas el2 is ranked
                 e: int = np.count_nonzero(pos_el1 < positions[id_el2])
 
-                # vector that contains for the two elements el1 and el2 the number of rankings such that respectively:
+                # vector that contains for the two elements x and y the number of rankings such that respectively:
                 # x < y, x > y, x and y are tied, x is the only ranked, y is the only ranked, x and y are non-ranked
                 relative_positions: np.ndarray = np.array(
                     [e - d + a, self.nb_rankings - e - b - c + a, b - a, c - a, d - a, a])

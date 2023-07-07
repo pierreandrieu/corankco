@@ -48,9 +48,9 @@ class KwikSortAbs(MedianRanking):
         positions = dataset.get_positions()
 
         self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme)
-        return ConsensusSingleRanking(consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=
-        dataset, scoring_scheme=scoring_scheme, att=
-                                      {ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
+        return ConsensusSingleRanking(
+            consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=dataset,
+            scoring_scheme=scoring_scheme, att={ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
 
     def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
                    scoring_scheme: ScoringScheme) -> Element:

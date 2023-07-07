@@ -420,7 +420,7 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         :param id_elements: Mapping between unique integer IDs and actual elements
         :return: The consensus ranking as a Ranking object
         """
-        count_after = ExactAlgorithmCplex._initialize_defeat_counts(nb_elem)
+        count_after: Dict[int, int] = ExactAlgorithmCplex._initialize_defeat_counts(nb_elem)
         ExactAlgorithmCplex._calculate_defeat_counts(cplex_variables, map_elements_cplex, count_after)
 
         return ExactAlgorithmCplex._create_ranking_from_defeat_counts(count_after, id_elements)

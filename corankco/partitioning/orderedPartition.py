@@ -92,20 +92,33 @@ class OrderedPartition:
         if consensus.nb_elements != self.nb_elements:
             flag = False
 
+        # initialization of variables
         id_bucket_cons: int = 0
         id_partition: int = 0
 
         while flag and id_partition < len(self._partition):
-            elements_to_see = self.get_group_index(id_partition)
-            nb_elements_to_see = len(self.get_group_index(id_partition))
+            # check the id_partition-th group of the ordered partition
+            elements_to_see: Set[Element] = self.get_group_index(id_partition)
+            # number of elements in the target group
+            nb_elements_to_see: int = len(self.get_group_index(id_partition))
+
+            # check if one element of the consensus is not in the group before all the elements of the group have been
+            # seen in the consensus
             while flag and id_bucket_cons < len(cons) and nb_elements_to_see > 0:
-                bucket_cons = cons[id_bucket_cons]
+                # the current bucket of the consensus to check
+                bucket_cons: Set[Element] = cons[id_bucket_cons]
+                # if in the target bucket of the consensus, one Element is not in the non-empty target
+                # OrderedPartition's group: then the consensus is not consistent with the OrderedPartition
                 for element_bucket_cons in bucket_cons:
                     if element_bucket_cons not in elements_to_see:
                         flag = False
+                    # if the Element is in the OrderedPartition's target group, then we decrement the number of elements
+                    # of the target group to see
                     else:
                         nb_elements_to_see -= 1
+                # move to next bucket
                 id_bucket_cons += 1
+                # move to next target group of the OrderedPartition if all elements have been checked
                 if nb_elements_to_see == 0:
                     id_partition += 1
         return flag

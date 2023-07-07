@@ -47,6 +47,8 @@ class ParCons(GraphBasedAlgorithm):
         else:
             self._bound_for_exact = bound_for_exact
 
+        print("init ", self._bound_for_exact, " ", self._auxiliary_alg)
+
     def compute_consensus_rankings(
             self,
             dataset: Dataset,
@@ -71,10 +73,10 @@ class ParCons(GraphBasedAlgorithm):
         :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
         implementation does not support the given scoring scheme.
         """
-
+        print("ParCons computation, bound = ", self._bound_for_exact)
         # prevent circular inclusions
         if self._bound_for_exact > 0:
-            from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
+            from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
 
         # optimal unless a non-exact auxiliary algorithm is used
         optimal: bool = True
@@ -111,7 +113,7 @@ class ParCons(GraphBasedAlgorithm):
                     res.extend(cons_ext)
                     optimal = False
                 else:
-                    cons_ext = ExactAlgorithm(preprocess=False).compute_consensus_rankings(
+                    cons_ext = ExactAlgorithmCplexForPaperOptim1().compute_consensus_rankings(
                         sub_problem, scoring_scheme, True).consensus_rankings[0]
                     res.extend(cons_ext)
 

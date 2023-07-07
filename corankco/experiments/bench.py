@@ -257,6 +257,3 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
                 res += ";" + str(round(float(np.mean(np.asarray(h_res[interval][scoring_scheme]))), 2))
             res += "\n"
         return res
-
-#######################################################################################################################
-# sc1 = ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)

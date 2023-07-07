@@ -22,7 +22,7 @@ class Element:
         elif isinstance(value, str):
             self._type = str
         else:
-            raise TypeError("Value must be int or str")
+            raise TypeError("Value must be int or str, ", type(value), " found")
         self._value = value
 
     def _get_value(self) -> Union[int, str]:

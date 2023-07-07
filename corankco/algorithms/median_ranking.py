@@ -2,6 +2,7 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
 from time import time
+from typing import Tuple
 
 
 class ScoringSchemeNotHandledException(Exception):
@@ -55,10 +56,11 @@ class MedianRanking:
     def bench_time_consensus(self,
                              dataset: Dataset,
                              scoring_scheme: ScoringScheme,
-                             return_at_most_one_ranking: bool = False,
-                             lower_bound_time: float = 1.) -> float:
+                             return_at_most_one_ranking: bool = True,
+                             lower_bound_time: float = 1.) -> Tuple[float, float]:
         """
-        Calculate and return the average computation time for a given dataset and scoring scheme.
+        Calculate and return the average computation time for a given dataset and scoring scheme, with the Kemeny score
+        associated to the consensus
 
         :param dataset: The dataset of rankings to be aggregated.
         :type dataset: Dataset
@@ -68,18 +70,22 @@ class MedianRanking:
         :type return_at_most_one_ranking: bool
         :param lower_bound_time: The lower bound on the total computation time.
         :type lower_bound_time: float
-        :return: The average computation time.
-        :rtype: float
+        :return: The average computation time and the Kemeny score of the consensus.
+        :rtype: Tuple[float, float]
         """
         sum_time: float = 0
         nb_computation: int = 0
+        score: float = -1.
         while sum_time <= lower_bound_time:
             begin = time()
-            self.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, True)
+            consensus: Consensus = self.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking,
+                                                                   True)
+            if score < 0:
+                score = consensus.kemeny_score
             end = time()
             sum_time += end - begin
             nb_computation += 1
-        return sum_time / nb_computation
+        return sum_time / nb_computation, score
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         """

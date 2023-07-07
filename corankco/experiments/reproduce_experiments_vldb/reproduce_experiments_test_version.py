@@ -83,10 +83,11 @@ def run_bench_exact_optimized_scoring_scheme_vldb(path_dataset: str, raw_data=Fa
 
 # runs experiment 3 in research paper
 def run_count_subproblems_t_vldb(path_dataset: str, raw_data=False):
-    kcfs = []
+    kcfs: List[ScoringScheme] = []
     penalties_t = [0.0, 0.25, 0.5, 0.75, 1.]
     for penalty in penalties_t:
-        kcfs.append(ScoringScheme([[0., 1., 1., 0., 1., 0], [penalty, penalty, 0., penalty, penalty, penalty]]))
+        scoringscheme: ScoringScheme = ScoringScheme([[0., 1., 1., 0., 1., 0], [penalty, penalty, 0., penalty, penalty, penalty]])
+        kcfs.append(scoringscheme)
     bench = BenchPartitioningScoringScheme(
         dataset_folder=path_dataset,
         # the kcfs to consider

@@ -11,7 +11,6 @@ from corankco.algorithms.parcons.parcons import ParCons
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
 from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
-from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim2 import ExactAlgorithmCplexForPaperOptim2
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.ranking import Ranking
@@ -25,8 +24,8 @@ class TestAlgos(unittest.TestCase):
         self.test_time_computation: bool = False
         self.my_algs: List[MedianRanking] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom()]
         self.my_algs.extend([ExactAlgorithmCplex(optimize=True), ExactAlgorithmCplex(optimize=False),
-                             ParCons(), ExactAlgorithmGeneric(), ExactAlgorithmCplexForPaperOptim2(),
-                             ExactAlgorithmCplexForPaperOptim1(), ExactAlgorithm()])
+                             ParCons(), ExactAlgorithmGeneric(),
+                             ExactAlgorithmCplexForPaperOptim1(), ExactAlgorithm(optimize=False), ExactAlgorithm(optimize=True)])
         self.scoring_scheme_unifying = ScoringScheme.get_unifying_scoring_scheme()
         self.scoring_scheme_induced = ScoringScheme.get_induced_measure_scoring_scheme()
         self.scoring_scheme_pseudo = ScoringScheme.get_pseudodistance_scoring_scheme()
@@ -57,7 +56,7 @@ class TestAlgos(unittest.TestCase):
     def test_consensus_different_rankings_incomplete_with_output_ties(self):
         dataset = Dataset([Ranking.from_list([{4, 5}, {2, 3, 1}])] * 3 + [Ranking.from_list([{3}, {2}, {1, 4}])])
         my_algs: List[MedianRanking] = [ExactAlgorithmCplex(optimize=True), ExactAlgorithmCplex(optimize=False),
-                                        ParCons(), ExactAlgorithmGeneric(), ExactAlgorithmCplexForPaperOptim2(),
+                                        ParCons(), ExactAlgorithmGeneric(),
                                         ExactAlgorithmCplexForPaperOptim1()]
         for alg in my_algs:
             consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_unifying)

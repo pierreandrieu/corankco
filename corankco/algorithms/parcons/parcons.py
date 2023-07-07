@@ -4,15 +4,15 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from typing import List, Set
-from itertools import combinations
 from igraph import VertexClustering
 from corankco.element import Element
 from numpy import ndarray, asarray
 from corankco.ranking import Ranking
-from corankco.algorithms.graphbasedalgorithm import GraphBasedAlgorithm
+from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
+from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
 
 
-class ParCons(GraphBasedAlgorithm):
+class ParCons(MedianRanking, PairwiseBasedAlgorithm):
     """
     ParCons is a graph-based heuristics for Kemeny-Young rank aggregation published in P. Andrieu, B. Brancotte,
     L. Bulteau, S. Cohen-Boulakia, A. Denise, A. Pierrot, S. Vialette, Efficient, robust and effective rank aggregation
@@ -47,8 +47,6 @@ class ParCons(GraphBasedAlgorithm):
         else:
             self._bound_for_exact = bound_for_exact
 
-        print("init ", self._bound_for_exact, " ", self._auxiliary_alg)
-
     def compute_consensus_rankings(
             self,
             dataset: Dataset,
@@ -73,11 +71,6 @@ class ParCons(GraphBasedAlgorithm):
         :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
         implementation does not support the given scoring scheme.
         """
-        print("ParCons computation, bound = ", self._bound_for_exact)
-        # prevent circular inclusions
-        if self._bound_for_exact > 0:
-            from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
-
         # optimal unless a non-exact auxiliary algorithm is used
         optimal: bool = True
 
@@ -90,7 +83,7 @@ class ParCons(GraphBasedAlgorithm):
         positions: ndarray = dataset.get_positions()
 
         # get the graph of elements and the cost matrix
-        gr1, mat_score = ParCons._graph_of_elements(positions, sc)
+        gr1, mat_score = ParCons.graph_of_elements(positions, sc)
 
         # get the strongly connected components in a topological sort
         scc: VertexClustering = gr1.components()
@@ -99,7 +92,7 @@ class ParCons(GraphBasedAlgorithm):
         for scc_i in scc:
             set_current_scc: Set[int] = set(scc_i)
             set_current_elements: Set[Element] = {dataset.mapping_id_elem[el_scc] for el_scc in set_current_scc}
-            if ParCons._can_be_all_tied(set_current_scc, mat_score):
+            if ParCons.can_be_all_tied(set_current_scc, mat_score):
                 res.append(set_current_elements)
             # if there is at least one pair of elements that cannot be tied with minimal cost,
             # then we have no trivial optimal solution. According to the size of the sub-problem, use of
@@ -127,33 +120,6 @@ class ParCons(GraphBasedAlgorithm):
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att=hash_information)
-
-    @staticmethod
-    def _can_be_all_tied(id_elements_to_check: Set[int], cost_matrix: ndarray) ->bool:
-        """
-        Check if all elements in a given set can be tied together with minimal cost.
-
-        This method goes through all pairs of elements in the given set, checking the cost of tying them together.
-        If the cost of tying any pair is higher than placing one before or after the other, the function returns False,
-        indicating that not all elements in the set can be tied together with minimal cost.
-
-        :param id_elements_to_check: a set of IDs of the elements to be checked.
-        :type id_elements_to_check: Set[int]
-        :param cost_matrix: a 3D matrix where cost_matrix[i][j][k] denotes the cost of placing i and j in
-                            k-th relative position in the consensus.
-        :type cost_matrix: ndarray
-        :return: True if all elements can be tied together with minimal cost, False otherwise.
-        :rtype: bool
-        """
-        if len(id_elements_to_check) < 2:
-            return True
-        for e1, e2 in combinations(id_elements_to_check, 2):
-            cost_to_tie = cost_matrix[e1][e2][2]
-            cost_to_place_before = cost_matrix[e1][e2][0]
-            cost_to_place_after = cost_matrix[e1][e2][1]
-            if cost_to_tie > min(cost_to_place_before, cost_to_place_after):
-                return False
-        return True
 
     def get_full_name(self) -> str:
         """

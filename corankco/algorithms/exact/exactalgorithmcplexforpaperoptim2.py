@@ -52,7 +52,7 @@ class ExactAlgorithmCplexForPaperOptim2(ExactAlgorithmCplex):
                 cost_to_place_after = cost_matrix[e1][e2][1]
                 # if for a given pair, the cost of tying is not minimal, the associated boolean is set to False
                 if can_be_all_tied:
-                    if -0.001 <= cost_to_tie - min(cost_to_place_before, cost_to_place_after) <= 0.001:
+                    if -0.001 <= cost_to_tie - min(cost_to_place_before, cost_to_place_after):
                         can_be_all_tied = False
                         break
 

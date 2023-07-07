@@ -49,6 +49,10 @@ class ExactAlgorithmCplexForPaperOptim1(ExactAlgorithmCplex):
         # if the optimization can be done, then all tied variables are set to 0
         if can_have_no_ties:
             for e1, e2 in combinations(range(len(cost_matrix)), 2):
+                if e1 > e2:
+                    tmp = e1
+                    e1 = e2
+                    e2 = tmp
                 # set id of constraint, add constraint
                 my_rownames.append("c%s" % count)
                 # constraint: 1. * t_elem1_elem2 == 0

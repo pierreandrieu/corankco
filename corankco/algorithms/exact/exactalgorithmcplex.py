@@ -335,7 +335,8 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
                 cost_to_place_after = cost_matrix[e1][e2][1]
                 # if for a given pair, the cost of tying is not minimal, the associated boolean is set to False
                 if can_be_all_tied:
-                    if -0.001 <= cost_to_tie - min(cost_to_place_before, cost_to_place_after) <= 0.001:
+                    if -ExactAlgorithmCplex._PRECISION_THRESHOLD <= cost_to_tie - min(
+                            cost_to_place_before, cost_to_place_after):
                         can_be_all_tied = False
                         # if the two booleans are false, the loop is over
                         if not can_have_no_ties:
@@ -353,7 +354,10 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
             if can_be_all_tied:
                 for elem1, elem2 in combinations(scc_sets[i], 2):
                     # for each pair of elements (with elem1 < elem2)
-
+                    if elem1 > elem2:
+                        tmp = elem1
+                        elem1 = elem2
+                        elem2 = tmp
                     # set id of constraint, add constraint
                     my_rownames.append("c%s" % count)
                     # constraint: 1. * t_elem1_elem2 == 1
@@ -364,6 +368,10 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
 
             if can_have_no_ties:
                 for elem1, elem2 in combinations(scc_sets[i], 2):
+                    if elem1 > elem2:
+                        tmp = elem1
+                        elem1 = elem2
+                        elem2 = tmp
                     # set id of constraint, add constraint
                     my_rownames.append("c%s" % count)
                     # constraint: 1. * t_elem1_elem2 == 0

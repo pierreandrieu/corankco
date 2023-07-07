@@ -3,6 +3,7 @@ from corankco.algorithms.median_ranking import MedianRanking
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
+from corankco.ranking import Ranking
 from numpy import ndarray, array, shape, zeros, count_nonzero, vdot, asarray
 from operator import itemgetter
 import pulp
@@ -49,7 +50,7 @@ class ExactAlgorithmGeneric(MedianRanking):
                         id_elem += 1
         nb_elem = len(elem_id)
 
-        positions = ExactAlgorithmGeneric.__positions(rankings, elem_id)
+        positions = dataset.get_positions()
 
         sc = asarray(scoring_scheme.penalty_vectors)
 
@@ -159,17 +160,17 @@ class ExactAlgorithmGeneric(MedianRanking):
 
         ranking = []
         current_nb_def = 0
-        bucket = []
+        bucket: Set = set()
 
         for elem, nb_defeats in (sorted(h_def.items(), key=itemgetter(1))):
             if nb_defeats == current_nb_def:
-                bucket.append(id_elements[elem])
+                bucket.add(id_elements[elem])
             else:
                 ranking.append(bucket)
-                bucket = [id_elements[elem]]
+                bucket = {id_elements[elem]}
                 current_nb_def = nb_defeats
         ranking.append(bucket)
-        return Consensus(consensus_rankings=[ranking],
+        return Consensus(consensus_rankings=[Ranking(ranking)],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att={ConsensusFeature.IsNecessarilyOptimal: True,

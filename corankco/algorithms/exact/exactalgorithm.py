@@ -1,22 +1,33 @@
-from corankco.algorithms.median_ranking import MedianRanking
-from corankco.dataset import Dataset
-from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import Consensus
+from corankco.algorithms.exact.exactalgorithmbase import ExactAlgorithmBase
+from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
+from corankco.scoringscheme import ScoringScheme
+from corankco.dataset import Dataset
+from corankco.consensus import Consensus
 
 
-class ExactAlgorithm(MedianRanking):
-    def __init__(self, optimize=True, preprocess=True):
-        self.__optimize = optimize
-        self.__preprocess = preprocess
+class ExactAlgorithm(ExactAlgorithmBase):
+    """
+    A class that wraps the exact algorithms. This class decides which exact algorithm to use based on
+    the availability of the Cplex library. If Cplex is not available, it uses a free solver.
+    """
 
-    def compute_consensus_rankings(
-            self,
-            dataset: Dataset,
-            scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking=False,
-            bench_mode=False
-    ) -> Consensus:
+    def __init__(self, optimize=True):
+        """
+        Initialize the exact algorithm.
+
+        :param optimize: Boolean for whether to optimize the algorithm or not by adding constraints thanks tu sufficient
+        conditions. Defaults to True.
+        """
+        super().__init__(optimize)
+        try:
+            import cplex
+            self._alg = ExactAlgorithmCplex(optimize)
+        except ImportError:
+            self._alg = ExactAlgorithmGeneric(optimize)
+
+    def compute_consensus_rankings(self, dataset: Dataset, scoring_scheme: ScoringScheme,
+                                   return_at_most_one_ranking: bool = True, bench_mode: bool = False) -> Consensus:
         """
         :param dataset: A dataset containing the rankings to aggregate
         :type dataset: Dataset (class Dataset in package 'datasets')
@@ -33,32 +44,22 @@ class ExactAlgorithm(MedianRanking):
         :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
         implementation of the algorithm does not fit with the scoring scheme
         """
-        if self.__preprocess:
-            from corankco.algorithms.exact.exactpreprocess import ExactPreprocess
-            return ExactPreprocess(self.__optimize).compute_consensus_rankings(dataset,
-                                                                               scoring_scheme,
-                                                                               return_at_most_one_ranking,
-                                                                               bench_mode)
-
-        try:
-            import cplex
-            from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
-            alg = ExactAlgorithmCplex(self.__optimize, self.__preprocess)
-            return alg.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, bench_mode)
-        except ImportError:
-            ret = return_at_most_one_ranking
-            return ExactAlgorithmGeneric().compute_consensus_rankings(dataset, scoring_scheme, ret, bench_mode)
+        return self._alg.compute_consensus_rankings(dataset, scoring_scheme, return_at_most_one_ranking, bench_mode)
 
     def get_full_name(self) -> str:
-        res = "Exact algorithm"
-        if self.__optimize:
-            res += ", optim1"
-            if self.__preprocess:
-                res += ", optim2"
-        else:
-            if self.__preprocess:
-                res += ", optim2"
-        return res
+        """
 
-    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
-        return True
+        :return: The name of the algorithm, depends on which has been used between Cplex and PULP
+        """
+        return self._alg.get_full_name()
+
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme):
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True as ExactAlgorithmCplex can handle any ScoringScheme
+        :rtype: bool
+        """
+        return self._alg.is_scoring_scheme_relevant_when_incomplete_rankings(scoring_scheme)

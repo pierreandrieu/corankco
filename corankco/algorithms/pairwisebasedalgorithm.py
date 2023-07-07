@@ -7,7 +7,8 @@ from itertools import combinations
 
 class PairwiseBasedAlgorithm:
     @staticmethod
-    def graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> Tuple[Graph, ndarray]:
+    def graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> \
+            Tuple[Graph, ndarray, Set[Tuple[int, int]]]:
         """
         Compute the graph of elements and the cost of pairwise relative positions.
 
@@ -18,14 +19,17 @@ class PairwiseBasedAlgorithm:
 
         :param positions: a matrix where pos[i][j] denotes the position of element i in ranking j (-1 if non-ranked)
         :param matrix_scoring_scheme: the numpy ndarray version of the scoring scheme
-        :return: A tuple containing the Graph of elements defined in the FGCS article and the 3D matrix of costs of
-        pairwise relative positions.
+        :return: A tuple containing the Graph of elements defined in the FGCS article, the 3D matrix of costs of
+        pairwise relative positions, and the set of the robust arcs defined in the FGCS article
         """
         graph_of_elements: Graph = Graph(directed=True)
+        robust_arcs: Set[Tuple[int, int]] = set()
+
         cost_before: ndarray = matrix_scoring_scheme[0]
         cost_tied: ndarray = matrix_scoring_scheme[1]
         cost_after: ndarray = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
                                      cost_before[5]])
+
 
         # n = nb of elements, m = nb of rankings
         n: int = shape(positions)[0]
@@ -76,13 +80,18 @@ class PairwiseBasedAlgorithm:
                 if put_after > put_before or put_after > put_tied:
                     arcs.append((e1, e2))
 
+                if put_before < put_after and put_before < put_tied:
+                    robust_arcs.add((e1, e2))
+                if put_after < put_before and put_after < put_tied:
+                    robust_arcs.add((e2, e1))
+
                 # save the costs, will be used further
                 matrix[e1][e2] = [put_before, put_after, put_tied]
                 matrix[e2][e1] = [put_after, put_before, put_tied]
 
         # arcs should be added all at once, the impact on performances is clear
         graph_of_elements.add_edges(arcs)
-        return graph_of_elements, matrix
+        return graph_of_elements, matrix, robust_arcs
 
     @staticmethod
     def pairwise_cost_matrix(positions: ndarray, matrix_scoring_scheme: ndarray) -> ndarray:

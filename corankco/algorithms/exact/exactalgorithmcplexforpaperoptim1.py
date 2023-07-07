@@ -59,3 +59,13 @@ class ExactAlgorithmCplexForPaperOptim1(ExactAlgorithmCplex):
 
         # all the constraints of this function were equality constraints
         return "E" * (len(my_rhs) - initial_nb_constraints)
+
+    def get_full_name(self) -> str:        # return "Exact algorithm ILP Cplex"
+
+        """
+        Return the full name of the algorithm.
+
+        :return: The string 'Exact algorithm ILP Cplex'.
+        :rtype: str
+        """
+        return "ExactAlgorithm-optim1"

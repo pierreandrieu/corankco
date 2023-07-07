@@ -56,7 +56,7 @@ class MedianRanking:
                              dataset: Dataset,
                              scoring_scheme: ScoringScheme,
                              return_at_most_one_ranking: bool = False,
-                             lower_bound_time: float = 2.) -> float:
+                             lower_bound_time: float = 1.) -> float:
         """
         Calculate and return the average computation time for a given dataset and scoring scheme.
 

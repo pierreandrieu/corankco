@@ -107,7 +107,7 @@ class BenchScalabilityScoringScheme(ExperimentFromDataset):
                  dataset_selector_exp: DatasetSelector = None,
                  steps: int = 5,
                  max_time: float = float('inf'),
-                 repeat_time_computation_until: int = 1):
+                 repeat_time_computation_until: float = 1.):
 
         super().__init__(dataset_folder, dataset_selector_exp)
         self.__alg = alg

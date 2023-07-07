@@ -469,8 +469,10 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
         :return: The string 'Exact algorithm ILP Cplex'.
         :rtype: str
         """
-        return "Exact algorithm ILP Cplex"
-
+        # return "Exact algorithm ILP Cplex"
+        if self._optimize:
+            return "ExactAlgorithm-optim1-optim2"
+        return "ExactAlgorithm"
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         """
         Check if the scoring scheme is relevant when the rankings are incomplete.

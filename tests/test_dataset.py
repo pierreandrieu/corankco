@@ -1,7 +1,7 @@
 import unittest
 from corankco.ranking import Ranking
 from corankco.dataset import Dataset
-
+from corankco.element import Element
 
 class TestDataset(unittest.TestCase):
 
@@ -86,6 +86,15 @@ class TestDataset(unittest.TestCase):
         self.assertFalse(dataset.contains_element(10))
         self.assertFalse(dataset.contains_element(0))
         self.assertFalse(dataset.contains_element(45))
+
+    def test_dataset_projection(self):
+        ranking1 = Ranking.from_list([{1, 2, 3, 9}, {4, 5}])
+        ranking2 = Ranking.from_list([{9, 5, 6}, {2}, {1}])
+        ranking3 = Ranking.from_list([{7, 8, 9}])
+        dataset = Dataset([ranking1, ranking2, ranking3])
+        dataset2 = dataset.sub_problem_from_elements({Element(1), Element(2)})
+        dataset3 = Dataset([Ranking.from_list([{1, 2}]), Ranking.from_list([{2}, {1}])])
+        self.assertEqual(dataset2, dataset3)
 
 
 if __name__ == "__main__":

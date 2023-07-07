@@ -8,8 +8,12 @@ from corankco.algorithms.bioconsert.bioco import BioCo
 from corankco.algorithms.kwiksort.kwiksortrandom import KwikSortRandom
 from corankco.algorithms.borda.borda import BordaCount
 from corankco.algorithms.parcons.parcons import ParCons
-from corankco.algorithms.parcons.parcons2 import ParCons2
 from corankco.algorithms.median_ranking import MedianRanking
+from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
+from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
+from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim2 import ExactAlgorithmCplexForPaperOptim2
+from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
+from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.ranking import Ranking
 from corankco.rankingsgeneration.rankingsgenerate import create_rankings
 import time
@@ -20,36 +24,48 @@ class TestAlgos(unittest.TestCase):
     def setUp(self):
         self.test_time_computation: bool = False
         self.my_algs: List[MedianRanking] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom()]
-        self.my_algs.extend([ParCons(), ParCons2()])
+        self.my_algs.extend([ExactAlgorithmCplex(optimize=True), ExactAlgorithmCplex(optimize=False),
+                             ParCons(), ExactAlgorithmGeneric(), ExactAlgorithmCplexForPaperOptim2(),
+                             ExactAlgorithmCplexForPaperOptim1(), ExactAlgorithm()])
         self.scoring_scheme_unifying = ScoringScheme.get_unifying_scoring_scheme()
         self.scoring_scheme_induced = ScoringScheme.get_induced_measure_scoring_scheme()
         self.scoring_scheme_pseudo = ScoringScheme.get_pseudodistance_scoring_scheme()
 
     def test_consensus_same_rankings(self):
-        dataset = Dataset([Ranking.from_list([{1}, {2}, {3}])] * 3)
+        dataset = Dataset([Ranking.from_list([{3}, {2}, {1}])] * 3)
         for alg in self.my_algs:
-            print(alg)
-            print(alg.get_full_name())
             consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{1}, {2}, {3}]))
+            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{3}, {2}, {1}]))
 
     def test_consensus_different_rankings(self):
-        dataset = Dataset([Ranking.from_list([{1}, {2}, {3}])] * 2 + [Ranking.from_list([{3}, {2}, {1}])])
+        dataset = Dataset([Ranking.from_list([{1}, {2}, {3}])] * 1 + [Ranking.from_list([{3}, {2}, {1}])] * 3)
         for alg in self.my_algs:
             consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{1}, {2}, {3}]))
+            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{3}, {2}, {1}]))
 
     def test_consensus_different_rankings_incomplete(self):
         dataset = Dataset([Ranking.from_list([{1}, {2}])] * 3 + [Ranking.from_list([{3}, {2}, {1}])])
 
         for alg in self.my_algs:
-            print(alg.get_full_name())
             consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_unifying)
             self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{1}, {2}, {3}]))
             consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_unifying)
             self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{1}, {2}, {3}]))
             consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_induced)
             self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{3}, {1}, {2}]))
+
+    def test_consensus_different_rankings_incomplete_with_output_ties(self):
+        dataset = Dataset([Ranking.from_list([{4, 5}, {2, 3, 1}])] * 3 + [Ranking.from_list([{3}, {2}, {1, 4}])])
+        my_algs: List[MedianRanking] = [ExactAlgorithmCplex(optimize=True), ExactAlgorithmCplex(optimize=False),
+                                        ParCons(), ExactAlgorithmGeneric(), ExactAlgorithmCplexForPaperOptim2(),
+                                        ExactAlgorithmCplexForPaperOptim1()]
+        for alg in my_algs:
+            consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_unifying)
+            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{4, 5}, {2, 3, 1}]))
+            consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_unifying)
+            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{4, 5}, {2, 3, 1}]))
+            consensus = alg.compute_consensus_rankings(dataset, self.scoring_scheme_induced)
+            self.assertEqual(consensus.consensus_rankings[0], Ranking.from_list([{4, 5}, {2, 3, 1}]))
 
     def test_scalability(self):
         if self.test_time_computation:

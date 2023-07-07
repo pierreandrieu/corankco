@@ -31,10 +31,11 @@ class BenchTime(ExperimentFromDataset):
         for alg in self.__algs:
             ligne += ";" + alg.get_full_name()
         ligne += "\n"
-        self._write_line_in_file("/home/pierre/Bureau/res_bench.txt", ligne)
+        self._write_line_in_file("/home/pierre/Bureau/res_bench_" + str(self.__scoring_scheme) + ".txt", ligne)
         res += ligne
         must_run = [True] * len(self.__algs)
         for dataset in sorted(self.datasets, key=lambda dataset_obj: dataset_obj.nb_elements):
+            print("name ", dataset.name, " n = ", dataset.nb_elements)
             ligne: str = ""
             ligne += dataset.name + ";" + str(dataset.nb_elements)
             id_alg = 0
@@ -51,7 +52,7 @@ class BenchTime(ExperimentFromDataset):
                 else:
                     ligne += ";" + str(float("inf"))
             ligne += "\n"
-            self._write_line_in_file("/home/pierre/Bureau/res_bench.txt", ligne)
+            self._write_line_in_file("/home/pierre/Bureau/res_bench_" + str(self.__scoring_scheme) + ".txt", ligne)
             res += ligne
         return res
 

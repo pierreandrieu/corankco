@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 from corankco.dataset import Dataset
 from corankco.consensus import Consensus
 from corankco.scoringscheme import ScoringScheme
+from corankco.algorithms.median_ranking import MedianRanking
 
 
 class IncompatibleArgumentsException(Exception):
     pass
 
 
-class ExactAlgorithmBase(ABC):
+class ExactAlgorithmBase(ABC, MedianRanking):
     """
     An abstract base class for exact algorithms. This class outlines the interface that all
     exact algorithms must implement.

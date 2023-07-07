@@ -1,6 +1,7 @@
 from corankco.algorithms.exact.exactalgorithmbase import ExactAlgorithmBase
 from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
+from corankco.algorithms.exact.ExactOptimized import ExactAlgorithmOptimized
 from corankco.scoringscheme import ScoringScheme
 from corankco.dataset import Dataset
 from corankco.consensus import Consensus
@@ -22,7 +23,9 @@ class ExactAlgorithm(ExactAlgorithmBase):
         super().__init__(optimize)
         try:
             import cplex
-            self._alg = ExactAlgorithmCplex(optimize)
+            if optimize:
+                self._alg = ExactAlgorithmOptimized()
+            self._alg = ExactAlgorithmCplex(optimize=False)
         except ImportError:
             self._alg = ExactAlgorithmGeneric(optimize)
 

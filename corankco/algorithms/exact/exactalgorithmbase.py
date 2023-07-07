@@ -11,18 +11,18 @@ class IncompatibleArgumentsException(Exception):
 
 class ExactAlgorithmBase(ABC, MedianRanking):
     """
-    An abstract base class for exact algorithms. This class outlines the interface that all
-    exact algorithms must implement.
+    An abstract base class for exact algorithms. This class outlines the interface that all exact algorithms must
+    implement.
     """
 
-    def __init__(self, optimize=True):
+    def __init__(self, optimize: bool = True):
         """
         Initialize the exact algorithm.
 
         :param optimize: Boolean for whether to use the graph-based preprocess of ParCons algorithm. Defaults to True.
         WARNING: if optimize = True, then, we cannot ensure that all the optimal consensus will be returned
         """
-        self._optimize = optimize
+        self._optimize: bool = optimize
 
     @abstractmethod
     def compute_consensus_rankings(

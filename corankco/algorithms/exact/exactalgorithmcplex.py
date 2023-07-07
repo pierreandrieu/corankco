@@ -1,18 +1,18 @@
 from typing import List, Dict, Set, Tuple, Union
-from itertools import combinations
 from algorithms.exact.exactalgorithmbase import ExactAlgorithmBase, IncompatibleArgumentsException
-from corankco.algorithms.graphbasedalgorithm import GraphBasedAlgorithm
+from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from numpy import ndarray, asarray
+from itertools import combinations
 from operator import itemgetter
 from corankco.ranking import Ranking
 from corankco.element import Element
 import cplex
 
 
-class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
+class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
     """
     A class to perform exact optimization on the rank aggregation problem using CPLEX linear programming.
 
@@ -59,6 +59,41 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
                                                  "returns a single ranking, hence parameter return_at_most_one_ranking"
                                                  " must be set to false (default value)")
 
+        consensus_rankings: List[Ranking] = self._compute_consensus_rankings_with_optim(
+            dataset, scoring_scheme, self._optimize, return_at_most_one_ranking)
+        return Consensus(consensus_rankings=consensus_rankings,
+                         dataset=dataset,
+                         scoring_scheme=scoring_scheme,
+                         att={ConsensusFeature.IsNecessarilyOptimal: True,
+                              # ConsensusFeature.KemenyScore: my_prob.solution.get_objective_value(),
+                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                              })
+
+    def _compute_consensus_rankings_with_optim(
+            self,
+            dataset: Dataset,
+            scoring_scheme: ScoringScheme,
+            look_for_scc: bool,
+            return_at_most_one_ranking: bool = True,
+    ) -> List[Ranking]:
+        """
+        :param dataset: A dataset containing the rankings to aggregate
+        :type dataset: Dataset (class Dataset in package 'datasets')
+        :param scoring_scheme: The penalty vectors to consider
+        :type scoring_scheme: ScoringScheme (class ScoringScheme in package 'distances')
+        :param look_for_scc: True to compute Graph pre-processing, True only at the first call, False for each recursive
+         call
+        :type look_for_scc: bool
+        :param return_at_most_one_ranking: the algorithm should not return more than one ranking
+        :type return_at_most_one_ranking: bool
+        :return one or more optimal rankings if the underlying algorithm can find several equivalent consensus rankings
+        If the algorithm is not able to provide multiple consensus, or if return_at_most_one_ranking is True then, it
+        should return a list made of the only / the first consensus found.
+        In all scenario, the algorithm returns a list of rankings
+        :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
+        implementation of the algorithm does not fit with the scoring scheme
+        """
+
         id_elements: Dict[int, Element] = dataset.mapping_id_elem
 
         # number of distinct elements in the dataset
@@ -73,76 +108,104 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
         # get both the graph of elements defined in GraphBasedAlgorithm interface and the cost matrix
         # which is a 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
         # i after j, i tied with j in the consensus according to the scoring scheme.
-        graph_elements, cost_matrix = ExactAlgorithmCplex._graph_of_elements(positions, numpy_scoring_scheme)
+        if look_for_scc:
+            # computes the graph with the cost matrix
+            graph_elements, cost_matrix = ExactAlgorithmCplex.graph_of_elements(positions, numpy_scoring_scheme)
+            # computes the scc of the graph
+            scc = graph_elements.components()
+            # to store the consensus ranking
+            ranking: List[Set[Element]] = []
+            for scc_i in scc:
+                # for each scc, if the sub-problem is trivial to solve, then we solve it directly (see ParCons)
+                scc_i_set: Set[int] = {x for x in scc_i}
+                if ExactAlgorithmCplex.can_be_all_tied(scc_i_set, cost_matrix):
+                    ranking.append({id_elements[id_elem] for id_elem in scc_i_set})
+                # otherwise, we use the exact algorithm to get a solution to the sub-problem,
+                # with this time the boolean set to False to prevent the useless computation of scc
+                # (and infinite loop obviously)
+                else:
+                    # update the ranking to return
+                    new_dataset: Dataset = dataset.sub_problem_from_ids(scc_i_set)
+                    rankings: List[Ranking] = self._compute_consensus_rankings_with_optim(new_dataset, scoring_scheme,
+                                                                                          False, True)
+                    for bucket in rankings[0]:
+                        ranking.append(bucket)
+            return [Ranking(ranking)]
 
+        else:
+            consensus_rankings: List[Ranking] = []
+            cost_matrix = PairwiseBasedAlgorithm.pairwise_cost_matrix(positions, numpy_scoring_scheme)
         # key: int id of cplex variable. Value: Tuple['x' or 't', element1, element2]. x = before, t = tied
 
-        # Cplex object
-        my_prob: cplex.Cplex = cplex.Cplex()  # initiate
-        my_prob.set_results_stream(None)  # mute
+            # Cplex object
+            my_prob: cplex.Cplex = cplex.Cplex()  # initiate
+            my_prob.set_results_stream(None)  # mute
 
-        # Setting the mip-gap parameter. This value represents the relative optimality gap tolerance.
-        # The solver stops searching when the relative difference between the best found solution
-        # and the best bound is within this value. Setting this value to 0 can lead to incorrect results
-        # due to the precision limitations of floating point numbers, hence a small positive value is used.
-        my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
-        my_prob.parameters.mip.pool.absgap.set(0.000001)
+            # Setting the mip-gap parameter. This value represents the relative optimality gap tolerance.
+            # The solver stops searching when the relative difference between the best found solution
+            # and the best bound is within this value. Setting this value to 0 can lead to incorrect results
+            # due to the precision limitations of floating point numbers, hence a small positive value is used.
+            my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
+            my_prob.parameters.mip.pool.absgap.set(0.000001)
 
-        # out problem is a minimization problem
-        my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
+            # out problem is a minimization problem
+            my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
 
-        # with 4, all the optimal consensus will be found, within a limit of 10000000
-        if not return_at_most_one_ranking:
-            my_prob.parameters.mip.pool.intensity.set(4)
-            my_prob.parameters.mip.limits.populate.set(10000000)
+            # with 4, all the optimal consensus will be found, within a limit of 10000000
+            if not return_at_most_one_ranking:
+                my_prob.parameters.mip.pool.intensity.set(4)
+                my_prob.parameters.mip.limits.populate.set(10000000)
 
-        my_obj: List[float] = []
-        my_ub: List[float] = []
-        my_lb: List[float] = []
-        my_names: List[str] = []
+            my_obj: List[float] = []
+            my_ub: List[float] = []
+            my_lb: List[float] = []
+            my_names: List[str] = []
 
-        map_elements_cplex: Dict[int, Tuple[str, int, int]] = ExactAlgorithmCplex._add_cplex_variables(my_obj, my_ub,
-                                                                                                       my_lb, my_names,
-                                                                                                       cost_matrix)
+            map_elements_cplex: Dict[int, Tuple[str, int, int]] = \
+                ExactAlgorithmCplex._add_cplex_variables(my_obj, my_ub, my_lb, my_names, cost_matrix)
 
-        my_prob.variables.add(obj=my_obj, lb=my_lb, ub=my_ub, types="B"*len(map_elements_cplex), names=my_names)
+            my_prob.variables.add(obj=my_obj, lb=my_lb, ub=my_ub, types="B"*len(map_elements_cplex), names=my_names)
 
-        # rhs = right hand side
-        my_rhs: List[int] = []
-        my_rownames: List[str] = []
-        rows: List[List[List[str] | List[float]]] = []
+            # rhs = right hand side
+            my_rhs: List[int] = []
+            # name of cplex variables
+            my_rownames: List[str] = []
+            # to store the constraints
+            rows: List[List[List[str] | List[float]]] = []
 
-        # inequations : E for Equality, G for >=  and L for <=
-        my_sense: str = "E" * int(nb_elem*(nb_elem-1)/2) + "L" * (3*nb_elem * (nb_elem-1) * (nb_elem-2))
+            # inequations : E for Equality, G for >=  and L for <=
+            my_sense: str = "E" * int(nb_elem*(nb_elem-1)/2) + "L" * (3*nb_elem * (nb_elem-1) * (nb_elem-2))
 
-        ExactAlgorithmCplex._add_binary_constraints(nb_elem, my_rhs, my_rownames, rows)
-        ExactAlgorithmCplex._add_transitivity_constraints(nb_elem, my_rhs, my_rownames, rows)
+            # add binary constraints
+            ExactAlgorithmCplex._add_binary_constraints(nb_elem, my_rhs, my_rownames, rows)
+            # add transitivity constraints
+            ExactAlgorithmCplex._add_transitivity_constraints(nb_elem, my_rhs, my_rownames, rows)
+            # add personal constraints
+            my_sense += self._add_personal_optimization_constraints(my_rhs, my_rownames, rows, cost_matrix)
+            # give the constraints to cplex
+            my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
 
-        my_sense += self._add_personal_optimization_constraints(my_rhs, my_rownames, rows,
-                                                                                   graph_elements, cost_matrix)
+            # if return[...] = False, then all the optimal rankings will be stored if optimize = False
+            if not return_at_most_one_ranking:
+                my_prob.populate_solution_pool()
 
-        my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
-        medianes = []
-
-        if not return_at_most_one_ranking:
-            my_prob.populate_solution_pool()
-
-            nb_optimal_solutions = my_prob.solution.pool.get_num()
-            for i in range(nb_optimal_solutions):
-                names = my_prob.solution.pool.get_values(i)
-                medianes.append(ExactAlgorithmCplex._create_consensus(nb_elem, names, map_elements_cplex, id_elements))
-        else:
-            my_prob.solve()
-            x = my_prob.solution.get_values()
-            medianes.append(ExactAlgorithmCplex._create_consensus(nb_elem, x, map_elements_cplex, id_elements))
-
-        return Consensus(consensus_rankings=medianes,
-                         dataset=dataset,
-                         scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.IsNecessarilyOptimal: True,
-                              ConsensusFeature.KemenyScore: my_prob.solution.get_objective_value(),
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
-                              })
+                nb_optimal_solutions = my_prob.solution.pool.get_num()
+                # for each optimal solutions
+                for i in range(nb_optimal_solutions):
+                    # get the variables results
+                    names = my_prob.solution.pool.get_values(i)
+                    # construct the consensus
+                    consensus_rankings.append(ExactAlgorithmCplex._create_consensus(
+                        nb_elem, names, map_elements_cplex, id_elements))
+            else:
+                # get one optimal solution
+                my_prob.solve()
+                # get the variable results
+                x = my_prob.solution.get_values()
+                # compute the consensus
+                consensus_rankings.append(ExactAlgorithmCplex._create_consensus(
+                    nb_elem, x, map_elements_cplex, id_elements))
+            return consensus_rankings
 
     @staticmethod
     def _add_cplex_variables(my_obj, my_ub: List[float], my_lb: [List[float]], my_names: List[str],
@@ -294,111 +357,84 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
                             rows.append([[i_tie_j, j_tie_k, i_tie_k], [2.0, 2.0, -1.0]])
 
     def _add_personal_optimization_constraints(self, my_rhs: List[int], my_rownames: List[str],
-                                               rows: List[List[Union[List[str], List[float]]]], graph_elements,
-                                               cost_matrix: ndarray) -> str:
+                                               rows: List[List[Union[List[str], List[float]]]], cost_matrix: ndarray) \
+            -> str:
         """
-        Adds optimization constraints based on sufficient conditions.
-        This method uses the graph of elements defined in Andrieu et al.,  IJAR, 2023.
+        Adds optimization constraints based on one sufficient condition: see Prop 2 in Andrieu et al., IJAR, 2023.
 
         :param my_rhs: List of integers representing the right-hand side of the constraints
         :param my_rownames: List of strings representing the names of the constraints
         :param rows: List of lists representing the coefficients of the constraints
-        :param graph_elements: The graph of elements defined in Andrieu et al., IJAR, 2023.
         :param cost_matrix: 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
                           i after j, i tied with j in the consensus according to the scoring scheme.
         :return: String representing the type of constraints added, all 'E' for equality constraints
         """
+
         if not self._optimize:
             return ""
+
         initial_nb_constraints: int = len(my_rhs)
         count: int = len(my_rhs)
 
-        # gets the scc of the graph in a topological sort
-        scc = graph_elements.components()
-        scc_sets: List[Set[int]] = []
-        for scc_i in scc:
-            scc_sets.append({x for x in scc_i})
+        # searching for a pair x y of elements such that before(x,y) + before(y,x) > tied(x,y)
+        # if no such pair exist, then we can set all tied variables to 0 as we know that at least one optimal consensus
+        # is a ranking without ties
+        can_have_no_ties: bool = True
+        # for e1 in 0 ... nb_elements - 2 and e2 in e1 + 1, nb_elements+1
+        for e1, e2 in combinations(range(len(cost_matrix)), 2):
+            cost_to_tie = cost_matrix[e1][e2][2]
+            cost_to_place_before = cost_matrix[e1][e2][0]
+            cost_to_place_after = cost_matrix[e1][e2][1]
+            calc: float = cost_to_place_before + cost_to_place_after - 2 * cost_to_tie
+            # if the test fails, then the optimization cannot be used
+            if calc > ExactAlgorithmCplex._PRECISION_THRESHOLD:
+                can_have_no_ties = False
+                break
 
-        for i in range(len(scc) - 1):
-            # first step : manage constraints within the ith scc. Checks :
-            # * if all the elements of the scc can be tied with minimal cost. If yes, then they will be tied
-            # * if, for each x != y in the scc, we have mat_score[i][j][0] + mat_score[i][j][1] - 2 * mat_score[i][j][2]
-            # then, we an ensure that there exists one optimal consensus for this sub-problem with no ties.
-
-            can_be_all_tied: bool = True
-            can_have_no_ties: bool = True
-
-            # tests all the ordered pairs of elements of ith scc.
-            for e1, e2 in combinations(scc_sets[i], 2):
-                cost_to_tie = cost_matrix[e1][e2][2]
-                cost_to_place_before = cost_matrix[e1][e2][0]
-                cost_to_place_after = cost_matrix[e1][e2][1]
-                # if for a given pair, the cost of tying is not minimal, the associated boolean is set to False
-                if can_be_all_tied:
-                    if -ExactAlgorithmCplex._PRECISION_THRESHOLD <= cost_to_tie - min(
-                            cost_to_place_before, cost_to_place_after):
-                        can_be_all_tied = False
-                        # if the two booleans are false, the loop is over
-                        if not can_have_no_ties:
-                            break
-                # if for a given pair x, y, before(x,y) + before(y,x) > 2 * tied(x,y), then the
-                # associated boolean is set to False
-                if can_have_no_ties:
-                    calc: float = cost_matrix[e1][e2][0] + cost_matrix[e1][e2][1] - 2 * cost_matrix[e1][e2][2]
-                    if calc > ExactAlgorithmCplex._PRECISION_THRESHOLD:
-                        can_have_no_ties = False
-                        if not can_be_all_tied:
-                            break
-
-            # if elements of the scc can be all tied with minimal cost:
-            if can_be_all_tied:
-                for elem1, elem2 in combinations(scc_sets[i], 2):
-                    # for each pair of elements (with elem1 < elem2)
-                    if elem1 > elem2:
-                        tmp = elem1
-                        elem1 = elem2
-                        elem2 = tmp
-                    # set id of constraint, add constraint
-                    my_rownames.append("c%s" % count)
-                    # constraint: 1. * t_elem1_elem2 == 1
-                    i_tie_j = "t_%s_%s" % (elem1, elem2)
-                    rows.append([[i_tie_j], [1.]])
-                    my_rhs.append(1)
-                    count += 1
-
-            if can_have_no_ties:
-                for elem1, elem2 in combinations(scc_sets[i], 2):
-                    if elem1 > elem2:
-                        tmp = elem1
-                        elem1 = elem2
-                        elem2 = tmp
-                    # set id of constraint, add constraint
-                    my_rownames.append("c%s" % count)
-                    # constraint: 1. * t_elem1_elem2 == 0
-                    i_tie_j = "t_%s_%s" % (elem1, elem2)
-                    rows.append([[i_tie_j], [1.]])
-                    my_rhs.append(0)
-                    count += 1
-
-            # now, add the before relations of the graph between i_th scc and all the j_th scc, j > i
-            for j in range(i + 1, len(scc)):
-                # get in a set the elements of scc_j
-
-                # for each element e1 of the 1st scc, element e2 of the 2nd scc, e1 can be set before e2
-                for elem1 in scc_sets[i]:
-                    for elem2 in scc_sets[j]:
-                        # set id of constraint, add constraint
-                        my_rownames.append("c%s" % count)
-                        # constraint: 1. * x_elem1_elem2 == 1
-                        i_bef_j = "x_%s_%s" % (elem1, elem2)
-                        rows.append([[i_bef_j], [1.]])
-                        my_rhs.append(1)
-                        count += 1
+        # if the optimization can be done, then all tied variables are set to 0
+        if can_have_no_ties:
+            for e1, e2 in combinations(range(len(cost_matrix)), 2):
+                if e1 > e2:
+                    tmp = e1
+                    e1 = e2
+                    e2 = tmp
+                # set id of constraint, add constraint
+                my_rownames.append("c%s" % count)
+                # constraint: 1. * t_elem1_elem2 == 0
+                i_tie_j = "t_%s_%s" % (e1, e2)
+                rows.append([[i_tie_j], [1.]])
+                my_rhs.append(0)
+                count += 1
 
         # all the constraints of this function were equality constraints
         return "E" * (len(my_rhs) - initial_nb_constraints)
 
+    @staticmethod
+    def _create_consensus(nb_elem: int, cplex_variables: List, map_elements_cplex: Dict, id_elements: Dict) -> Ranking:
+        """
+        This function creates the consensus ranking from the solved CPLEX problem.
 
+        :param nb_elem: The number of elements to be ranked
+        :param cplex_variables: List of CPLEX variables of the problem
+        :param map_elements_cplex: Mapping between CPLEX variables and pairs of elements
+        :param id_elements: Mapping between unique integer IDs and actual elements
+        :return: The consensus ranking as a Ranking object
+        """
+        count_after = ExactAlgorithmCplex._initialize_defeat_counts(nb_elem)
+        ExactAlgorithmCplex._calculate_defeat_counts(cplex_variables, map_elements_cplex, count_after)
+
+        return ExactAlgorithmCplex._create_ranking_from_defeat_counts(count_after, id_elements)
+
+    @staticmethod
+    def _initialize_defeat_counts(nb_elem: int) -> Dict[int, int]:
+        """
+        Initialize the dictionary that will count the defeats of each element.
+
+        :param nb_elem: The number of elements to be ranked
+        :return: A dictionary where keys are the unique IDs of elements and values = defeat counts (initialized at 0)
+        """
+        # at the beginning, 0 defeat for each element
+        return {i: 0 for i in range(nb_elem)}
 
     @staticmethod
     def _create_ranking_from_defeat_counts(count_after: Dict, id_elements: Dict) -> Ranking:
@@ -427,6 +463,24 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
         ranking.append(bucket)
         return Ranking(ranking)  # Return the ranking
 
+    @staticmethod
+    def _calculate_defeat_counts(cplex_variables: List, map_elements_cplex: Dict, count_after: Dict):
+        """
+        Calculate the number of defeats of each element.
+
+        :param cplex_variables: List of CPLEX variables of the problem
+        :param map_elements_cplex: Mapping between CPLEX variables and pairs of elements
+        :param count_after: Dictionary that will be updated with the defeat counts
+        """
+        for i in range(len(cplex_variables)):
+            # if the value is set to 1 (value is True)
+            if abs(cplex_variables[i] - 1) < 0.001:
+                # we add +1 to the "loser" element
+                var_type, _, loser_elem = map_elements_cplex[i]
+                # var_type == x ==> variable is type "i before j" with a value of 1 that is j lose
+                if var_type == "x":
+                    count_after[loser_elem] += 1
+
     def get_full_name(self) -> str:
         """
         Return the full name of the algorithm.
@@ -438,6 +492,7 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, GraphBasedAlgorithm):
         if self._optimize:
             return "ExactAlgorithm-optim1-optim2"
         return "ExactAlgorithm"
+
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
         """
         Check if the scoring scheme is relevant when the rankings are incomplete.

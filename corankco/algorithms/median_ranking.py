@@ -21,7 +21,7 @@ class MedianRanking:
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking: bool = False,
+            return_at_most_one_ranking: bool = True,
             bench_mode: bool = False
     ) -> Consensus:
         """

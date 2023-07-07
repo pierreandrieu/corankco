@@ -36,6 +36,19 @@ class Experiment:
     def _run_final_data(self, raw_data: str) -> str:
         raise NotImplementedError("The method not implemented")
 
+    def _write_line_in_file(self, path: str, line: str) -> None:
+        """
+        Appends a given line to a file at a specified path.
+
+        :param path: The path to the file to which the line should be appended.
+        :type path: str
+        :param line: The line to append to the file.
+        :type line: str
+        :return: None
+        """
+        with open(path, "a") as file:
+            file.write(line)
+
     def run_final_data_from_previous_exp(self, previous_output_path: str) -> str:
         f = open(previous_output_path, "r")
         text = f.read()
@@ -89,7 +102,7 @@ class ExperimentFromOrphanetDataset(ExperimentFromDataset):
 
     def __init__(self, dataset_folder: str, dataset_selector: DatasetSelector = None):
         super().__init__(dataset_folder, dataset_selector)
-        self._orphanetParser = OrphanetParser.get_orpha_base_for_vldb(join_paths(get_parent_path(
+        self._orphanetParser = OrphanetParser.get_orpha_base_for_ijar(join_paths(get_parent_path(
                                                                                 get_parent_path(dataset_folder)),
                                                                                   "supplementary_data"))
         self._datasets_gs = {}

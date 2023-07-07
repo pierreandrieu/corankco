@@ -9,6 +9,20 @@ from itertools import groupby
 
 
 class BordaCount(MedianRanking):
+    """
+    Borda is a rank aggregation method defined by Borda in J. C. de Borda, Mémoire sur les élections au scrutin,
+    Histoire de l’académie royale des sciences, Paris, France, 1781, Ch. 1, pp. 657–664.
+    It is one of the most famous voting system, used for example to elect the "Ballon d'or"
+    This rank aggregation method has been slightly adapted to incomplete rankings with ties.
+    Handling ties: score of an element in a ranking can be the rank of the element - 1, or the id bucket. The user can
+    select its preference with the parameter use_bucket_id, boolean, False by default
+    For instance, if ranking = [ {3, 5, 4}, {1, 2} ], if use_bucket_id = False, score(1) = score(2) = 3 whereas if
+    use_bucket_id =  True, score(1) = score(2) = 1
+    Handling non-ranked elements: depend on the Scoring Scheme used (see ScoringScheme class). Two of them are allowed
+    (see method is_scoring_scheme_relevant_when_incomplete_rankings).
+    According to the scoring scheme, elements will be ranked by score considering non-ranked elements as in a last
+    bucket, or elements will be ranked according to their mean score when they are ranked.
+    """
     def __init__(self,  use_bucket_id=False):
         """
         Initialize the BordaCount object.
@@ -56,6 +70,7 @@ class BordaCount(MedianRanking):
         # for a given element e, points[e][0] = number of points of e with borda count and points[e][1] =
         # number of rankings such that e is ranked
 
+        # computing scores for each element in a Dict
         points: Dict[Element, List[int]] = {}
         for ranking in rankings_to_use:
             id_bucket: int = 0

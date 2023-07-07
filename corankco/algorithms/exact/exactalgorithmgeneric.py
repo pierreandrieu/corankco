@@ -4,13 +4,15 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.ranking import Ranking
+from corankco.element import Element
+from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from numpy import ndarray, array, shape, zeros, count_nonzero, vdot, asarray
 from operator import itemgetter
 import pulp
 from igraph import Graph
 
 
-class ExactAlgorithmGeneric(MedianRanking):
+class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
     def __init__(self):
         pass
 
@@ -37,29 +39,17 @@ class ExactAlgorithmGeneric(MedianRanking):
         :raise ScoringSchemeNotHandledException when the algorithm cannot compute the consensus because the
         implementation of the algorithm does not fit with the scoring scheme
         """
-        rankings = dataset.rankings
-        elem_id = {}
-        id_elements = {}
-        id_elem = 0
-        for ranking in rankings:
-            for bucket in ranking:
-                for element in bucket:
-                    if element not in elem_id:
-                        elem_id[element] = id_elem
-                        id_elements[id_elem] = element
-                        id_elem += 1
-        nb_elem = len(elem_id)
+        id_elements: Dict[int, Element] = dataset.mapping_id_elem
+        nb_elem: int = dataset.nb_elements
+        positions: ndarray = dataset.get_positions()
+        sc: ndarray = asarray(scoring_scheme.penalty_vectors)
 
-        positions = dataset.get_positions()
+        graph, mat_score = ExactAlgorithmGeneric.graph_of_elements(positions, sc)
 
-        sc = asarray(scoring_scheme.penalty_vectors)
+        my_values: List[float] = []
+        my_vars: List[pulp.LpVariable] = []
 
-        graph, mat_score, ties_must_be_checked = self.__graph_of_elements(positions, sc)
-
-        my_values = []
-        my_vars = []
-
-        h_vars = {}
+        h_vars: Dict[str, int] = {}
         cpt = 0
 
         for i in range(nb_elem):

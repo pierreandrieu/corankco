@@ -23,7 +23,7 @@ class ExperimentOrphanet(ExperimentFromDataset):
                  dataset_selector: DatasetSelector = None,
                  ):
         super().__init__(dataset_folder=dataset_folder, dataset_selector=dataset_selector)
-        self.__orphanetParser = OrphanetParser.get_orpha_base_for_vldb(join_paths(get_parent_path(
+        self.__orphanetParser = OrphanetParser.get_orpha_base_for_ijar(join_paths(get_parent_path(
                                                                                 get_parent_path(dataset_folder)),
                                                                                   "supplementary_data"))
         self.__algo = algo

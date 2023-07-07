@@ -124,7 +124,7 @@ class OrphanetParser(BiologicalDatabase):
         return orpha_parser.diseases
 
     @staticmethod
-    def get_orpha_base_for_vldb(folder_data_files: str):
+    def get_orpha_base_for_ijar(folder_data_files: str):
         path_orphanet_base = join_paths(folder_data_files, "en_product6.xml")
         path_mapping_ncbi = join_paths(folder_data_files, "mapping_genes_geneNCBI_orphanet.csv")
         path_mapping_diseases = join_paths(folder_data_files, "mappingDiseaseID.csv")
@@ -138,5 +138,5 @@ class OrphanetParser(BiologicalDatabase):
         return orpha_parser
 
     @staticmethod
-    def get_diseases_orphanet_for_vldb(folder_data_files: str) -> List[Disease]:
-        return OrphanetParser.get_orpha_base_for_vldb(folder_data_files).__diseaseList
+    def get_diseases_orphanet_for_ijar(folder_data_files: str) -> List[Disease]:
+        return OrphanetParser.get_orpha_base_for_ijar(folder_data_files).__diseaseList

@@ -443,6 +443,49 @@ class Dataset:
         """
         return Dataset(self.unified_rankings())
 
+    def sub_problem_from_elements(self, elements_to_keep: Set[Element]) -> 'Dataset':
+        """
+        Generates a sub-problem Dataset by projecting the original Dataset on a given set of elements.
+
+        The resulting Dataset only includes the rankings that contain at least one of the elements from
+        the 'elements_to_keep' set. Similarly, within each ranking, only buckets that contain at least one
+        of the elements from the 'elements_to_keep' set are kept.
+
+        :param elements_to_keep: A set of elements which the sub-problem should be based on.
+        :type elements_to_keep: Set[Element]
+
+        :return: A Dataset representing the sub-problem, which only includes the elements from 'elements_to_keep' set.
+        :rtype: Dataset
+        """
+
+        projected_rankings = [
+            Ranking([
+                bucket.intersection(elements_to_keep)
+                for bucket in ranking
+                if bucket.intersection(elements_to_keep)
+            ])
+            for ranking in self.rankings
+            if any(bucket.intersection(elements_to_keep) for bucket in ranking)
+        ]
+        return Dataset(projected_rankings)
+
+    def sub_problem_from_ids(self, id_elements_to_keep: Set[int]) -> 'Dataset':
+        """
+        Generates a sub-problem Dataset by projecting the original Dataset on a given set of int IDs of elements.
+
+        The resulting Dataset only includes the rankings that contain at least one of the elements from
+        the 'elements_to_keep' set. Similarly, within each ranking, only buckets that contain at least one
+        of the elements from the 'elements_to_keep' set are kept.
+
+        :param id_elements_to_keep: A set of elements which the sub-problem should be based on.
+        :type id_elements_to_keep: Set[int]
+
+        :return: A Dataset representing the sub-problem which only includes the elements from 'id_elements_to_keep' set.
+        :rtype: Dataset
+        """
+
+        return self.sub_problem_from_elements(set(self._mapping_id_element[id_elem] for id_elem in id_elements_to_keep))
+
     def write(self, path) -> None:
         """
         Stores the input rankings of the dataset in a file

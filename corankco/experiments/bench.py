@@ -26,13 +26,17 @@ class BenchTime(ExperimentFromDataset):
         self.__repeat_time_computation_until = repeat_time_computation_until
 
     def _run_raw_data(self) -> str:
-        res = "dataset;nb_elements"
+        res = ""
+        ligne: str = "dataset;nb_elements"
         for alg in self.__algs:
-            res += ";" + alg.get_full_name()
-        res += "\n"
+            ligne += ";" + alg.get_full_name()
+        ligne += "\n"
+        self._write_line_in_file("/home/pierre/Bureau/res_bench.txt", ligne)
+        res += ligne
         must_run = [True] * len(self.__algs)
-        for dataset in sorted(self.datasets):
-            res += dataset.name + ";" + str(dataset.nb_elements)
+        for dataset in sorted(self.datasets, key=lambda dataset_obj: dataset_obj.nb_elements):
+            ligne: str = ""
+            ligne += dataset.name + ";" + str(dataset.nb_elements)
             id_alg = 0
             for alg in self.__algs:
                 if must_run[id_alg]:
@@ -40,13 +44,15 @@ class BenchTime(ExperimentFromDataset):
                                                                 self.__scoring_scheme,
                                                                 True,
                                                                 self.__repeat_time_computation_until)
-                    res += ";" + str(time_computation)
+                    ligne += ";" + str(time_computation)
                     if time_computation > self.__max_time:
                         must_run[id_alg] = False
                     id_alg += 1
                 else:
-                    res += ";" + str(float("inf"))
-            res += "\n"
+                    ligne += ";" + str(float("inf"))
+            ligne += "\n"
+            self._write_line_in_file("/home/pierre/Bureau/res_bench.txt", ligne)
+            res += ligne
         return res
 
     def _run_final_data(self, raw_data: str) -> str:
@@ -116,7 +122,7 @@ class BenchScalabilityScoringScheme(ExperimentFromDataset):
             res += ";" + scoring_scheme.get_nickname()
         res += "\n"
         flag = [True] * len(self.__scoring_schemes)
-        for dataset in sorted(self.datasets):
+        for dataset in sorted(self.datasets, key=lambda dataset_obj: dataset_obj.nb_elements):
             res += dataset.name + ";" + str(dataset.nb_elements)
             id_scoring_scheme = 0
             for scoring_scheme in self.__scoring_schemes:
@@ -204,7 +210,8 @@ class BenchPartitioningScoringScheme(ExperimentFromDataset):
         for scoring_scheme in self.__scoring_schemes:
             res += str(scoring_scheme.penalty_vectors) + ";"
         res += "\n"
-        for dataset in sorted(self.datasets):
+        # for dataset in sorted(self.datasets):
+        for dataset in sorted(self.datasets, key=lambda dataset_obj: dataset_obj.nb_elements):
             res += dataset.name + ";" + str(dataset.nb_elements) + ";"
             for scoring_scheme in self.__scoring_schemes:
                 consensus = self.__alg.compute_consensus_rankings(dataset, scoring_scheme, True)

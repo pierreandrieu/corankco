@@ -15,7 +15,7 @@ class ExactAlgorithmCplexForPaperOptim1(ExactAlgorithmCplex):
     More information can be found in the following article: Andrieu et al., IJAR, 2023.
     """
     def _add_personal_optimization_constraints(self, my_rhs: List[int], my_rownames: List[str],
-                                               rows: List[List[Union[List[str], List[float]]]], graph_elements,
+                                               rows: List[List[Union[List[str], List[float]]]],
                                                cost_matrix: ndarray) -> str:
         """
         Adds optimization constraints based on one sufficient condition: see Prop 2 in Andrieu et al., IJAR, 2023.
@@ -23,7 +23,6 @@ class ExactAlgorithmCplexForPaperOptim1(ExactAlgorithmCplex):
         :param my_rhs: List of integers representing the right-hand side of the constraints
         :param my_rownames: List of strings representing the names of the constraints
         :param rows: List of lists representing the coefficients of the constraints
-        :param graph_elements: The graph of elements defined in Andrieu et al., IJAR, 2023.
         :param cost_matrix: 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
                           i after j, i tied with j in the consensus according to the scoring scheme.
         :return: String representing the type of constraints added, all 'E' for equality constraints

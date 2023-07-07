@@ -4,15 +4,18 @@ from corankco.algorithms.median_ranking import MedianRanking, ScoringSchemeNotHa
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
+from typing import List, Dict, Set
+from corankco.ranking import Ranking
+from corankco.element import Element
 
 
 class MedRank(MedianRanking):
-    def __init__(self,  h=0.5):
+    def __init__(self, h: float = 0.5):
+        self.__h: float = h
         if h < 0:
-            h = 0
+            self.__h = 0.
         elif h > 1:
-            h = 1
-        self.__h = h
+            self.__h = 1.
 
     # Complexity : 0 (2 * n) with adaptation for induced measure
     def compute_consensus_rankings(
@@ -44,13 +47,14 @@ class MedRank(MedianRanking):
 
         if scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme().penalty_vectors) or \
                 scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5).penalty_vectors):
-            rankings_to_use = dataset.unified_rankings()
+            rankings_to_use: List[Ranking] = dataset.unified_rankings()
         else:
-            rankings_to_use = dataset.rankings
-        has = {}
+            rankings_to_use: List[Ranking] = dataset.rankings
+
+        has: Dict[Element, int] = {}
 
         nb_rankings_needed = {}
-        already_put = set()
+        already_put: Set = set()
 
         for ranking in rankings_to_use:
             for bucket in ranking:
@@ -87,15 +91,34 @@ class MedRank(MedianRanking):
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att={
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
-                              }
+                             ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                         }
                          )
 
     def get_full_name(self) -> str:
+        """
+        Return the full name of the algorithm.
+
+        :return: The string 'MedRank'.
+        :rtype: str
+        """
         return "MedRank"
 
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
+        """
+        Check if the scoring scheme is relevant when the rankings are incomplete.
+
+        :param scoring_scheme: The scoring scheme to be checked.
+        :type scoring_scheme: ScoringScheme
+        :return: True if the scoring scheme is equivalent to one of the following:
+                 - induced measure scoring scheme
+                 - unifying scoring scheme
+                 - induced measure scoring scheme with p=0.5
+                 - unifying scoring scheme with p=0.5
+                 Otherwise, False.
+        :rtype: bool
+        """
         return scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme().penalty_vectors) or \
-               scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme().penalty_vectors) or \
-               scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(0.5).penalty_vectors)\
-               or scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5).penalty_vectors)
+            scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme().penalty_vectors) or \
+            scoring_scheme.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(0.5).penalty_vectors) \
+            or scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(0.5).penalty_vectors)

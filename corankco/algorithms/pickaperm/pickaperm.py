@@ -35,7 +35,8 @@ class PickAPerm(MedianRanking):
         implementation of the algorithm does not fit with the scoring scheme
         """
         sc = scoring_scheme.penalty_vectors
-        if not dataset.is_complete:
+        if not dataset.is_complete and not scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme()):
+
             for i in range(3):
                 if sc[0][i] > sc[0][i+3] or sc[1][i] > sc[1][i+3]:
                     raise InompleteRankingsIncompatibleWithScoringSchemeException

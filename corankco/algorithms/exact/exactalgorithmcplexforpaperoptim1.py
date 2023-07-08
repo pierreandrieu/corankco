@@ -14,6 +14,9 @@ class ExactAlgorithmCplexForPaperOptim1(ExactAlgorithmCplex):
 
     More information can be found in the following article: Andrieu et al., IJAR, 2023.
     """
+    def __init__(self):
+        super().__init__(optimize=False)
+
     def _add_personal_optimization_constraints(self, my_rhs: List[int], my_rownames: List[str],
                                                rows: List[List[Union[List[str], List[float]]]],
                                                cost_matrix: ndarray) -> str:

@@ -14,9 +14,14 @@ import cplex
 
 class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
     """
-    A class to perform exact optimization on the rank aggregation problem using CPLEX linear programming.
 
-    More information can be found in the following article: Andrieu et al., IJAR, 2023.
+    A class to perform exact optimization on the rank aggregation problem using CPLEX linear programming.
+    More information can be found in P.Andrieu, S.Cohen-Boulakia, M.Couceiro, A.Denise, A.Pierrot. A Unifying Rank 
+    Aggregation Model to Suitably and Efficiently Aggregate Any Kind of Rankings. 
+    https://dx.doi.org/10.2139/ssrn.4353494
+    Note: This implementation uses CPLEX, which is proprietary software. Users must download and install CPLEX separately
+    from the IBM website. While CPLEX is not open source, there is a free version available for academic use.
+    More information can be found at: https://www.ibm.com/products/ilog-cplex-optimization-studio
 
     :ivar _PRECISION_THRESHOLD: float representing the precision threshold used for floating point comparison
     """
@@ -110,7 +115,7 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         # i after j, i tied with j in the consensus according to the scoring scheme.
         if look_for_scc:
             # computes the graph with the cost matrix
-            graph_elements, cost_matrix = ExactAlgorithmCplex.graph_of_elements(positions, numpy_scoring_scheme)
+            graph_elements, cost_matrix, _ = ExactAlgorithmCplex.graph_of_elements(positions, numpy_scoring_scheme)
             # computes the scc of the graph
             scc = graph_elements.components()
             # to store the consensus ranking
@@ -140,6 +145,10 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
             # Cplex object
             my_prob: cplex.Cplex = cplex.Cplex()  # initiate
             my_prob.set_results_stream(None)  # mute
+
+            my_prob.parameters.timelimit.set(3600)  # temps limité à 3600 secondes (1 heure)
+            my_prob.parameters.workmem.set(16384)  # mémoire de travail limitée à 2048 Mo (2 Go)
+            my_prob.parameters.mip.limits.treememory.set(4096)  # limite de mémoire de l'arbre à 1024 Mo (1 Go
 
             # Setting the mip-gap parameter. This value represents the relative optimality gap tolerance.
             # The solver stops searching when the relative difference between the best found solution

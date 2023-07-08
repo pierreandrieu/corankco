@@ -22,9 +22,9 @@ class BioConsert(MedianRanking):
     """
     def __init__(self, starting_algorithms: Collection[MedianRanking] = None):
         if starting_algorithms is None:
-            self._starting_algorithms = []
+            self._starting_algorithms: List[MedianRanking] = []
         else:
-            self._starting_algorithms = starting_algorithms
+            self._starting_algorithms: List[MedianRanking] = [alg for alg in starting_algorithms]
 
     def compute_consensus_rankings(
             self,
@@ -245,7 +245,6 @@ class BioConsert(MedianRanking):
         :rtype: bool
         """
         for alg in self._starting_algorithms:
-            print(alg.get_full_name())
             if not alg.is_scoring_scheme_relevant_when_incomplete_rankings():
                 return False
         return True

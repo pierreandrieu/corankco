@@ -23,7 +23,7 @@ class CopelandMethod(MedianRanking):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking=False,
+            return_at_most_one_ranking=True,
             bench_mode=False
     ) -> ConsensusSingleRanking:
         """

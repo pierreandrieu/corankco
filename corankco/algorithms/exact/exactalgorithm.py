@@ -8,8 +8,18 @@ from corankco.consensus import Consensus
 
 class ExactAlgorithm(ExactAlgorithmBase):
     """
-    A class that wraps the exact algorithms. This class decides which exact algorithm to use based on
-    the availability of the Cplex library. If Cplex is not available, it uses a free solver.
+    This class provides a wrapper for exact ranking algorithms. It intelligently selects an appropriate exact algorithm
+    depending on the availability of the Cplex library. If Cplex is not installed, the class defaults to a free solver.
+
+    The complexity of this algorithm is exponential. In practical use cases, it is expected to execute within a few
+    seconds for ranking tasks involving fewer than 80 elements. For larger sets of elements, the performance will be
+    significantly influenced by specific characteristics of the input rankings.
+
+    Particularly, if the size of the largest strongly connected component (as described in the research paper
+    "Efficient, robust, and effective rank aggregation for massive biological datasets"
+    (https://www.researchgate.net/publication/352277711_Efficient_robust_and_effective_rank_aggregation_for_massive_biological_datasets))
+    exceeds 100, the algorithm may not complete in a reasonable timeframe or may require excessive memory.
+    This information can be determined using ParConsPartition class.
     """
 
     def __init__(self, optimize=True):

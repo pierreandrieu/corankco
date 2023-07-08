@@ -1,9 +1,10 @@
 import unittest
-from corankco.dataset import Dataset
-from corankco.scoringscheme import ScoringScheme
-from corankco.algorithms.bioconsert.bioco import BioCo
-from corankco.ranking import Ranking
-from corankco.algorithms.median_ranking import ScoringSchemeNotHandledException
+from dataset import Dataset
+from scoringscheme import ScoringScheme
+from algorithms.bioconsert.bioco import BioCo
+from ranking import Ranking
+from algorithms.median_ranking import ScoringSchemeNotHandledException
+
 
 class TestBordaCount(unittest.TestCase):
 

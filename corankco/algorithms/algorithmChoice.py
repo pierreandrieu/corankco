@@ -5,9 +5,7 @@ from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.parcons.parcons import ParCons
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.algorithms.kwiksort.kwiksortrandom import KwikSortRandom
-from corankco.algorithms.repeatchoice.repeatchoice import RepeatChoice
 from corankco.algorithms.pickaperm.pickaperm import PickAPerm
-from corankco.algorithms.medrank.medrank import MedRank
 from corankco.algorithms.borda.borda import BordaCount
 from corankco.algorithms.bioconsert.bioco import BioCo
 from corankco.algorithms.copeland.copeland import CopelandMethod
@@ -16,33 +14,28 @@ from corankco.algorithms.copeland.copeland import CopelandMethod
 class AlgorithmEnumeration:
     """Contains a list of classes for all available ranking algorithms."""
     median_ranking_algorithms = [
-        BioConsert,
-        ParCons,
         ExactAlgorithm,
-        KwikSortRandom,
-        RepeatChoice,
-        PickAPerm,
-        MedRank,
-        BordaCount,
+        ParCons,
+        BioConsert,
         BioCo,
+        KwikSortRandom,
+        BordaCount,
         CopelandMethod,
+        PickAPerm,
     ]
 
 
 @unique
 class Algorithm(Enum):
     """Enum representing the available ranking algorithms."""
-    BioConsert = 0
+    Exact = 0
     ParCons = 1
-    Exact = 2
-    KwikSortRandom = 3
-    RepeatChoice = 4
+    BioConsert = 2
+    BioCo = 3
+    KwikSortRandom = 4
     PickAPerm = 5
-    MedRank = 6
-    BordaCount = 7
-    BioCo = 8
-    CopelandMethod = 9
-    AllTied = 10
+    BordaCount = 6
+    CopelandMethod = 7
 
     @staticmethod
     def get_all() -> List['Algorithm']:
@@ -52,9 +45,8 @@ class Algorithm(Enum):
         :return: A List of all the available algorithms.
         :rtype: List[Algorithm]
         """
-        return [Algorithm.AllTied, Algorithm.BioConsert, Algorithm.ParCons,
-                Algorithm.Exact, Algorithm.KwikSortRandom, Algorithm.RepeatChoice, Algorithm.PickAPerm,
-                Algorithm.MedRank, Algorithm.BordaCount, Algorithm.BioCo, Algorithm.CopelandMethod]
+        return [Algorithm.Exact, Algorithm.ParCons, Algorithm.BioConsert, Algorithm.BioCo, Algorithm.KwikSortRandom,
+                Algorithm.PickAPerm, Algorithm.BordaCount, Algorithm.CopelandMethod]
 
     @staticmethod
     def get_all_compatible_with_any_scoring_scheme() -> List['Algorithm']:
@@ -66,7 +58,7 @@ class Algorithm(Enum):
         :return: A List of all the algorithms compatible with any scoring scheme.
         :rtype: List[Algorithm]
         """
-        return [Algorithm.BioConsert, Algorithm.ParCons, Algorithm.Exact,
+        return [Algorithm.Exact, Algorithm.ParCons, Algorithm.BioConsert,
                 Algorithm.KwikSortRandom, Algorithm.CopelandMethod]
 
 

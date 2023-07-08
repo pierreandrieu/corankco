@@ -10,13 +10,14 @@ from numpy import ndarray, asarray
 from corankco.ranking import Ranking
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
+from corankco.partitioning.parconsPartition import ParConsPartition
 
 
 class ParCons(MedianRanking, PairwiseBasedAlgorithm):
     """
     ParCons is a graph-based heuristics for Kemeny-Young rank aggregation published in P. Andrieu, B. Brancotte,
     L. Bulteau, S. Cohen-Boulakia, A. Denise, A. Pierrot, S. Vialette, Efficient, robust and effective rank aggregation
-    for massive biological datasets, Future Generation Computer Systems, 2021, pp 406–421.
+    for massive biological datasets. Future Generation Computer Systems, 2021, pp 406–421.
     Complexity: O(nb_elements² * nb_rankings)
     ParCons divides the initial problem into subproblems such that concatenating an optimal solutions of each subproblem
     forms an optimal solution for the initial problem.
@@ -51,8 +52,8 @@ class ParCons(MedianRanking, PairwiseBasedAlgorithm):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking=False,
-            bench_mode=False
+            return_at_most_one_ranking: bool = True,
+            bench_mode: bool = False
     ) -> Consensus:
         """
         Calculate and return the consensus rankings based on the given dataset and scoring scheme.
@@ -83,7 +84,7 @@ class ParCons(MedianRanking, PairwiseBasedAlgorithm):
         positions: ndarray = dataset.get_positions()
 
         # get the graph of elements and the cost matrix
-        gr1, mat_score = ParCons.graph_of_elements(positions, sc)
+        gr1, mat_score, _ = ParCons.graph_of_elements(positions, sc)
 
         # get the strongly connected components in a topological sort
         scc: VertexClustering = gr1.components()

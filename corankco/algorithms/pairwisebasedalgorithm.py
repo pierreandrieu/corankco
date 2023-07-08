@@ -6,11 +6,16 @@ from itertools import combinations
 
 
 class PairwiseBasedAlgorithm:
+    """
+
+    Class to gather several useful methods for pairwise based algorithms. Class for code factorisation.
+    """
     @staticmethod
     def graph_of_elements(positions: ndarray, matrix_scoring_scheme: ndarray) -> \
             Tuple[Graph, ndarray, Set[Tuple[int, int]]]:
         """
-        Compute the graph of elements and the cost of pairwise relative positions.
+        Compute the graph of elements, the cost of pairwise relative positions and the set of robust arcs defined in the
+        Future Generation Computer Systems article (as mentioned in the Class docstring)
 
         This function generates a graph of elements as defined in the Future Generation Computer Systems article
         (as mentioned in the Class docstring) and computes the cost of pairwise relative positions.

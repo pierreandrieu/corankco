@@ -3,6 +3,7 @@ from corankco.ranking import Ranking
 from corankco.dataset import Dataset
 from corankco.element import Element
 
+
 class TestDataset(unittest.TestCase):
 
     def setUp(self):
@@ -95,6 +96,12 @@ class TestDataset(unittest.TestCase):
         dataset2 = dataset.sub_problem_from_elements({Element(1), Element(2)})
         dataset3 = Dataset([Ranking.from_list([{1, 2}]), Ranking.from_list([{2}, {1}])])
         self.assertEqual(dataset2, dataset3)
+
+    def test_generation(self):
+        dataset = Dataset.get_random_dataset_markov(10, 3, 50, True)
+        self.assertEqual(dataset.nb_elements, 10)
+        self.assertEqual(dataset.nb_rankings, 3)
+        self.assertTrue(dataset.is_complete)
 
 
 if __name__ == "__main__":

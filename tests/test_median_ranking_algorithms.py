@@ -14,7 +14,6 @@ from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlg
 from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.ranking import Ranking
-from corankco.rankingsgeneration.rankingsgenerate import create_rankings
 import time
 
 
@@ -68,7 +67,7 @@ class TestAlgos(unittest.TestCase):
 
     def test_scalability(self):
         if self.test_time_computation:
-            dataset = Dataset.from_raw_list(create_rankings(2000, 50, 100, True))
+            dataset = Dataset.get_random_dataset_markov(2000, 50, 100, True)
             for alg in self.my_algs:
                 debut = time.time()
                 alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)

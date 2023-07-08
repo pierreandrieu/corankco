@@ -3,7 +3,6 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.dataset import Dataset
 from corankco.ranking import Ranking
 from corankco.kemeny_score_computation import KemenyComputingFactory
-from corankco.rankingsgeneration.rankingsgenerate import create_rankings
 from random import seed
 
 
@@ -32,9 +31,8 @@ class TestKemenyComputation(unittest.TestCase):
 
     def test_compare_nlogn_nsquare_scores(self):
         for i in range(100):
-            dataset_test = Dataset.from_raw_list(
-                create_rankings(nb_elements=8, nb_rankings=5, steps=300, complete=False))
-            consensus = Ranking.from_list(create_rankings(20, 1, 1000, complete=True)[0])
+            dataset_test = Dataset.get_random_dataset_markov(nb_elem=8, nb_rankings=5, steps=300, complete=False)
+            consensus = Ranking.generate_rankings(20, 1, 1000, complete=True)[0]
 
             # test with sc 1
             score_nlogn = self._kemeny1.get_kemeny_score(consensus, dataset_test)

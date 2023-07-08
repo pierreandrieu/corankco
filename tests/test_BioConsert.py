@@ -2,7 +2,7 @@ import unittest
 from dataset import Dataset
 from scoringscheme import ScoringScheme
 from algorithms.bioconsert.bioconsert import BioConsert
-from ranking import Ranking
+from corankco.ranking import Ranking
 
 
 class TestBordaCount(unittest.TestCase):

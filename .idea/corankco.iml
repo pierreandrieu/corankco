@@ -5,7 +5,7 @@
       <sourceFolder url="file://$MODULE_DIR$/corankco" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
     </content>
-    <content url="file:///opt/ibm/ILOG/CPLEX_Studio201/cplex/python/3.8/x86-64_linux" />
+    <content url="file:///opt/ibm/ILOG/CPLEX_Studio2211/cplex/python/3.8/x86-64_linux" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

@@ -21,8 +21,8 @@ class KwikSortAbs(MedianRanking):
             self,
             dataset: Dataset,
             scoring_scheme: ScoringScheme,
-            return_at_most_one_ranking=False,
-            bench_mode=False
+            return_at_most_one_ranking: bool = True,
+            bench_mode: bool = False
     ) -> ConsensusSingleRanking:
         """
         Calculate and return the consensus rankings based on the given dataset and scoring scheme.

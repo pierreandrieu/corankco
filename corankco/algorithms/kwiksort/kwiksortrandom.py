@@ -7,6 +7,9 @@ from corankco.scoringscheme import ScoringScheme
 
 
 class KwikSortRandom(KwikSortAbs):
+    """
+    Implementation of KwikSort algorithm (see KwikSortAbs abstract class) with choice of pivot is random, uniform
+    """
 
     def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
                    scoring_scheme: ScoringScheme) -> Element:

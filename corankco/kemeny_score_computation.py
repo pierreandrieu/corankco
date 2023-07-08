@@ -11,6 +11,12 @@ class InvalidRankingsForComputingDistance(Exception):
 
 
 class KemenyComputingFactory:
+    """
+    Class to compute Kemeny scores given a ScoringScheme, according to the framework defined in P.Andrieu,
+    S.Cohen-Boulakia, M.Couceiro, A.Denise, A.Pierrot. A Unifying Rank Aggregation Model to Suitably and Efficiently
+    Aggregate Any Kind of Rankings. https://dx.doi.org/10.2139/ssrn.4353494
+    The Kemeny score is generalized within a framework to handle incomplete rankings with ties
+    """
     def __init__(self, sc: ScoringScheme):
         self.__scoring_scheme: ScoringScheme = sc
 

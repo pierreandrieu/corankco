@@ -1,7 +1,0 @@
-Abscess of liver:[[7124], [1401], [7099], [3553], [64127], [3953], [100507436], [796], [5806], [3570], [6288], [406996], [695], [653361]]
-Hepatic Abscess:[[]]
-Hepatic abscess NOS:[[]]
-Hepatic Abscesses:[[]]
-Hepatic abscess:[[]]
-Liver Abscess:[[1401], [3953], [695], [6288], [653361]]
-Liver Abscesses:[[]]

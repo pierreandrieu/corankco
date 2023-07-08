@@ -1,4 +1,0 @@
-Panniculitis:[[84868], [4609], [673], [4684], [695], [64135], [6362], [90268], [89795]]
-Panniculitis unspecified:[[4609], [673]]
-Panniculitis unspecified site:[[4609], [673]]
-Panniculitides:[[]]

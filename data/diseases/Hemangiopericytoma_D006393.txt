@@ -1,6 +1,0 @@
-Haemangiopericytoma:[[]]
-Hemangiopericytomas:[[1499], [7015], [999], [4255], [7291], [6093], [6591], [6778], [51176], [4665]]
-HPA - haemangiopericytoma:[[]]
-HPA - hemangiopericytoma:[[]]
-Hemangiopericytoma:[[29126], [4255], [6778], [10499], [4665], [23462]]
-Perithelioma:[[]]

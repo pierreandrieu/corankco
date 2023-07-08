@@ -1,8 +1,0 @@
-PS - Pulmonary valve stenosis:[[3708]]
-Valvular Pulmonic Stenosis:[[]]
-Stenosis Pulmonary Valve:[[7422], [4846], [4851], [5781], [3606], [3934], [182], [3708]]
-Valvular Pulmonic Stenoses:[[]]
-Stenoses Pulmonary Valve:[[]]
-Pulmonary valve stenosis:[[5781], [3708]]
-Pulmonic valve stenosis:[[182]]
-PVS - Pulmonary valve stenosis:[[]]

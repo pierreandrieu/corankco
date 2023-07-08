@@ -1,7 +1,0 @@
-Malignant neuroleptic syndrome:[[6261], [1813], [1565], [1577], [255239]]
-NMS (Neuroleptic Malignant Syndrome):[[]]
-Syndromes Neuroleptic Malignant:[[1813], [1565]]
-Neuroleptic malignant syndrome:[[1813], [1565], [6261], [255239]]
-Syndrome Neuroleptic Malignant:[[6261], [1813], [1565], [1577], [255239]]
-NMSs (Neuroleptic Malignant Syndrome):[[]]
-NMS - Neuroleptic malignant syndrome:[[]]

@@ -1,6 +1,0 @@
-BSE (Bovine Spongiform Encephalopathy):[[5621]]
-Mad Cow Disease:[[]]
-BSEs (Bovine Spongiform Encephalopathy):[[]]
-Encephalitis Bovine Spongiform:[[4137]]
-Spongiform Encephalopathy Bovine:[[5621], [4137]]
-Mad Cow Diseases:[[]]

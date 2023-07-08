@@ -1,8 +1,0 @@
-Jaundice Cholestatic:[[282617], [10599], [1244], [28234], [151306], [1522]]
-Obstructive hyperbilirubinaemia:[[]]
-Obstructive hyperbilirubinemia:[[3162], [2944], [5243], [213], [9970], [151306]]
-Mechanical Jaundice:[[]]
-Cholestatic jaundice syndrome:[[]]
-Obstructive Jaundice:[[3162], [2688], [5618], [4583], [151306]]
-Cholestatic jaundice:[[]]
-Obstructive jaundice:[[3162], [2688], [5618], [4583], [151306]]

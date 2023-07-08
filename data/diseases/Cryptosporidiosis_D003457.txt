@@ -1,8 +1,0 @@
-Infection Cryptosporidium:[[29126], [4153], [23411], [356], [5781], [998], [2150], [3673], [1915], [1811], [406891], [121512]]
-Cryptosporidiasis:[[]]
-Infection caused by Cryptosporidium:[[29126], [4153], [23411], [356], [5781], [2150], [3673]]
-Cryptosporidioses:[[]]
-Infection by Cryptosporidium:[[29126], [4153], [23411], [356], [5781], [998], [2150], [3673], [1915], [1811], [406891], [121512]]
-Cryptosporidiosis:[[5578], [6863]]
-Cryptosporidium infection:[[29126], [4153], [23411], [356], [5781], [998], [2150], [3673], [1915], [1811], [406891], [121512]]
-Cryptosporidium Infections:[[4153], [29126], [23411], [5781], [356]]

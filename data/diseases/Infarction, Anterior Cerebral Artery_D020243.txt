@@ -1,8 +1,0 @@
-Infarction Anterior Cerebral Artery Circulation:[[]]
-Infarctions ACA:[[3569]]
-Infarcts ACA:[[3569], [23435]]
-Infarction Anterior Cerebral Artery:[[]]
-Stroke Anterior Cerebral Artery:[[]]
-Infarction Anterior Cerebral Artery Distribution:[[]]
-Infarct ACA:[[3569], [7015], [712]]
-Infarction ACA:[[3569], [7292], [7015], [3605], [7057], [23435], [1536], [406992], [192343]]

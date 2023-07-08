@@ -1,6 +1,0 @@
-Intraoperative hemorrhage:[[7422], [1401], [4846], [7450]]
-Surgical Hemorrhages:[[]]
-Surgical Hemorrhage:[[]]
-Intraoperative haemorrhage:[[7450]]
-Surgical Blood Losses:[[]]
-Surgical Blood Loss:[[]]

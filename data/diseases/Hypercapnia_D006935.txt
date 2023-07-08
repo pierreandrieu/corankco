@@ -1,4 +1,0 @@
-Hypercapnemia:[[]]
-Hypercapnia:[[5573], [476], [5971]]
-Hypercapnaemia:[[]]
-Hypercarbia:[[]]

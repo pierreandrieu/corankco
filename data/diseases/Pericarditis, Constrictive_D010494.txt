@@ -1,3 +1,0 @@
-Pericarditides Constrictive:[[4318], [4879], [5465], [4591]]
-Pericarditis Constrictive:[[4879], [4591]]
-Constrictive pericarditis:[[4879], [4591]]

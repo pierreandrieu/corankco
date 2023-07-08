@@ -1,7 +1,0 @@
-Torticollis:[[7085], [773]]
-Wryneck:[[]]
-Contracture of neck:[[7040], [4000], [2065], [1499], [1785], [1950], [7077], [871]]
-Neck contractures:[[4000], [1785]]
-Wry neck:[[]]
-TORTICOLLIS:[[7085], [773]]
-Torticollis unspecified:[[773]]

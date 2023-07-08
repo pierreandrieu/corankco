@@ -1,3 +1,0 @@
-Teratogenesis:[[57167], [6910], [157570]]
-Teratogenicity:[[7157], [57167], [1642], [51185], [65108]]
-Teratogenic effect:[[4524], [5743]]

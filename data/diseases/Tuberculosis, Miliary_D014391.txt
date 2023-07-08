@@ -1,7 +1,0 @@
-Miliary tuberculosis unspecified:[[]]
-Miliary tuberculosis unspecified unspecified:[[]]
-Tuberculoses Miliary:[[1956], [7097], [5133]]
-MTB - Miliary tuberculosis:[[]]
-Tuberculosis Miliary:[[7097], [1956], [5133]]
-Miliary tuberculosis:[[5133]]
-Unspecified miliary tuberculosis:[[]]

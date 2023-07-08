@@ -1,7 +1,0 @@
-Lassa Fever:[[]]
-Lassa haemorrhagic fever:[[]]
-Lassa hemorrhagic fever:[[30835], [23586], [8720]]
-Lassa Fevers:[[]]
-Lassa Virus Infections:[[23586], [30835], [558]]
-Virus Infection Lassa:[[26762], [30835], [23586], [684], [558], [4233], [83737], [10015], [3916], [7301], [339390]]
-Lassa fever:[[]]

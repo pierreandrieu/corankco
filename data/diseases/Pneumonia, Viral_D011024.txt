@@ -1,4 +1,0 @@
-Viral pneumonia:[[3605], [54106], [7026]]
-Viral Pneumonia:[[3605], [54106], [7026]]
-Viral pneumonia unspecified:[[]]
-Viral Pneumonias:[[]]

@@ -1,6 +1,0 @@
-Tumour of caecum:[[]]
-Neoplasm Cecal:[[3845], [3569], [3586], [596], [6288]]
-Tumor of cecum:[[999], [23314], [1015], [28234]]
-Neoplasm of cecum:[[999], [23314], [1015]]
-Neoplasms Cecal:[[3845], [3569], [3586], [596], [6288], [406935]]
-Neoplasm of caecum:[[]]

@@ -1,7 +1,0 @@
-Hookworm diseases:[[3458], [3605], [50943], [3565], [90865], [920], [3596], [3559], [3567], [1118], [972]]
-Infection Hookworm:[[3458], [920], [3605], [50943], [3565], [3596], [90865], [3559], [3567], [972], [1118]]
-Infections Hookworm:[[3458], [3605], [920], [50943], [3565], [90865], [3567], [972]]
-Hookworm infection:[[90865], [1118]]
-Disease caused by superfamily Ancylostomatoidea:[[]]
-Disease due to superfamily Ancylostomatoidea:[[]]
-Hookworm disease unspecified:[[3559]]

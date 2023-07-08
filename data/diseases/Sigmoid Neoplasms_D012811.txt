@@ -1,7 +1,0 @@
-Neoplasm of sigmoid colon:[[4318], [3845], [5243], [595], [3815], [4583], [4852], [6566]]
-Sigmoid Colon Neoplasm:[[]]
-Tumor of sigmoid colon:[[3815], [5243], [3845], [4318], [595], [6566], [7345], [4583], [1571], [8784], [4852], [7432]]
-Sigmoid Neoplasm:[[]]
-Sigmoid Neoplasms:[[]]
-Tumour of sigmoid colon:[[3845], [4318], [595], [3815], [5243], [1571], [6566], [7345]]
-Sigmoid Colon Neoplasms:[[]]

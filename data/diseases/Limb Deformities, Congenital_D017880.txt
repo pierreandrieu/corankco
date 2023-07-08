@@ -1,8 +1,0 @@
-Unspecified anomaly of unspecified limb:[[3791], [2321], [7042]]
-Congenital anomaly of limb:[[5290], [8626], [2321], [7042], [5308], [6473]]
-Congenital anomaly of limb(s) NOS:[[]]
-Congenital abnormality of the limb:[[6469]]
-Congenital deformity of limb:[[4524], [7040], [3236], [6473]]
-Unspecified congenital malformation of limb(s):[[7422], [7157], [3091], [1499], [652], [285]]
-Limb Deformities Congenital:[[7040], [6469], [3569], [4359], [2255], [127833]]
-Limb Deformity Congenital:[[4524], [7040], [3236], [6473]]

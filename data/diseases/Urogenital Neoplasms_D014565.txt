@@ -1,6 +1,0 @@
-Neoplasms Genitourinary:[[7490], [7040], [4233], [238], [8743], [2625], [4072], [768], [2492], [6928], [2120], [6098], [3642], [9476], [9098], [5013]]
-Neoplasms Genito-urinary:[[]]
-Neoplasm Genitourinary:[[7490], [4233], [238], [3320], [2625], [2120], [9476], [9098]]
-Urogenital Neoplasm:[[]]
-Neoplasm Genito-urinary:[[]]
-Urogenital Neoplasms:[[6928]]

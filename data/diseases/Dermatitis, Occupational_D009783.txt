@@ -1,6 +1,0 @@
-Occupational Dermatitides:[[]]
-Occupational allergic contact dermatitis:[[7124], [3586], [10], [3356], [2312]]
-Occupational eczema:[[7124], [3553], [4318], [2312], [2908], [154], [3565], [929]]
-Industrial dermatitis:[[6532], [2944], [3356], [213], [3350], [383]]
-Occupational Dermatitis:[[10], [9]]
-Occupational dermatitis:[[10], [9]]

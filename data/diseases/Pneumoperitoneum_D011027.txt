@@ -1,3 +1,0 @@
-Peritoneal cavity free air:[[6387], [6352], [6361]]
-Pneumoperitoneum:[[1956], [2064], [3091], [4609], [332], [3146], [3791], [6382]]
-PP - Pneumoperitoneum:[[]]

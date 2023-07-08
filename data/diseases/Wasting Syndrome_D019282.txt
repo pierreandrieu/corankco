@@ -1,6 +1,0 @@
-Wasting Syndrome:[[3479], [3952], [3240], [1832], [1828]]
-Wasting Diseases:[[6774]]
-Wasting syndrome:[[3479], [3952], [3240], [1832], [1828]]
-Wasting Disease:[[5621], [1589], [6337], [1380]]
-Wasting Syndromes:[[]]
-Wasting disease:[[5621], [1589], [6337], [1380]]

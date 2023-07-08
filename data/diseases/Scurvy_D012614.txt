@@ -1,8 +1,0 @@
-Hypoascorbemia:[[2989]]
-Scorbutus:[[]]
-Scurvies:[[]]
-HYPOASCORBEMIA:[[2989]]
-VITAMIN C INABILITY TO SYNTHESIZE:[[7018], [2989]]
-Scurvy:[[2989]]
-Hypoascorbemias:[[]]
-SCURVY:[[2989]]

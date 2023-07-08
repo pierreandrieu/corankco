@@ -1,4 +1,0 @@
-Scotoma:[[1201], [22901]]
-Scotomas:[[1030], [169522]]
-Visual field scotoma:[[]]
-Scotoma NOS:[[]]

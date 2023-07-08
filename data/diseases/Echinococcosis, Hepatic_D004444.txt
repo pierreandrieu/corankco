@@ -1,7 +1,0 @@
-Hepatic Alveolar Echinococcosis:[[]]
-Echinococcosis unspecified of liver:[[4790], [1432], [5599], [5594], [5595]]
-Hydatid Cysts Hepatic:[[]]
-Hydatidosis Hepatic:[[7099], [7097], [3880]]
-Echinococcosis of liver:[[3123], [3119], [3569], [3586], [7099], [4790], [7097], [3605], [5594], [1432], [5599], [5595], [1543], [6890], [3578], [6891], [192343]]
-Hepatic Echinococcosis:[[]]
-Hydatid Cyst Hepatic:[[]]

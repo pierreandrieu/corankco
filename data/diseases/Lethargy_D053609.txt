@@ -1,2 +1,0 @@
-Lethargy:[[18]]
-Lethargic:[[2908]]

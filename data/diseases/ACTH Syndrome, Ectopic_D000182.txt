@@ -1,8 +1,0 @@
-Syndromes Ectopic ACTH:[[3569], [2778], [4318], [5243], [1029], [3479], [1869]]
-Hypercortisolism due to nonpituitary tumor:[[]]
-Syndrome Ectopic ACTH:[[5443], [1029], [2778], [8091], [1956], [3569], [4088], [2099], [4318], [5243], [3479], [3606], [6622], [1869], [133], [5015], [6401], [10320], [3164], [6752], [9101], [6755], [181], [553], [5126]]
-Ectopic ACTH syndrome:[[10320], [5443], [6752], [6755], [181], [5126], [553]]
-Ectopic adrenocorticotropic hormone secretion:[[5443], [3958], [861], [9101]]
-Ectopic ACTH secretion causing Cushing's syndrome:[[5443], [3606]]
-Ectopic ACTH secretion:[[5443], [3569], [1956], [4318], [6622], [3479], [2778], [2099], [5243], [3606], [1029], [133], [1869], [4088], [6401], [9101], [9146], [6752], [6755], [553], [181], [5126], [4969]]
-Hypercortisolism due to nonpituitary tumour:[[]]

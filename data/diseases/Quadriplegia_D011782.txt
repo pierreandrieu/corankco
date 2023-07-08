@@ -1,5 +1,0 @@
-Quadriplegia unspecified:[[]]
-Quadriplegia:[[6785], [22872], [5354], [1282], [56270], [10352]]
-Tetraplegia:[[6647], [3569], [6509], [10717]]
-Quadriplegias:[[]]
-Tetraplegias:[[]]

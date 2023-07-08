@@ -1,6 +1,0 @@
-HSAN - Hereditary sensory and autonomic neuropathy:[[10558], [54463], [65125], [9517], [4914]]
-Sensory and Autonomic Neuropathies Hereditary:[[6335], [1786], [667], [59335], [9517], [7124], [4359], [29128]]
-Hereditary sensory and autonomic neuropathy:[[10558], [54463], [547], [11280], [6335], [65125], [1786], [4359], [667], [9517], [59335], [4803], [4914], [22948], [7124], [1636], [6622], [1312]]
-HSANs (Hereditary Sensory Autonomic Neuropathy):[[]]
-HSAN:[[4914], [65125], [10558], [54463], [9517], [80218]]
-HSAN (Hereditary Sensory Autonomic Neuropathy):[[10558], [54463], [65125], [9517], [4914]]

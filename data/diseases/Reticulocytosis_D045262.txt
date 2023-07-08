@@ -1,4 +1,0 @@
-Increased reticulocytes:[[3383], [3688], [4968], [2056], [2539], [7037], [7351], [3676], [406881], [6548], [360], [2495], [3047], [961], [2532], [5906], [406884], [965], [4059], [310], [94033], [3386], [5911]]
-Reticulocyte count above reference range:[[]]
-Reticulocytosis:[[]]
-Reticulocytoses:[[]]

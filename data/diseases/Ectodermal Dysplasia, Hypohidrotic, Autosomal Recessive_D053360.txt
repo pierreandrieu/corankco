@@ -1,8 +1,0 @@
-Anhydridic Ectodermal Dysplasia Autosomal Recessive:[[10804], [10913], [2706], [653361], [128178], [1896], [3861], [79977], [4790], [54084], [81607], [3229], [121391], [1474], [1147], [1832], [83999], [80326]]
-Autosomal Recessive Anhydrotic Ectodermal Dysplasia:[[]]
-Autosomal recessive hypohidrotic ectodermal dysplasia syndrome:[[1896], [1474]]
-Ectodermal Dysplasia Hypohidrotic Autosomal Recessive:[[10913], [128178], [1896], [1474]]
-Ectodermal Dysplasia Hypohydrotic Autosomal Recessive:[[]]
-Ectodermal Dysplasia Anhidrotic Autosomal Recessive:[[10913], [653361], [1896], [4790]]
-Anhidridic Ectodermal Dysplasia Autosomal Recessive:[[10804], [10913], [2706], [653361], [128178], [1896], [3861], [79977], [4790], [54084], [81607], [3229], [121391], [1474], [1147], [1832], [83999], [80326]]
-Hypohidrotic autosomal recessive ectodermal dysplasia:[[10913], [128178], [1896], [1474]]

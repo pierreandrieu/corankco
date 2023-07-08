@@ -1,6 +1,0 @@
-Allergy to peanuts:[[]]
-Peanut Allergies:[[]]
-Peanut Hypersensitivity:[[]]
-Peanut Allergy:[[3123], [3119], [929], [2312], [10892], [3578], [933], [257397]]
-Hypersensitivity Groundnut:[[]]
-Allergy to peanut:[[3119], [3586], [3123], [2312], [929], [50943], [3578], [10892], [933], [257397]]

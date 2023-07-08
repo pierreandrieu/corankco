@@ -1,6 +1,0 @@
-Schistosoma mansoni Infection:[[53366], [7157], [3459], [7124], [3458], [596], [3605], [7097], [3119], [4609], [3565], [3596], [30835], [3578]]
-Schistosoma mansoni Infections:[[7157], [7124], [3458], [7097], [3605], [3119], [3565], [30835], [3459]]
-Schistosomiasis due to Schistosoma mansoni [intestinal schistosomiasis]:[[]]
-Schistosoma mansoni infection:[[53366], [7157], [3459], [7124], [3458], [596], [3605], [7097], [3119], [4609], [3565], [3596], [30835], [3578]]
-Schistosomiasis due to schistosoma mansoni:[[7124], [4609], [3458], [596], [3605], [3596], [3565]]
-Schistosomiasis mansoni:[[7040], [3586], [3458], [6347], [3383], [1432], [3596], [6348], [3567]]

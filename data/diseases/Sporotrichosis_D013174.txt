@@ -1,6 +1,0 @@
-Infection by Sporothrix schenkii:[[7040], [3586], [7099], [3458], [7097], [10747]]
-Sporotrichoses:[[]]
-Sporothrix Infection:[[7040], [3586], [7099], [3458], [7097], [10747]]
-Sporotrichosis:[[3586], [3458], [4153], [10747], [64170]]
-Sporothrix Infections:[[3586], [7099], [3458], [7040], [7097], [10747]]
-Sporotrichosis unspecified:[[]]

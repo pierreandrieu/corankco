@@ -1,6 +1,0 @@
-Congenital pachyonychia:[[3872], [8323]]
-Pachyonychia Congenita Syndrome:[[4780], [2312]]
-Pachyonychia Congenita:[[3872], [3853], [3868], [4780], [3854], [2312], [4987], [8323], [286887], [83902]]
-Pachyonychia congenita syndrome:[[4780], [2312]]
-Pachyonychia congenita:[[3872], [3853], [3868], [4780], [3854], [2312], [4987], [8323], [286887], [83902]]
-Pachyonychia Congenital:[[3872], [8323]]

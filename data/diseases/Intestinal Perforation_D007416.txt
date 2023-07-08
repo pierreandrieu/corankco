@@ -1,4 +1,0 @@
-Perforation Intestinal:[[64127], [2099], [3815], [581], [578]]
-Perforation of intestine:[[3815], [581], [64127], [796], [578], [9166], [84627]]
-Perforations Intestinal:[[3304]]
-Intestinal perforation:[[64127]]

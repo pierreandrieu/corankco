@@ -1,8 +1,0 @@
-Neoplasm of endocrine gland:[[]]
-Tumor of endocrine gland:[[84432], [406933], [406983]]
-Tumour of endocrine gland:[[406933], [406983]]
-Tumor of endocrine system:[[7421], [3952], [596], [9365], [10399], [1591], [26291]]
-Neoplasms Endocrine Gland:[[406983]]
-Neoplasm Endocrine Gland:[[]]
-Neoplasm of endocrine system:[[596], [3952]]
-Tumour of endocrine system:[[7421], [596], [3952], [9365], [10399]]

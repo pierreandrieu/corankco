@@ -1,5 +1,0 @@
-Pneumonias Aspiration:[[6387], [796]]
-Aspiration pneumonia:[[3605], [6863]]
-Pneumonia Aspiration:[[3605], [29126], [5468], [796], [6387], [406947], [10406], [7356], [6863], [574447]]
-Aspiration pneumonia NOS:[[]]
-Inhalation pneumonia:[[4318], [2944], [796], [114548], [7356]]

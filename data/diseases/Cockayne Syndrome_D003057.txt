@@ -1,7 +1,0 @@
-Syndrome Cockayne:[[2074], [1161], [672], [2068], [2072], [2067], [2073], [7515], [142], [3725], [328], [1025], [467], [2071], [2648], [7182], [79661], [2965], [404672], [267004]]
-Cockayne syndrome:[[2074], [1161], [672], [2068], [7515], [142], [3725], [2067], [328], [2073], [1025], [467], [2072], [2071], [7182], [2648], [79661], [2965], [404672], [267004]]
-Syndrome Progeria-Like:[[]]
-Progeroid Nanism:[[]]
-Progeria Like Syndrome:[[]]
-Progeria-Like Syndromes:[[]]
-Dwarfism-Retinal Atrophy-Deafness Syndrome:[[]]

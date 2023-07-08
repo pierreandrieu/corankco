@@ -1,4 +1,0 @@
-Parasitic Disease Animal:[[]]
-Parasitic Infection Animal:[[4790], [3135], [54106], [3481], [8288]]
-Parasitic Diseases Animal:[[54106]]
-Parasitic Infections Animal:[[4790], [54106], [3135], [3481]]

@@ -1,7 +1,0 @@
-Unspecified disease of pharynx:[[351], [1029], [7157], [7015], [1399]]
-Pharyngeal Disease:[[]]
-Pharynx Disease:[[]]
-Pharyngeal Diseases:[[]]
-Pharynx Diseases:[[]]
-Diseases of Pharynx:[[7157], [1029], [351], [3553], [7015], [7098], [7442], [6794], [2304], [8989], [117581]]
-Disorder of pharynx:[[7157], [3553], [351], [7015], [5663], [6794], [7991], [8989], [5816]]

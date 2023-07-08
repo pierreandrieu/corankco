@@ -1,7 +1,0 @@
-Intestinal malabsorption:[[6573], [8029], [1080], [6523], [338], [6555], [113235], [1056], [3938], [51128], [192343]]
-Syndromes Malabsorption:[[338], [113235]]
-Malabsorption:[[1080], [6523], [338], [6555], [113235], [6573], [3938], [1581], [1056], [8029], [5166], [51128], [2694], [5651], [81693], [84701], [192343]]
-Intestinal malabsorption unspecified:[[]]
-Syndrome Malabsorption:[[338], [1080], [8029], [6573], [3938], [81693], [1056], [5166], [192343]]
-Unspecified intestinal malabsorption:[[]]
-Malabsorption syndrome:[[]]

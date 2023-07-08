@@ -1,6 +1,0 @@
-Mucormycosis:[[3688], [3309]]
-Mucorales Infections:[[]]
-Mucormycoses:[[]]
-Mucorales Infection:[[]]
-Mucormycose:[[]]
-Mucormycosis unspecified:[[3688]]

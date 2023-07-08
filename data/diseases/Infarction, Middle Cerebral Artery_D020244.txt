@@ -1,7 +1,0 @@
-Middle Cerebral Artery Infarction:[[959], [4684], [246778], [3875], [5154], [10894]]
-Stroke Middle Cerebral Artery:[[6387], [5743], [183], [3091], [4314], [6647], [6285], [959], [958], [2022], [4615], [361], [2876], [5972], [3875], [10203], [406997]]
-MCA Infarct:[[348], [1401], [3990], [10060]]
-MCA Infarcts:[[348], [1401]]
-Middle Cerebral Artery Circulation Infarction:[[]]
-MCA Infarction:[[]]
-Cerebral Infarction Middle Cerebral Artery:[[5743], [6647], [183], [958], [6285]]

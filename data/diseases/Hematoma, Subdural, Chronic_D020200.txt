@@ -1,3 +1,0 @@
-Subdural Hematoma Chronic:[[7422], [4318], [207], [4313], [2321], [3265], [5228], [358], [1513], [406936], [10344]]
-Hemorrhage Subdural Chronic:[[7422], [4318], [7040], [4313], [2321], [358]]
-Subdural Hematomas Chronic:[[7040], [94]]

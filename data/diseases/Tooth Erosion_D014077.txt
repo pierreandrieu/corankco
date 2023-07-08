@@ -1,5 +1,0 @@
-Tooth Erosions:[[]]
-Erosion of teeth NOS:[[3479]]
-Erosion of teeth:[[7124], [3569], [3553], [4318], [3479], [8600], [4982], [265], [10117]]
-Tooth Erosion:[[]]
-Tooth erosion:[[]]

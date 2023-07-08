@@ -1,5 +1,0 @@
-Histoplasmosis unspecified:[[]]
-Histoplasmosis:[[3075], [718], [100507436], [387715], [4536]]
-Infections Histoplasma:[[64581], [3594]]
-Infection Histoplasma:[[3684], [64581], [3594]]
-Histoplasmoses:[[]]

@@ -1,7 +1,0 @@
-Cryopyrin-Associated Periodic Syndromes:[[114548], [3569], [3553], [3557], [4615]]
-Cryopyrin-associated periodic syndromes:[[114548], [3569], [3553], [3557], [4615]]
-Cryopyrin Associated Periodic Syndromes:[[114548], [3569], [3557], [3553], [4615]]
-Cryopyrinopathies:[[3553], [114548]]
-Cryopyrin associated periodic syndrome:[[114548], [3569], [3557], [3553], [4210], [4615], [10940]]
-Cryopyrinopathy:[[]]
-Cryopyrin-Associated Periodic Syndrome:[[114548], [3569], [3553], [4210], [3557], [4615], [10940]]

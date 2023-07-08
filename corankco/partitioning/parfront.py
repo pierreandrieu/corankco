@@ -8,15 +8,18 @@ from numpy import ndarray, asarray
 
 
 class ParFront(PairwiseBasedAlgorithm):
+    """
+    ParFront is an algorithm published in P. Andrieu, B. Brancotte, L. Bulteau, S. Cohen-Boulakia, A. Denise, A. Pierrot
+    , S. Vialette, Efficient, robust and effective rank aggregation for massive biological datasets, Future Generation
+    Computer Systems, 2021, pp 406–421.
+    The objective of this algorithm is the following one: it computes an ordered partition of the elements to rank that
+    is a list of sets L = [s1, s2, s3, ..., sk] such that for all i < j, for all x in s[i] and y in s[j], x is before y
+    in all the optimal consensus rankings within a Kemeny prism. It is true for any ScoringScheme (see ScoringScheme
+    class).
+    """
 
-    def __init__(self):
-        pass
-
-    def compute_frontiers(
-            self,
-            dataset: Dataset,
-            scoring_scheme: ScoringScheme
-    ) -> OrderedPartition:
+    @staticmethod
+    def compute_partition(dataset: Dataset, scoring_scheme: ScoringScheme) -> OrderedPartition:
         """
         :param dataset: A dataset containing the rankings to aggregate
         :type dataset: Dataset (class Dataset in package 'datasets')
@@ -28,7 +31,7 @@ class ParFront(PairwiseBasedAlgorithm):
         id_elements: Dict[int, Element] = dataset.mapping_id_elem
 
         positions: ndarray = dataset.get_positions()
-        gr1, mat_score, robust_arcs = self.graph_of_elements(positions, sc)
+        gr1, mat_score, robust_arcs = ParFront.graph_of_elements(positions, sc)
         sccs = gr1.components()
 
         # initialization of the partition

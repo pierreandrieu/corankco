@@ -3,7 +3,6 @@ from collections import Counter
 import numpy as np
 import copy
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, name_file
-from corankco.rankingsgeneration.rankingsgenerate import create_rankings, uniform_permutations
 from corankco.ranking import Ranking
 from corankco.element import Element, PairwiseElementComparison
 from corankco.scoringscheme import ScoringScheme
@@ -21,27 +20,7 @@ class Dataset:
     :type rankings: list of Ranking
     :param name: Name of the dataset.
     :type name: str, optional
-    """    # returns the pairwise cost matrix
-    def pairs_relative_positions(self) -> np.ndarray:
-        positions: np.ndarray = self.get_positions()
-        n = self.nb_elements
-        m = self.nb_rankings
-        matrix = np.zeros((n * n, 6))
-        for e1 in range(n-1, -1, -1):
-            ind1 = n * e1 + e1
-            ind2 = ind1
-            for e2 in range(e1-1, -1, -1):
-                ind1 -= 1
-                ind2 -= n
-                a = np.count_nonzero(positions[e1] + positions[e2] == -2)
-                b = np.count_nonzero(positions[e1] == positions[e2])
-                c = np.count_nonzero(positions[e2] == -1)
-                d = np.count_nonzero(positions[e1] == -1)
-                e = np.count_nonzero(positions[e1] < positions[e2])
-                matrix[ind1] = [e-d+a, b-a, m-(a+b+c+d+e), c-a, d-a, a]
-                matrix[ind2] = [e - d + a, b - a, m - (a + b + c + d + e), c - a, d - a, a]
-
-        return matrix
+    """
 
     def __init__(self, rankings: List[Ranking], name: str = ""):
         """
@@ -504,22 +483,22 @@ class Dataset:
         :param nb_rankings: the number of rankings for the dataset
         :return: a new Dataset instance whose rankings are uniformly generated complete rankings without ties
         """
-        return Dataset.from_raw_list(uniform_permutations(nb_elem, nb_rankings))
+        return Dataset(Ranking.uniform_permutations(nb_elem, nb_rankings))
 
     @staticmethod
-    def get_random_dataset_markov(nb_elem: int, nb_rankings: int, step, complete: bool = False):
+    def get_random_dataset_markov(nb_elem: int, nb_rankings: int, steps: int, complete: bool = False):
         """
         Get a Dataset generated using a Markov chain. Note that if complete is set to false, the return dataset
         may contain fewer elements than initially wanted if one or more elements have been removed from all the rankings
         during the markov walking
         :param nb_elem: the number of elements in the wanted dataset
         :param nb_rankings: the number of rankings in the wanted dataset
-        :param step: the number of steps in the Markov chain for each ranking to generate
+        :param steps: the number of steps in the Markov chain for each ranking to generate
         :param complete: true iif the wanted dataset must be complete that is if all the elements must be ranked in all
         the rankings
         :return: A Dataset generated using a Markov chain, see details in corankco.rankingsgeneration.rankingsgenerate
         """
-        return Dataset.from_raw_list(create_rankings(nb_elem, nb_rankings, step, complete))
+        return Dataset(Ranking.generate_rankings(nb_elem, nb_rankings, steps, complete))
 
     @staticmethod
     def get_datasets_from_folder(path_folder: str) -> List['Dataset']:

@@ -101,13 +101,19 @@ class Dataset:
         rankings_final: List[Ranking] = []
         all_ints: bool = True
         for ranking in rankings:
+            print(ranking)
             if not all_ints:
                 break
             for bucket in ranking:
+                print(bucket)
                 if not all_ints:
                     break
                 for element in bucket:
-                    if not element.can_be_int():
+                    if isinstance(element, int):
+                        continue
+                    elif isinstance(element, str) and not element.isdigit():
+                        all_ints = False
+                    elif not element.can_be_int():
                         all_ints = False
                         break
         if all_ints:
@@ -340,10 +346,10 @@ class Dataset:
         :return: A complete description of the Dataset object containing all the available information
         """
         return "Dataset description:\n\telements:" + str(self.nb_elements) + "\n\trankings:" + str(self.nb_rankings) \
-               + "\n\tcomplete:" \
-               + str(self.is_complete) + "\n\twithout ties: " + str(self.without_ties) + "\n\t" \
-               + "rankings:\n" \
-               + "\n".join("\t\tr"+str(i+1)+" = "+str(self.rankings[i]) for i in range(len(self.rankings)))
+            + "\n\tcomplete:" \
+            + str(self.is_complete) + "\n\twithout ties: " + str(self.without_ties) + "\n\t" \
+            + "rankings:\n" \
+            + "\n".join("\t\tr" + str(i + 1) + " = " + str(self.rankings[i]) for i in range(len(self.rankings)))
 
     # returns a numpy ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
     def get_positions(self) -> np.ndarray:
@@ -584,6 +590,7 @@ class DatasetSelector:
     """
     Class usable to filter datasets according to their number of elements and / or rankings
     """
+
     def __init__(self,
                  nb_elem_min: int = 0,
                  nb_elem_max: Union[int, float] = float('inf'),
@@ -654,7 +661,7 @@ class DatasetSelector:
         :return: a String representation of the object, containing the values of the attributes of the class
         """
         return "nb elements between " + str(self._nb_elem_min) + " and " + str(self._nb_elem_max) + \
-               "; nb rankings between " + str(self._nb_rankings_min) + " and " + str(self._nb_rankings_max)
+            "; nb rankings between " + str(self._nb_rankings_min) + " and " + str(self._nb_rankings_max)
 
     def __repr__(self) -> str:
         """
@@ -662,3 +669,4 @@ class DatasetSelector:
         :return: a String representation of the object, containing the values of the attributes of the class
         """
         return self.__str__()
+

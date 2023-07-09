@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>dataset &#8212; corankco 5.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="element" href="element.html" />
+    <link rel="prev" title="consensus" href="consensus.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-corankco.dataset">
+<span id="dataset"></span><h1>dataset<a class="headerlink" href="#module-corankco.dataset" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.dataset.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rankings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ranking.html#corankco.ranking.Ranking" title="corankco.ranking.Ranking"><span class="pre">Ranking</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class representing a dataset containing rankings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rankings</strong> (<em>list</em><em> of </em><a class="reference internal" href="ranking.html#corankco.ranking.Ranking" title="corankco.ranking.Ranking"><em>Ranking</em></a>) – Rankings in the dataset.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the dataset.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.contains_element">
+<span class="sig-name descname"><span class="pre">contains_element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.contains_element" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>element</strong> – the element to find</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>true iif the target element is ranked in at least one input ranking of the dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.description" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A complete description of the Dataset object containing all the available information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.from_file">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#corankco.dataset.Dataset.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Dataset from a file containing rankings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Dataset object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.from_raw_list">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_raw_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rankings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#corankco.dataset.Dataset.from_raw_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Dataset from a raw list of rankings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rankings</strong> (<em>List</em><em>[</em><em>List</em><em>[</em><em>Set</em><em>[</em><em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em><em>]</em><em>]</em><em>]</em>) – A list of rankings.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A new Dataset object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.get_dataset_from_file">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_dataset_from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#corankco.dataset.Dataset.get_dataset_from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a file of rankings and return a Dataset object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – The path to the ranking file to read.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Dataset object containing the read rankings.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.get_datasets_from_folder">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_datasets_from_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.get_datasets_from_folder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a List of Dataset, one by file of the folder path
+:param path_folder: the path of the folder containing the datasets
+:return: a List containing one Dataset by dataset file in the input folder path</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.get_positions">
+<span class="sig-name descname"><span class="pre">get_positions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.get_positions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the position of element i in ranking j</p>
+</dd>
+</dl>
+<p>position = -1 if element i is non-ranked in ranking j</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.get_random_dataset_markov">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_random_dataset_markov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_rankings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.get_random_dataset_markov" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Dataset generated using a Markov chain. Note that if complete is set to false, the return dataset
+may contain fewer elements than initially wanted if one or more elements have been removed from all the rankings
+during the markov walking
+:param nb_elem: the number of elements in the wanted dataset
+:param nb_rankings: the number of rankings in the wanted dataset
+:param steps: the number of steps in the Markov chain for each ranking to generate
+:param complete: true iif the wanted dataset must be complete that is if all the elements must be ranked in all
+the rankings
+:return: A Dataset generated using a Markov chain, see details in corankco.rankingsgeneration.rankingsgenerate</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.get_uniform_permutation_dataset">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_uniform_permutation_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_rankings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.get_uniform_permutation_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Dataset of nb_elem elements and nb_rankings complete rankings without ties
+where each ranking is uniformly generated
+:param nb_elem: the number of wanted elements for the dataset
+:param nb_rankings: the number of rankings for the dataset
+:return: a new Dataset instance whose rankings are uniformly generated complete rankings without ties</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.is_complete">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_complete</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#corankco.dataset.Dataset.is_complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to check if the dataset is complete that is if all the rankings of the dataset have the same domain.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns True if the object is complete, False otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.mapping_elem_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping_elem_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.dataset.Dataset.mapping_elem_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the mapping element -&gt; unique int ID for each element of the universe of the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a dictionary that associates for each element of the universe a unique int ID.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict[<a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element">Element</a>, int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.mapping_id_elem">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mapping_id_elem</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.dataset.Dataset.mapping_id_elem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the mapping element -&gt; unique int ID for each element of the universe of the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a dictionary that associates for each element of the universe a unique int ID.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict[<a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element">Element</a>, int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corankco.dataset.Dataset.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the name of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns the name of the dataset.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.nb_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_elements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corankco.dataset.Dataset.nb_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the total number of elements that appear in at least one ranking of the Dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The total number of elements in the Dataset.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.nb_rankings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_rankings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corankco.dataset.Dataset.nb_rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the number of rankings of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns the number of rankings.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.penalties_relative_positions">
+<span class="sig-name descname"><span class="pre">penalties_relative_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoring_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="scoringscheme.html#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><span class="pre">ScoringScheme</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="element.html#corankco.element.PairwiseElementComparison" title="corankco.element.PairwiseElementComparison"><span class="pre">PairwiseElementComparison</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.penalties_relative_positions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a set of all pairs of elements with their costs of different relative positions under a Kemeny prism
+regarding the given ScoringScheme. Complexity: O(nb_elements * nb_elements * nb_rankings)
+Complexity: O(nb_rankings * nb_elements²)
+:param scoring_scheme: the ScoringScheme to use for the computation of the different relative costs
+:return: a Set of ElementComparison objects</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.rankings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rankings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ranking.html#corankco.ranking.Ranking" title="corankco.ranking.Ranking"><span class="pre">Ranking</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.dataset.Dataset.rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the rankings from the Dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The list of rankings in this Dataset object.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[<a class="reference internal" href="ranking.html#corankco.ranking.Ranking" title="corankco.ranking.Ranking">Ranking</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.remove_elements">
+<span class="sig-name descname"><span class="pre">remove_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements_to_remove</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.remove_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove elements from all rankings in the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements_to_remove</strong> (<em>Set</em><em>[</em><a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element"><em>Element</em></a><em>]</em>) – Set of elements to remove.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.remove_elements_rate_presence_lower_than">
+<span class="sig-name descname"><span class="pre">remove_elements_rate_presence_lower_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rate_presence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.remove_elements_rate_presence_lower_than" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove elements whose rate of presence in the rankings is lower than the provided threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>rate_presence</strong> (<em>float</em>) – Threshold below which elements are removed.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.remove_empty_rankings">
+<span class="sig-name descname"><span class="pre">remove_empty_rankings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.remove_empty_rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove empty rankings from the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.sub_problem_from_elements">
+<span class="sig-name descname"><span class="pre">sub_problem_from_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements_to_keep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#corankco.dataset.Dataset.sub_problem_from_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a sub-problem Dataset by projecting the original Dataset on a given set of elements.</p>
+<p>The resulting Dataset only includes the rankings that contain at least one of the elements from
+the ‘elements_to_keep’ set. Similarly, within each ranking, only buckets that contain at least one
+of the elements from the ‘elements_to_keep’ set are kept.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>elements_to_keep</strong> (<em>Set</em><em>[</em><a class="reference internal" href="element.html#corankco.element.Element" title="corankco.element.Element"><em>Element</em></a><em>]</em>) – A set of elements which the sub-problem should be based on.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Dataset representing the sub-problem, which only includes the elements from ‘elements_to_keep’ set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.sub_problem_from_ids">
+<span class="sig-name descname"><span class="pre">sub_problem_from_ids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_elements_to_keep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#corankco.dataset.Dataset.sub_problem_from_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a sub-problem Dataset by projecting the original Dataset on a given set of int IDs of elements.</p>
+<p>The resulting Dataset only includes the rankings that contain at least one of the elements from
+the ‘elements_to_keep’ set. Similarly, within each ranking, only buckets that contain at least one
+of the elements from the ‘elements_to_keep’ set are kept.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_elements_to_keep</strong> (<em>Set</em><em>[</em><em>int</em><em>]</em>) – A set of elements which the sub-problem should be based on.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A Dataset representing the sub-problem which only includes the elements from ‘id_elements_to_keep’ set.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.unified_dataset">
+<span class="sig-name descname"><span class="pre">unified_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.Dataset.unified_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a new Dataset object, representing the unified version of the instance dataset.
+In the returned dataset, for each input ranking r, all the elements of the universe non-ranked in r are added
+in a unifying bucket at the end of r.
+:return: a new Dataset object representing the unified version of the current instance</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.unified_rankings">
+<span class="sig-name descname"><span class="pre">unified_rankings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="ranking.html#corankco.ranking.Ranking" title="corankco.ranking.Ranking"><span class="pre">Ranking</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.unified_rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a unified version of the dataset as a List of Ranking objects, that is a list of the input rankings such
+that for each ranking r, all the elements of the universe non-ranked in r are added in a unifying bucket at the
+end of r.
+:return: the unified rankings of the Dataset within a new Ranking List</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.universe">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">universe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Set</span></em><a class="headerlink" href="#corankco.dataset.Dataset.universe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get the set of elements that appear in at least one input ranking of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a set of elements.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Set</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.without_ties">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">without_ties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#corankco.dataset.Dataset.without_ties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to check if the dataset is a list of rankings without ties
+:return: Returns True iif all the rankings of the dataset are without ties
+:rtype: bool</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.Dataset.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#corankco.dataset.Dataset.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the input rankings of the dataset in a file
+:param path: the path to store the dataset
+:return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.dataset.</span></span><span class="sig-name descname"><span class="pre">DatasetSelector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_elem_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_elem_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">inf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_rankings_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_rankings_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.dataset.DatasetSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class usable to filter datasets according to their number of elements and / or rankings</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector.nb_elem_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_elem_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.dataset.DatasetSelector.nb_elem_max" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the attribute, that is the maximal number of elements to retain a dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector.nb_elem_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_elem_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corankco.dataset.DatasetSelector.nb_elem_min" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the attribute, that is the minimal number of elements to retain a dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector.nb_rankings_max">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_rankings_max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.dataset.DatasetSelector.nb_rankings_max" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the attribute, that is the maximal number of rankings to retain a dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector.nb_rankings_min">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nb_rankings_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#corankco.dataset.DatasetSelector.nb_rankings_min" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The value of the attribute, that is the minimal number of rankings to retain a dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.dataset.DatasetSelector.select_datasets">
+<span class="sig-name descname"><span class="pre">select_datasets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_datasets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.dataset.DatasetSelector.select_datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of Dataset objects, returns the List of Dataset references that fit with the filter
+:param list_datasets: the list of datasets to filter
+:return: the list l of Dataset references such that d in l iif:
+* self.nb_elem_min &lt;= d.nb_elements &lt;= self.nb_elem_max
+* self.nb_rankings_min &lt;= d.nb_rankings &lt;= self.nb_rankings_max</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="corankco.dataset.EmptyDatasetException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.dataset.</span></span><span class="sig-name descname"><span class="pre">EmptyDatasetException</span></span><a class="headerlink" href="#corankco.dataset.EmptyDatasetException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom exception for empty dataset</p>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">corankco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">consensus</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">dataset</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.dataset.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.dataset.DatasetSelector"><code class="docutils literal notranslate"><span class="pre">DatasetSelector</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.dataset.EmptyDatasetException"><code class="docutils literal notranslate"><span class="pre">EmptyDatasetException</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="element.html">element</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kemeny_score_computation.html">kemeny_score_computation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ranking.html">ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoringscheme.html">scoringscheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithmChoice.html">algorithmChoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioconsert.html">bioconsert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioco.html">bioco</a></li>
+<li class="toctree-l1"><a class="reference internal" href="borda.html">borda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copeland.html">copeland</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmbase.html">exactalgorithmbase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplexforpaperoptim1.html">exactalgorithmcplexforpaperoptim1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplex.html">exactalgorithmcplex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmgeneric.html">exactalgorithmgeneric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithm.html">exactalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortabs.html">kwiksortabs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortrandom.html">kwiksortrandom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="median_ranking.html">median_ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairwisebasedalgorithm.html">pairwisebasedalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parcons.html">parcons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pickaperm.html">pickaperm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orderedPartition.html">orderedPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parconsPartition.html">parconsPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parfront.html">parfront</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="consensus.html" title="previous chapter">consensus</a></li>
+      <li>Next: <a href="element.html" title="next chapter">element</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierre Andrieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/dataset.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

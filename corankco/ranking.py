@@ -44,7 +44,21 @@ class Ranking:
         :rtype: Ranking
         """
         buckets: List[Set[Element]] = parse_ranking_with_ties_of_str(ranking_str)
-        return cls(buckets)
+        all_ints: bool=True
+        for bucket in buckets:
+            if not all_ints:
+                break
+            for elem in bucket:
+                if not elem.can_be_int():
+                    all_ints = False
+                    break
+        if all_ints:
+            buckets_final: List[Set[Element]] = []
+            for bucket in buckets:
+                buckets_final.append({Element(int(str(elem))) for elem in bucket})
+        else:
+            bucket_final = buckets
+        return cls(buckets_final)
 
     @classmethod
     def from_list(cls, ranking_list: List[Set[Union[int, str]]]) -> 'Ranking':
@@ -386,3 +400,4 @@ class Ranking:
     def __change_ranking_incomplete(ranking: np.ndarray, steps: int, nb_elements: int, missing_elements: Set):
         for step in range(steps):
             Ranking.__step_element_incomplete(ranking, randint(0, nb_elements - 1), missing_elements)
+

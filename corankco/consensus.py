@@ -280,10 +280,9 @@ class Consensus:
                     - the first integer is
                     -the second one is
         """
-        gs_set = set()
-        for elem in goldstandard:
-            gs_set.add(elem)
-        return len(self.topk_ranking(top_k).intersection(gs_set))
+        print(self.consensus_rankings[0])
+        print("goldstandard", goldstandard, " topkranking", self.topk_ranking(top_k))
+        return len(self.topk_ranking(top_k).intersection({elem for elem in goldstandard}))
 
     def topk_ranking(self, top_k: int) -> Set[int or str]:
         res = set()
@@ -361,3 +360,4 @@ class ConsensusSingleRanking(Consensus):
         :return: the position of the given target element in the consensus ranking
         """
         return self.positions_element(element)[0]
+

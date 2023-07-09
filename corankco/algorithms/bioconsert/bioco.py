@@ -4,6 +4,7 @@ from corankco.algorithms.borda.borda import BordaCount
 
 class BioCo(BioConsert):
     """
+
     BioCo is a BioConsert instance that uses Borda as starting point to improve its consensus with local search
     BioConsert is a heuristics for Kemeny-Young rank aggregation published in
     S.Cohen-Boulakia, A.Denise, S.Hamel. Using Medians to Generate Consensus Rankings for Biological Data.
@@ -11,10 +12,13 @@ class BioCo(BioConsert):
     Complexity: O(nb_elements²)
     This algorithm is BioConsert, which uses Borda method as starting point (see details on BioConsert Class docstring).
     For time computation reasons, a part of this algorithm is written in C
+
     """
     def __init__(self):
         """
+
         Initializes a BioConsert instance with BordaCount as starting algorithm
+
         """
         super().__init__(starting_algorithms=[BordaCount()])
 
@@ -22,5 +26,6 @@ class BioCo(BioConsert):
         """
 
         :return: Bioco (BioConsert with [BordaCount] as starter algorithms)
+
         """
         return "Bioco (" + super().get_full_name() + ")"

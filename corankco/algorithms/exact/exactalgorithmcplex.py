@@ -1,5 +1,5 @@
 from typing import List, Dict, Set, Tuple, Union
-from algorithms.exact.exactalgorithmbase import ExactAlgorithmBase, IncompatibleArgumentsException
+from corankco.algorithms.exact.exactalgorithmbase import ExactAlgorithmBase, IncompatibleArgumentsException
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme

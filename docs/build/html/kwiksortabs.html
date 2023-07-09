@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>kwiksortabs &#8212; corankco 5.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="kwiksortrandom" href="kwiksortrandom.html" />
+    <link rel="prev" title="exactalgorithm" href="exactalgorithm.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-corankco.algorithms.kwiksort.kwiksortabs">
+<span id="kwiksortabs"></span><h1>kwiksortabs<a class="headerlink" href="#module-corankco.algorithms.kwiksort.kwiksortabs" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.algorithms.kwiksort.kwiksortabs.</span></span><span class="sig-name descname"><span class="pre">KwikSortAbs</span></span><a class="headerlink" href="#corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for KwikSort algorithms. KwikSort is a heuristics designed for Kemeny-Young method.
+QuickSort based algorithm: pick a pivot, find the set of elements shat should be ranked after pivot,
+then before pivot, then tied with pivot, and recursively go on with the before and after sets
+complexity: mean: O(nb_rankings * nb_elements * log2(nb_elements)) if choice of pivot is O(1)
+complexity: worst: 0(nb_ranking * nb_elements²) if pivot divides elements in groups of size 1 and n-1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.compute_consensus_rankings">
+<span class="sig-name descname"><span class="pre">compute_consensus_rankings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataset.html#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><span class="pre">Dataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="scoringscheme.html#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><span class="pre">ScoringScheme</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_at_most_one_ranking</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bench_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="consensus.html#corankco.consensus.ConsensusSingleRanking" title="corankco.consensus.ConsensusSingleRanking"><span class="pre">ConsensusSingleRanking</span></a></span></span><a class="headerlink" href="#corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.compute_consensus_rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and return the consensus rankings based on the given dataset and scoring scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="dataset.html#corankco.dataset.Dataset" title="corankco.dataset.Dataset"><em>Dataset</em></a>) – The dataset of rankings to be aggregated.</p></li>
+<li><p><strong>scoring_scheme</strong> (<a class="reference internal" href="scoringscheme.html#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><em>ScoringScheme</em></a>) – The scoring scheme to be used for calculating consensus.</p></li>
+<li><p><strong>return_at_most_one_ranking</strong> (<em>bool</em>) – If True, the algorithm should return at most one ranking.</p></li>
+<li><p><strong>bench_mode</strong> (<em>bool</em>) – If True, the algorithm may return additional information for benchmarking purposes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Consensus rankings. If the algorithm is unable to provide multiple consensuses or</p>
+</dd>
+</dl>
+<p>return_at_most_one_ranking is True, a single consensus ranking is returned.
+:raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
+implementation does not support the given scoring scheme.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.get_full_name">
+<span class="sig-name descname"><span class="pre">get_full_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.get_full_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the full name of the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>name of the algorithm, must be defined in daughter classes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.is_scoring_scheme_relevant_when_incomplete_rankings">
+<span class="sig-name descname"><span class="pre">is_scoring_scheme_relevant_when_incomplete_rankings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scoring_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="scoringscheme.html#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><span class="pre">ScoringScheme</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs.is_scoring_scheme_relevant_when_incomplete_rankings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the scoring scheme is relevant when the rankings are incomplete.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scoring_scheme</strong> (<a class="reference internal" href="scoringscheme.html#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><em>ScoringScheme</em></a>) – The scoring scheme to be checked.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True as KwikSort can handle any ScoringScheme</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">corankco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="element.html">element</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kemeny_score_computation.html">kemeny_score_computation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ranking.html">ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoringscheme.html">scoringscheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithmChoice.html">algorithmChoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioconsert.html">bioconsert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioco.html">bioco</a></li>
+<li class="toctree-l1"><a class="reference internal" href="borda.html">borda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copeland.html">copeland</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmbase.html">exactalgorithmbase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplexforpaperoptim1.html">exactalgorithmcplexforpaperoptim1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplex.html">exactalgorithmcplex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmgeneric.html">exactalgorithmgeneric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithm.html">exactalgorithm</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">kwiksortabs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.algorithms.kwiksort.kwiksortabs.KwikSortAbs"><code class="docutils literal notranslate"><span class="pre">KwikSortAbs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortrandom.html">kwiksortrandom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="median_ranking.html">median_ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairwisebasedalgorithm.html">pairwisebasedalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parcons.html">parcons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pickaperm.html">pickaperm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orderedPartition.html">orderedPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parconsPartition.html">parconsPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parfront.html">parfront</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="exactalgorithm.html" title="previous chapter">exactalgorithm</a></li>
+      <li>Next: <a href="kwiksortrandom.html" title="next chapter">kwiksortrandom</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierre Andrieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/kwiksortabs.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>element &#8212; corankco 5.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="kemeny_score_computation" href="kemeny_score_computation.html" />
+    <link rel="prev" title="dataset" href="dataset.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-corankco.element">
+<span id="element"></span><h1>element<a class="headerlink" href="#module-corankco.element" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.element.Element">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.element.</span></span><span class="sig-name descname"><span class="pre">Element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.element.Element" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class to represent an element of a ranking.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>Union</em><em>[</em><em>int</em><em>, </em><em>str</em><em>]</em>) – the value of the element, either an integer or a string</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.Element.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type</span></em><a class="headerlink" href="#corankco.element.Element.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the type of the instance
+:return: type of the instance
+:rtype: Type</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.Element.value">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#corankco.element.Element.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the value of the instance
+:return: value of the instance
+:rtype: Union[int, str]</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.element.</span></span><span class="sig-name descname"><span class="pre">PairwiseElementComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_before_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_after_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tied_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.element.PairwiseElementComparison" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to encapsulate the cost of the different relative orders for two elements in a consensus ranking within a
+Kemeny prism</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison.x">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a></em><a class="headerlink" href="#corankco.element.PairwiseElementComparison.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to get the x element
+:return: x</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison.x_after_y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_after_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.element.PairwiseElementComparison.x_after_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to get the cost to place x after y in a consensus in a Kemeny prism
+:return: cost to place x after y in a consensus in a Kemeny prism</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison.x_before_y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_before_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.element.PairwiseElementComparison.x_before_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to get the cost to place x before y in a consensus in a Kemeny prism
+:return: cost to place x before y in the consensus in a Kemeny prism</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison.x_tied_y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_tied_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.element.PairwiseElementComparison.x_tied_y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to get the cost to tie x and y in a consensus in a Kemeny prism
+:return: cost to tie x and y in a consensus in a Kemeny prism</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.element.PairwiseElementComparison.y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#corankco.element.Element" title="corankco.element.Element"><span class="pre">Element</span></a></em><a class="headerlink" href="#corankco.element.PairwiseElementComparison.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property to get the y element
+:return: y</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">corankco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">element</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.element.Element"><code class="docutils literal notranslate"><span class="pre">Element</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.element.PairwiseElementComparison"><code class="docutils literal notranslate"><span class="pre">PairwiseElementComparison</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kemeny_score_computation.html">kemeny_score_computation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ranking.html">ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoringscheme.html">scoringscheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithmChoice.html">algorithmChoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioconsert.html">bioconsert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioco.html">bioco</a></li>
+<li class="toctree-l1"><a class="reference internal" href="borda.html">borda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copeland.html">copeland</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmbase.html">exactalgorithmbase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplexforpaperoptim1.html">exactalgorithmcplexforpaperoptim1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplex.html">exactalgorithmcplex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmgeneric.html">exactalgorithmgeneric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithm.html">exactalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortabs.html">kwiksortabs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortrandom.html">kwiksortrandom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="median_ranking.html">median_ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pairwisebasedalgorithm.html">pairwisebasedalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parcons.html">parcons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pickaperm.html">pickaperm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orderedPartition.html">orderedPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parconsPartition.html">parconsPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parfront.html">parfront</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="dataset.html" title="previous chapter">dataset</a></li>
+      <li>Next: <a href="kemeny_score_computation.html" title="next chapter">kemeny_score_computation</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierre Andrieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/element.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -12,6 +12,7 @@ import bioconsertinc
 
 class BioConsert(MedianRanking):
     """
+
     BioConsert is a heuristics for Kemeny-Young rank aggregation published in
     Cohen-Boulakia, Sarah & Denise, Alain & Hamel, Sylvie. (2011). Using Medians to Generate Consensus Rankings for
     Biological Data. 6809. 73-90. 10.1007/978-3-642-22351-8_5.
@@ -19,6 +20,7 @@ class BioConsert(MedianRanking):
     Had best quality results on benchmark (complete rankings) in Brancotte et al. (2015). Rank aggregation with
     ties: Experiments and Analysis.
     For time computation reasons, a part of this algorithm is written in C
+
     """
     def __init__(self, starting_algorithms: Collection[MedianRanking] = None):
         if starting_algorithms is None:
@@ -49,6 +51,7 @@ class BioConsert(MedianRanking):
         :rtype: Consensus
         :raise ScoringSchemeNotHandledException: When the algorithm cannot compute the consensus because the
         implementation does not support the given scoring scheme.
+
         """
 
         scoring_scheme_ndarray: ndarray = asarray(scoring_scheme.penalty_vectors)
@@ -222,6 +225,7 @@ class BioConsert(MedianRanking):
         """
 
         :return: the name of the Algorithm i.e. "BioConsert with " + information on the departure algorithms if not None
+
         """
         list_alg = list(self._starting_algorithms)
         res = "BioConsert with "
@@ -243,6 +247,7 @@ class BioConsert(MedianRanking):
         :type scoring_scheme: ScoringScheme
         :return: True iif all the starting algorithms are compatible with the scoring scheme
         :rtype: bool
+
         """
         for alg in self._starting_algorithms:
             if not alg.is_scoring_scheme_relevant_when_incomplete_rankings():

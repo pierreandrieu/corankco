@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>pairwisebasedalgorithm &#8212; corankco 5.1.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="parcons" href="parcons.html" />
+    <link rel="prev" title="median_ranking" href="median_ranking.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-corankco.algorithms.pairwisebasedalgorithm">
+<span id="pairwisebasedalgorithm"></span><h1>pairwisebasedalgorithm<a class="headerlink" href="#module-corankco.algorithms.pairwisebasedalgorithm" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.algorithms.pairwisebasedalgorithm.</span></span><span class="sig-name descname"><span class="pre">PairwiseBasedAlgorithm</span></span><a class="headerlink" href="#corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to gather several useful methods for pairwise based algorithms. Class for code factorisation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.can_be_all_tied">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">can_be_all_tied</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_elements_to_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_matrix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.can_be_all_tied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if all elements in a given set can be tied together with minimal cost.</p>
+<p>This method goes through all pairs of elements in the given set, checking the cost of tying them together.
+If the cost of tying any pair is higher than placing one before or after the other, the function returns False,
+indicating that not all elements in the set can be tied together with minimal cost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id_elements_to_check</strong> (<em>Set</em><em>[</em><em>int</em><em>]</em>) – a set of IDs of the elements to be checked.</p></li>
+<li><p><strong>cost_matrix</strong> (<em>ndarray</em>) – a 3D matrix where cost_matrix[i][j][k] denotes the cost of placing i and j in
+k-th relative position in the consensus.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if all elements can be tied together with minimal cost, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.graph_of_elements">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">graph_of_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_scoring_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Graph</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.graph_of_elements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the graph of elements, the cost of pairwise relative positions and the set of robust arcs defined in the
+Future Generation Computer Systems article (as mentioned in the Class docstring)</p>
+<p>This function generates a graph of elements as defined in the Future Generation Computer Systems article
+(as mentioned in the Class docstring) and computes the cost of pairwise relative positions.
+The latter is a 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
+i after j, i tied with j in the consensus according to the scoring scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>positions</strong> – a matrix where pos[i][j] denotes the position of element i in ranking j (-1 if non-ranked)</p></li>
+<li><p><strong>matrix_scoring_scheme</strong> – the numpy ndarray version of the scoring scheme</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the Graph of elements defined in the FGCS article, the 3D matrix of costs of</p>
+</dd>
+</dl>
+<p>pairwise relative positions, and the set of the robust arcs defined in the FGCS article</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.pairwise_cost_matrix">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pairwise_cost_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_scoring_scheme</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm.pairwise_cost_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the graph of elements and the cost of pairwise relative positions.</p>
+<p>This function generates a graph of elements as defined in the Future Generation Computer Systems article
+(as mentioned in the Class docstring) and computes the cost of pairwise relative positions.
+The latter is a 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
+i after j, i tied with j in the consensus according to the scoring scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>positions</strong> – a matrix where pos[i][j] denotes the position of element i in ranking j (-1 if non-ranked)</p></li>
+<li><p><strong>matrix_scoring_scheme</strong> – the numpy ndarray version of the scoring scheme</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the Graph of elements defined in the FGCS article and the 3D matrix of costs of</p>
+</dd>
+</dl>
+<p>pairwise relative positions.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">corankco</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="element.html">element</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kemeny_score_computation.html">kemeny_score_computation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ranking.html">ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scoringscheme.html">scoringscheme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithmChoice.html">algorithmChoice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioconsert.html">bioconsert</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bioco.html">bioco</a></li>
+<li class="toctree-l1"><a class="reference internal" href="borda.html">borda</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copeland.html">copeland</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmbase.html">exactalgorithmbase</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplexforpaperoptim1.html">exactalgorithmcplexforpaperoptim1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmcplex.html">exactalgorithmcplex</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithmgeneric.html">exactalgorithmgeneric</a></li>
+<li class="toctree-l1"><a class="reference internal" href="exactalgorithm.html">exactalgorithm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortabs.html">kwiksortabs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="kwiksortrandom.html">kwiksortrandom</a></li>
+<li class="toctree-l1"><a class="reference internal" href="median_ranking.html">median_ranking</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pairwisebasedalgorithm</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.algorithms.pairwisebasedalgorithm.PairwiseBasedAlgorithm"><code class="docutils literal notranslate"><span class="pre">PairwiseBasedAlgorithm</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parcons.html">parcons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pickaperm.html">pickaperm</a></li>
+<li class="toctree-l1"><a class="reference internal" href="orderedPartition.html">orderedPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parconsPartition.html">parconsPartition</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parfront.html">parfront</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="median_ranking.html" title="previous chapter">median_ranking</a></li>
+      <li>Next: <a href="parcons.html" title="next chapter">parcons</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Pierre Andrieu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 6.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/pairwisebasedalgorithm.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

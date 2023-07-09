@@ -4,8 +4,8 @@ from math import isnan
 
 class InvalidScoringScheme(Exception):
     def __init__(self,
-                 message="Scoring scheme must be 2 Lists. "
-                         "Each list must be a list of 6 real >= 0 values. "
+                 message="Scoring scheme must be 2 Lists. " +
+                         "Each list must be a list of 6 real >= 0 values. " +
                          "For instance, [[0., 1., 1., 0., 0., 0.], [1., 1., 0., 1., 1., 0.]]"):
         self.message = message
         super().__init__(self.message)
@@ -33,19 +33,20 @@ class ForbiddenAssociationPenaltiesScoringScheme(Exception):
 
 class ScoringScheme:
     """
+
     The ScoringScheme class represents a scoring scheme for comparing rankings.
 
     :param penalties: A list of 2 penalty vectors i.e. rwo lists of size 6.
 
     Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and r be a ranking.
-    - B: costs to pay for each elements x,y such that x < y in the consensus, more precisely:
+     - B: costs to pay for each elements x,y such that x < y in the consensus, more precisely:
       - B[0] if x < y in r
       - B[1] if x > y in r
       - B[2] if x is tied with y in r
       - B[3] if x is ranked and y is not
       - B[4] if y is ranked and x is not
       - B[5] if x and y are non-ranked
-    - T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
+     - T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
       - T[0] if x < y in r
       - T[1] if x > y in r
       - T[2] if x is tied with y in r
@@ -67,11 +68,13 @@ class ScoringScheme:
 
     def __init__(self, penalties: List[List[float]]):
         """
+
         Initialize the ScoringScheme object.
 
         :param penalties: A list of penalty vectors
         :rtype: List
         :raises InvalidScoringScheme: If penalties is not of a correct format.
+
         """
         # check types and lengths
         if type(penalties) is not list or len(penalties) != 2:
@@ -107,20 +110,24 @@ class ScoringScheme:
     @property
     def b1(self) -> float:
         """
+
         Returns the cost to have x < y in the consensus for each input ranking such that x is before y
 
         :return: The first element of the first penalty vector B.
         :rtype: float
+
         """
         return self._penalty_vectors[0][0]
 
     @property
     def b2(self) -> float:
         """
+
         Returns the cost to have x < y in the consensus for each input ranking such that y is before x
 
         :return: The second element of the first penalty vector B.
         :rtype: float
+
         """
         return self._penalty_vectors[0][1]
 

@@ -41,13 +41,13 @@ class KwikSortAbs(MedianRanking):
         implementation does not support the given scoring scheme.
         """
 
-        scoring_scheme: ndarray = asarray(scoring_scheme.penalty_vectors)
+        scoring_scheme_numpy: ndarray = asarray(scoring_scheme.penalty_vectors)
 
         consensus_list: List[List[Element]] = []
         mapping_elements_id: Dict[Element, int] = dataset.mapping_elem_id
         positions = dataset.get_positions()
 
-        self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme)
+        self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme_numpy)
         return ConsensusSingleRanking(
             consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=dataset,
             scoring_scheme=scoring_scheme, att={ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})

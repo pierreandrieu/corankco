@@ -1,6 +1,0 @@
-corankco
-========
-
-.. automodule:: corankco
-   :members:
-

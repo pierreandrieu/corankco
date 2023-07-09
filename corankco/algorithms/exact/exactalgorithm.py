@@ -33,8 +33,10 @@ class ExactAlgorithm(ExactAlgorithmBase):
         try:
             import cplex
             self._alg = ExactAlgorithmCplex(optimize=optimize)
+        except ModuleNotFoundError:
+            self._alg = ExactAlgorithmGeneric()
         except ImportError:
-            self._alg = ExactAlgorithmGeneric(optimize)
+            self._alg = ExactAlgorithmGeneric()
 
     def compute_consensus_rankings(self, dataset: Dataset, scoring_scheme: ScoringScheme,
                                    return_at_most_one_ranking: bool = True, bench_mode: bool = False) -> Consensus:

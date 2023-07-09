@@ -5,7 +5,6 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.algorithms.median_ranking import MedianRanking
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.ranking import Ranking
-import time
 
 
 class TestAlgos(unittest.TestCase):

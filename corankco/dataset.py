@@ -98,7 +98,30 @@ class Dataset:
             raise EmptyDatasetException("There must be at least one ranking")
 
         # check if all elements are integers. If yes, all str are converted to integers
-        rankings_final: List[Ranking] = copy.deepcopy(rankings)
+        rankings_final: List[Ranking] = []
+        all_ints: bool = True
+        for ranking in rankings:
+            if not all_ints:
+                break
+            for bucket in ranking:
+                if not all_ints:
+                    break
+                for element in bucket:
+                    if not element.can_be_int():
+                        all_ints = False
+                        break
+        if all_ints:
+            for ranking in rankings:
+                ranking_final: List[Set[Element]] = []
+                for bucket in ranking:
+                    ranking_final.append({Element(int(str(e))) for e in bucket})
+                rankings_final.append(Ranking(ranking_final))
+        else:
+            for ranking in rankings:
+                ranking_final: List[Set[Element]] = []
+                for bucket in ranking:
+                    ranking_final.append({Element(str(e)) for e in bucket})
+                rankings_final.append(Ranking(ranking_final))
         # check if rankings are complete or not, and with or without ties
 
         # now, checking if dataset is complete or not, with or without ties
@@ -108,9 +131,7 @@ class Dataset:
         # dataset is complete iif each element is present as many times as the nb of rankings
         nb_occur_elements_in_rankings: Dict[Element, int] = {}
         for ranking in rankings_final:
-            nb_elements = 0
             for bucket in ranking:
-                nb_elements += len(bucket)
                 if len(bucket) > 1:
                     without_ties = False
                 for element in bucket:

@@ -1,8 +1,8 @@
 import unittest
-from ..corankco.dataset import Dataset
-from scoringscheme import ScoringScheme
-from algorithms.borda.borda import BordaCount
-from ranking import Ranking
+from corankco.dataset import Dataset
+from corankco.scoringscheme import ScoringScheme
+from corankco.algorithms.borda.borda import BordaCount
+from corankco.ranking import Ranking
 
 
 class TestBordaCount(unittest.TestCase):

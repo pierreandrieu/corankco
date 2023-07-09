@@ -73,6 +73,8 @@ class TestScoringScheme(unittest.TestCase):
         self.assertEqual(sc.t3, 0.)
         self.assertEqual(sc.t4_and_t5, 7.)
         self.assertEqual(sc.t6, 8.)
+        self.assertEqual(sc.b_vector, [0., 1., 2., 3., 4., 5.])
+        self.assertEqual(sc.t_vector, [6., 6., 0., 7., 7., 8.])
 
     def test_pseudodistance_scoring_scheme(self):
         ss = ScoringScheme.get_pseudodistance_scoring_scheme()

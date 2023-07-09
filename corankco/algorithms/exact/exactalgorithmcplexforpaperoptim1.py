@@ -1,6 +1,6 @@
 from typing import List, Union
 from itertools import combinations
-from .exactalgorithmcplex import ExactAlgorithmCplex
+from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
 from numpy import ndarray
 
 

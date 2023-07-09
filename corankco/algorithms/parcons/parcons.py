@@ -10,7 +10,6 @@ from numpy import ndarray, asarray
 from corankco.ranking import Ranking
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
-from corankco.partitioning.parconsPartition import ParConsPartition
 
 
 class ParCons(MedianRanking, PairwiseBasedAlgorithm):

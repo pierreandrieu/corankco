@@ -2,6 +2,7 @@ import unittest
 from corankco.ranking import Ranking
 from corankco.dataset import Dataset
 from corankco.element import Element
+import os
 
 
 class TestDataset(unittest.TestCase):
@@ -19,7 +20,12 @@ class TestDataset(unittest.TestCase):
 
     def test_from_file(self):
         # Test from_file method with a test file
-        dataset = Dataset.from_file("dataset_example")
+        # Get the directory of the current script
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+
+        # Construct the full path to the dataset file
+        dataset_file = os.path.join(script_dir, "dataset_example")
+        dataset = Dataset.from_file(dataset_file)
         self.assertEqual(len(dataset.rankings), 2)
         # Add other assertions based on the expected content of the file
 

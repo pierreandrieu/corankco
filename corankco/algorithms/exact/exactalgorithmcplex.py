@@ -9,7 +9,10 @@ from itertools import combinations
 from operator import itemgetter
 from corankco.ranking import Ranking
 from corankco.element import Element
-import cplex
+try:
+    import cplex
+except ImportError:
+    print("Cplex must be installed to use this class")
 
 
 class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):

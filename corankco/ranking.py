@@ -44,7 +44,7 @@ class Ranking:
         :rtype: Ranking
         """
         buckets: List[Set[Element]] = parse_ranking_with_ties_of_str(ranking_str)
-        all_ints: bool=True
+        all_ints: bool = True
         for bucket in buckets:
             if not all_ints:
                 break
@@ -56,9 +56,8 @@ class Ranking:
             buckets_final: List[Set[Element]] = []
             for bucket in buckets:
                 buckets_final.append({Element(int(str(elem))) for elem in bucket})
-        else:
-            bucket_final = buckets
-        return cls(buckets_final)
+                return cls(buckets_final)
+        return cls(buckets)
 
     @classmethod
     def from_list(cls, ranking_list: List[Set[Union[int, str]]]) -> 'Ranking':
@@ -144,25 +143,6 @@ class Ranking:
                     return False
         return True
 
-    """"
-    def to_int(self) -> 'Ranking':
-        print("to_int")
-        int_repr = []
-        for bucket in self._buckets:
-            bucket_int: Set[int] = set()
-            for element in bucket:
-                print("elem = " + str(element) + " " + str(element.value) + " " + str(element.type))
-                if element.type == str and element.value.isdigit():
-                    print(" entree if ")
-                    bucket_int.add(int(element.value))
-                    print(" fin if ")
-                else:
-                    print("probleme with elem " + str(element))
-                    raise ValueError(f"Cannot convert {element.value} to int")
-            int_repr.append(bucket_int)
-        print("fin")
-        return Ranking.from_list(int_repr)
-    """
     def __len__(self) -> int:
         """
         Returns the number of buckets in the Ranking.

@@ -101,11 +101,9 @@ class Dataset:
         rankings_final: List[Ranking] = []
         all_ints: bool = True
         for ranking in rankings:
-            print(ranking)
             if not all_ints:
                 break
             for bucket in ranking:
-                print(bucket)
                 if not all_ints:
                     break
                 for element in bucket:

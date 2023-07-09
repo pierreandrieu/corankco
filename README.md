@@ -16,62 +16,71 @@ Example usage
 
 .. code-block:: python
 
-    from corankco.dataset import Dataset
-    from corankco.scoringscheme import ScoringScheme
-    from corankco.algorithms.algorithmChoice import get_algorithm
-    from corankco.algorithms.algorithmChoice import Algorithm
-    from corankco.kemeny_computation import KemenyComputingFactory
+     from corankco.ranking import Ranking
+     from corankco.dataset import Dataset
+     from corankco.scoringscheme import ScoringScheme
+     from corankco.algorithms.algorithmChoice import get_algorithm
+     from corankco.algorithms.algorithmChoice import Algorithm
     
-    dataset = Dataset([
-                  [[1], [2, 3]],
-                  [[3, 1], [4]],
-                  [[1], [5], [3, 2]]
-                 ])
-    # or d = Dataset.get_rankings_from_file(file_path), where file_path is a string
+     # create a ranking from a list of sets
+     ranking1 = Ranking.from_list([{1}, {2, 3}])
     
-    # print information about the dataset
-    print(dataset.description())
+     # or from a string
+     ranking2 = Ranking.from_string("[{3, 1}, {4}]")
+    
+     # also in this format
+     ranking3 = Ranking.from_string("[[1], [5], [3], [2]]")
+    
+     # now, create a Dataset object. A Dataset is a list of rankings
+     dataset = Dataset([ranking1, ranking2, ranking3])
+    
+     # or, create a Dataset object from a file where your rankings are stored
+     # format file: each line is a list of either set, or list of int / str.
+     d = Dataset.from_file(path="dataset_example")
+    
+     # print information about the dataset
+     print(dataset.description())
+    
+     # get all datasets in a folder
+     # list_datasets = Dataset.get_datasets_from_folder(path_folder="folder_path")
+    
+     # choose your scoring scheme
+     sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+    
+     print("scoring scheme : " + str(sc))
+     # scoring scheme description
+     print(sc.description())
+    
+     print("\n### Consensus computation ###\n")
+    
+     # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom,
+     # PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
+    
+     algorithms_to_execute = [get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True}),
+                                get_algorithm(alg=Algorithm.KwikSortRandom),
+                                get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
+                                get_algorithm(alg=Algorithm.ParCons,
+                                    parameters={"bound_for_exact": 90,
+                                "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
+                                get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True}),
+                                get_algorithm(alg=Algorithm.CopelandMethod),
+                                get_algorithm(alg=Algorithm.BioCo),
+                                get_algorithm(alg=Algorithm.BordaCount)
+                                ]
+     for alg in algorithms_to_execute:
+            print(alg.get_full_name())
+     consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=sc, return_at_most_one_ranking=True)
 
-    # get all datasets in a folder
-    list_datasets = Dataset.get_datasets_from_folder(folder_path) 
-    
-    # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
-    sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
-    
-    print("scoring scheme : " + str(sc))
-    # scoring scheme description
-    print(sc.description())
-    
-    print("\n### Consensus computation ###\n")
-    
+     # to get the consensus rankings : consensus.consensus_rankings
+     # description() will display supplementary information
 
-    
-    # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom, 
-    # RepeatChoice, PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
-   
-    algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
-                             get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
-                             get_algorithm(alg=Algorithm.ParCons, 
-                                           parameters={"bound_for_exact": 90,
-                                                   "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
-                             get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
-                             ]
-    for alg in algorithms_to_execute:
-        print(alg.get_full_name())
-        consensus = alg.compute_consensus_rankings(dataset=dataset, 
-                                                   scoring_scheme=sc, 
-                                                   return_at_most_one_ranking=False)
-        # to get the consensus rankings : consensus.consensus_rankings
-        print(consensus.description())
-        # if you want the consensus ranking only : print(consensus)
-    
-    # compute score ('distance') between two rankings
-    kemeny = KemenyComputingFactory(sc)
-    
-    r1 = [[1], [2], [3, 4]]
-    r2 = [[3], [2]]
-    
-    print(kemeny.score_between_rankings(r1, r2))
+     print(consensus.description())
+     # if you want the consensus ranking only : print(consensus)
+
+     # get the Kemeny score associated with the consensus:
+
+     print(consensus.kemeny_score)
+>>>
     
 
 More Examples
@@ -79,121 +88,160 @@ More Examples
 
 .. code-block:: python
 
-    >>> from corankco.dataset import Dataset
-    >>> from corankco.scoringscheme import ScoringScheme
-    >>> from corankco.algorithms.algorithmChoice import get_algorithm
-    >>> from corankco.algorithms.algorithmChoice import Algorithm
-    >>> from corankco.kemeny_computation import KemenyComputingFactory
+>>>     from corankco.ranking import Ranking
+>>>     from corankco.dataset import Dataset
+>>>     from corankco.scoringscheme import ScoringScheme
+>>>     from corankco.algorithms.algorithmChoice import get_algorithm
+>>>     from corankco.algorithms.algorithmChoice import Algorithm
     
-    >>> dataset = Dataset([
-    >>>               [[1], [2, 3]],
-    >>>               [[3, 1], [4]],
-    >>>               [[1], [5], [3, 2]]
-    >>>              ])
-    >>> # or d = Dataset(file_path), where file_path is a string
+>>>     # create a ranking from a list of sets
+        ranking1 = Ranking.from_list([{1}, {2, 3}])
+
+>>>     # or from a string
+>>>     ranking2 = Ranking.from_string("[{3, 1}, {4}]")
+
+>>>     # also in this format
+>>>     ranking3 = Ranking.from_string("[[1], [5], [3], [2]]")
     
-    >>> # print information about the dataset
-    >>> print(dataset.description())
+>>>     # now, create a Dataset object. A Dataset is a list of rankings
+>>>     dataset = Dataset([ranking1, ranking2, ranking3])
+    
+>>>     # or, create a Dataset object from a file where your rankings are stored
+>>>     # format file: each line is a list of either set, or list of int / str.
+>>>     d = Dataset.from_file(path="dataset_example")
+    
+>>>     # print information about the dataset
+>>>     print(dataset.description())
     Dataset description:
-        elements:5
-        rankings:3
-        complete:False
-        with ties: True
-        rankings:
-            r1 = [[1], [2, 3]]
-            r2 = [[3, 1], [4]]
-            r3 = [[1], [5], [3, 2]]
-              
-    >>> # choose your scoring scheme (or sc = ScoringScheme() for default scoring scheme)
-    >>> sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+    elements:5
+    rankings:3
+    complete:False
+    without ties: False
+    rankings:
+    r1 = [{1}, {2, 3}]
+    r2 = [{1, 3}, {4}]
+    r3 = [{1}, {5}, {3}, {2}]
+
+
+>>>     # get all datasets in a folder
+>>>     # list_datasets = Dataset.get_datasets_from_folder(path_folder="folder_path")
     
-    >>> print("scoring scheme : " + str(sc))
+>>>     # choose your scoring scheme
+>>>     sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+    
+>>>     print("scoring scheme : " + str(sc))
     scoring scheme : [[0.0, 1.0, 1.0, 0.0, 1.0, 1.0], [1.0, 1.0, 0.0, 1.0, 1.0, 0.0]]
 
-    >>> # scoring scheme description
-    >>> print(sc.description())
+>>>     # scoring scheme description
+>>>     print(sc.description())
     Scoring scheme description
-	x before y in consensus
-		x before y in input ranking: 0.0
-		y before x in input ranking: 1.0
-		x and y tied in input ranking: 1.0
-		x present y missing in input ranking: 0.0
-		x missing y present ranking: 1.0
-		x and y missing in input ranking: 1.0
-	x and y tied in consensus
-		x before y in input ranking: 1.0
-		y before x in input ranking: 1.0
-		x and y tied in input ranking: 0.0
-		x present y missing in input ranking: 1.0
-		x missing y present ranking: 1.0
-		x and y missing in input ranking: 0.0
+    x before y in consensus
+    x before y in input ranking: 0.0
+    y before x in input ranking: 1.0
+    x and y tied in input ranking: 1.0
+    x present y missing in input ranking: 0.0
+    x missing y present ranking: 1.0
+    x and y missing in input ranking: 1.0
+    x and y tied in consensus
+    x before y in input ranking: 1.0
+    y before x in input ranking: 1.0
+    x and y tied in input ranking: 0.0
+    x present y missing in input ranking: 1.0
+    x missing y present ranking: 1.0
+    x and y missing in input ranking: 0.0
+    
+>>>     print("\n### Consensus computation ###\n")
+    
+>>>     # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom,
+>>>     # PickAPerm, BordaCount, BioCo, CopelandMethod
+    
+>>>     algorithms_to_execute = [get_algorithm(alg=Algorithm.Exact, parameters={"optimize": False}),
 
-    
-    >>> print("\n### Consensus computation ###\n")
-    
-       
-    # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom, 
-    # RepeatChoice, PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
-   
-    algorithms_to_execute = [get_algorithm(alg=Algorithm.KwikSortRandom),
-                             get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
-                             get_algorithm(alg=Algorithm.ParCons, 
-                                           parameters={"bound_for_exact": 90,
-                                                   "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
-                             get_algorithm(alg=Algorithm.Exact, parameters={"limit_time_sec": 5})
-                             ]
-    >>> for alg in algorithms_to_execute:
-    >>>     print(alg.get_full_name())
-    >>>     consensus = alg.compute_consensus_rankings(dataset=dataset, 
-                                                       scoring_scheme=sc, 
-                                                       return_at_most_one_ranking=False)
-    >>>     print(consensus.description())
-    
+>>>                         get_algorithm(alg=Algorithm.KwikSortRandom),
+>>>                        get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
+>>>                         get_algorithm(alg=Algorithm.ParCons,
+>>>                                       parameters={"bound_for_exact": 90,
+>>>                                                   "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
+>>>                         get_algorithm(alg=Algorithm.CopelandMethod),
+>>>                        get_algorithm(alg=Algorithm.BioCo),
+>>>                         get_algorithm(alg=Algorithm.BordaCount)
+>>>                         ]
 
+>>>     for alg in algorithms_to_execute:
+>>>         print(alg.get_full_name())
+>>>         consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=sc, return_at_most_one_ranking=True)
+
+>>>         # to get the consensus rankings : consensus.consensus_rankings
+>>>         # description() will display supplementary information
+
+>>>         print(consensus.description())
+>>>         # if you want the consensus ranking only : print(consensus)
+
+>>>         # get the Kemeny score associated with the consensus:
+>>>         print(consensus.kemeny_score)
+    ExactAlgorithm
+    Consensus description:
+    necessarily optimal:True
+    computed by:ExactAlgorithm
+    kemeny score:8.0
+    consensus:
+    c1 = [{1}, {3}, {2}, {4}, {5}]
+    c2 = [{1}, {3}, {2}, {4, 5}]
+    c3 = [{1}, {3}, {5}, {2}, {4}]
+    c4 = [{1}, {3}, {2, 5}, {4}]
+    c5 = [{1}, {3}, {2}, {5}, {4}]
+    8.0
     KwikSortRandom
     Consensus description:
-        computed by:KwikSortRandom
-        kemeny score:8.0
-        necessarily optimal:False
-        consensus:
-            c1 = [[1], [3, 2], [5, 4]]
-            
+    computed by:KwikSortRandom
+    kemeny score:10.0
+    necessarily optimal:False
+    consensus:
+    c1 = [{1}, {3}, {2, 4, 5}]
+    10.0
     BioConsert with input rankings as starters
     Consensus description:
-        kemeny score:8.0
-        computed by:BioConsert with input rankings as starters
-        necessarily optimal:False
-        consensus:
-            c1 = [[1], [2, 3], [4, 5]]
-            c2 = [[1], [2, 3], [4], [5]]
-            c3 = [[1], [2, 3], [5], [4]]
-            
-    ParCons, uses  "KwikSortRandom" on groups of size >  90
+    kemeny score:8.0
+    computed by:BioConsert with input rankings as starters
+    necessarily optimal:False
+    consensus:
+    c1 = [{1}, {3}, {2}, {4, 5}]
+    c2 = [{1}, {3}, {2}, {4}, {5}]
+    c3 = [{1}, {3}, {5}, {2}, {4}]
+    8.0
+    ParCons, uses  "KwikSortRandom" on subproblems of size >  90
     Consensus description:
-        necessarily optimal:True
-        computed by:ParCons, uses  "KwikSortRandom" on groups of size >  90
-        weak partitioning (at least one optimal solution)[{1}, {2, 3}, {5}, {4}]
-        kemeny score:8.0
-        consensus:
-            c1 = [[1], [2, 3], [5], [4]]
-            
-    Exact algorithm
+    necessarily optimal:True
+    computed by:ParCons, uses  "KwikSortRandom" on subproblems of size >  90
+    weak partitioning (at least one optimal consensus)[{0}, {2}, {4}, {1}, {3}]
+    kemeny score:8.0
+    consensus:
+    c1 = [{1}, {3}, {5}, {2}, {4}]
+    8.0
+    Pick a Perm
     Consensus description:
-        necessarily optimal:True
-        kemeny score:8.0
-        computed by:Exact algorithm ILP Cplex
-        consensus:
-            c1 = [[1], [2, 3], [4], [5]]
-            c2 = [[1], [2, 3], [4, 5]]
-            c3 = [[1], [2, 3], [5], [4]]
-            
-    # compute score ('distance') between two rankings
-    kemeny = KemenyComputingFactory(sc)
-    
-    r1 = [[1], [2], [3, 4]]
-    r2 = [[3], [2]]
-    
-    print(kemeny.score_between_rankings(r1, r2))
-    5.0
-    
-    
+    kemeny score:9.0
+    computed by:Pick a Perm
+    necessarily optimal:False
+    consensus:
+    c1 = [{1}, {2, 3}, {4, 5}]
+    c2 = [{1}, {5}, {3}, {2}, {4}]
+    9.0
+    Bioco (BioConsert with [BordaCount] as starter algorithms)
+    Consensus description:
+    kemeny score:8.0
+    computed by:Bioco (BioConsert with [BordaCount] as starter algorithms)
+    necessarily optimal:False
+    consensus:
+    c1 = [{1}, {3}, {2, 5}, {4}]
+    8.0
+    CopelandMethod
+    Consensus description:
+    computed by:CopelandMethod
+    copeland scores:{1: 4.0, 2: 1.5, 3: 3.0, 4: 0.5, 5: 1.0}
+    copeland victories:{1: [4, 0, 0], 2: [1, 1, 2], 3: [3, 0, 1], 4: [0, 1, 3], 5: [0, 2, 2]}
+    kemeny score:8.0
+    necessarily optimal:False
+    consensus:
+    c1 = [{1}, {3}, {2}, {5}, {4}]
+    8.0

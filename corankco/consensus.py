@@ -73,11 +73,11 @@ class Consensus:
         if ConsensusFeature.KemenyScore not in self._att:
             self._att[ConsensusFeature.KemenyScore]: float = -1.
         # Dict that associate to each element its Copeland Score, generalized as in Andrieu et al., IJAR2022
-        if ConsensusFeature.CopelandScores not in self._att:
-            self._att[ConsensusFeature.CopelandScores]: Dict[Element, float] = {}
+        # if ConsensusFeature.CopelandScores not in self._att:
+        #    self._att[ConsensusFeature.CopelandScores]: Dict[Element, float] = {}
         # Dict that associate to each element x its number of victories, that is
-        if ConsensusFeature.CopelandVictories not in self._att:
-            self._att[ConsensusFeature.CopelandVictories]: Dict[Element, List[int]] = {}
+        # if ConsensusFeature.CopelandVictories not in self._att:
+        #    self._att[ConsensusFeature.CopelandVictories]: Dict[Element, List[int]] = {}
         # true iif the consensus is for sure optimal in the sense of the KCF, see Andrieu et al., IJAR2022
         if ConsensusFeature.IsNecessarilyOptimal not in self._att:
             self._att[ConsensusFeature.IsNecessarilyOptimal]: bool = False

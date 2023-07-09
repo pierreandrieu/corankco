@@ -1,6 +1,6 @@
 numpy~=1.21.2
 PuLP~=2.3
-bioconsertinc ~= 1.0.0
+bioconsertinc ~= 1.0.1
 setuptools~=57.0.0
 python-igraph
 biopython~=1.79

@@ -1,7 +1,7 @@
 import unittest
-from dataset import Dataset
-from scoringscheme import ScoringScheme
-from algorithms.bioconsert.bioconsert import BioConsert
+from corankco.dataset import Dataset
+from corankco.scoringscheme import ScoringScheme
+from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.ranking import Ranking
 
 

@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath('../'))
 project = 'corankco'
 copyright = '2023, Pierre Andrieu'
 author = 'Pierre Andrieu'
-release = '5.1.0'
+release = '6.0.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -58,8 +58,10 @@
 <dd class="field-odd"><p><strong>penalties</strong> – A list of 2 penalty vectors i.e. rwo lists of size 6.</p>
 </dd>
 </dl>
-<p>Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and r be a ranking.
-- B: costs to pay for each elements x,y such that x &lt; y in the consensus, more precisely:</p>
+<dl>
+<dt>Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and r be a ranking.</dt><dd><ul class="simple">
+<li><p>B: costs to pay for each elements x,y such that x &lt; y in the consensus, more precisely:</p></li>
+</ul>
 <blockquote>
 <div><ul class="simple">
 <li><p>B[0] if x &lt; y in r</p></li>
@@ -71,14 +73,20 @@
 </ul>
 </div></blockquote>
 <ul class="simple">
-<li><p>T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
-- T[0] if x &lt; y in r
-- T[1] if x &gt; y in r
-- T[2] if x is tied with y in r
-- T[3] if x is ranked and y is not
-- T[4] if y is ranked and x is not
-- T[5] if x and y are non-ranked</p></li>
+<li><p>T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:</p></li>
 </ul>
+<blockquote>
+<div><ul class="simple">
+<li><p>T[0] if x &lt; y in r</p></li>
+<li><p>T[1] if x &gt; y in r</p></li>
+<li><p>T[2] if x is tied with y in r</p></li>
+<li><p>T[3] if x is ranked and y is not</p></li>
+<li><p>T[4] if y is ranked and x is not</p></li>
+<li><p>T[5] if x and y are non-ranked</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#corankco.scoringscheme.InvalidScoringScheme" title="corankco.scoringscheme.InvalidScoringScheme"><strong>InvalidScoringScheme</strong></a> – If penalties is not of a correct format</p>

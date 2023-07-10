@@ -234,7 +234,6 @@ class Ranking:
         return rankings
 
     @staticmethod
-    @staticmethod
     def generate_rankings(nb_elements: int, nb_rankings: int, steps: int, complete=False) -> List['Ranking']:
         """
 
@@ -390,4 +389,3 @@ class Ranking:
     def __change_ranking_incomplete(ranking: np.ndarray, steps: int, nb_elements: int, missing_elements: Set):
         for step in range(steps):
             Ranking.__step_element_incomplete(ranking, randint(0, nb_elements - 1), missing_elements)
-

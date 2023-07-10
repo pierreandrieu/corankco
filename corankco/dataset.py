@@ -511,7 +511,7 @@ class Dataset:
         return Dataset(Ranking.uniform_permutations(nb_elem, nb_rankings))
 
     @staticmethod
-    def get_random_dataset_markov(nb_elem: int, nb_rankings: int, steps: int, complete: bool = False):
+    def get_random_dataset_markov(nb_elem: int, nb_rankings: int, steps: int, complete: bool = False) -> 'Dataset':
         """
         Get a Dataset generated using a Markov chain. Note that if complete is set to false, the return dataset
         may contain fewer elements than initially wanted if one or more elements have been removed from all the rankings
@@ -667,4 +667,3 @@ class DatasetSelector:
         :return: a String representation of the object, containing the values of the attributes of the class
         """
         return self.__str__()
-

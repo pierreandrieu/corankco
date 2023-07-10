@@ -7,8 +7,8 @@ from random import shuffle, randint
 
 class Ranking:
     """
-
     A class to represent a ranking, defined as a List of disjoint Set of Elements
+
     """
 
     def __init__(self, buckets: List[Set[Element]]):
@@ -18,6 +18,7 @@ class Ranking:
         :param buckets: A list of buckets which are sets of Elements
         :type buckets: List[Set[Element]]
         :raises ValueError: If buckets are not disjoint
+
         """
         self._buckets: List[Set[Element]] = buckets
 
@@ -42,6 +43,7 @@ class Ranking:
         :type ranking_str: str
         :return: A Ranking instance
         :rtype: Ranking
+
         """
         buckets: List[Set[Element]] = parse_ranking_with_ties_of_str(ranking_str)
         all_ints: bool = True
@@ -68,6 +70,7 @@ class Ranking:
         :type ranking_list: List[Union[int, str]]
         :return: A Ranking instance
         :rtype: Ranking
+
         """
         buckets: List[Set[Element]] = [set([Element(elem) for elem in bucket]) for bucket in ranking_list]
         return cls(buckets)
@@ -81,6 +84,7 @@ class Ranking:
         :type file_path: str
         :return: A Ranking instance
         :rtype: Ranking
+
         """
         with open(file_path, 'r') as f:
             ranking_str: str = f.read()
@@ -93,6 +97,7 @@ class Ranking:
 
         :return: The buckets of the ranking
         :rtype: List[Set[Element]]
+
         """
         return self._buckets
 
@@ -111,10 +116,8 @@ class Ranking:
         """
         Returns the set of all elements in the Ranking.
 
-        This is equivalent to the keys of the attribute 'positions'.
+        :return: A set of Elements which are the unique elements in the Ranking.
 
-        Returns:
-            A set of Elements which are the unique elements in the Ranking.
         """
         return set(self._positions.keys())
 
@@ -122,11 +125,10 @@ class Ranking:
     def nb_elements(self) -> int:
         """
         Returns the number of unique elements in the Ranking.
-
         This is equivalent to the size of the domain of the Ranking.
 
-        Returns:
-            An integer which is the number of unique elements in the Ranking.
+        :return: An integer which is the number of unique elements in the Ranking.
+
         """
         return len(self.domain)
 
@@ -136,6 +138,7 @@ class Ranking:
 
         :return: true iif all the elements in the ranking can be converted to int
         :rtype: bool
+
         """
         for bucket in self._buckets:
             for element in bucket:
@@ -158,12 +161,11 @@ class Ranking:
     def __iter__(self) -> Iterator[Set[Element]]:
         """
         Returns an iterator over the buckets in the Ranking.
-
         This allows the Ranking to be iterated over using a for loop,
         yielding each bucket in turn.
 
-        Returns:
-            An iterator over the buckets in the Ranking.
+        return: An iterator over the buckets in the Ranking.
+
         """
         return iter(self._buckets)
 
@@ -173,6 +175,7 @@ class Ranking:
 
         :return: A string representation of the Ranking instance
         :rtype: str
+
         """
         return str([{elem.value for elem in bucket} for bucket in self._buckets])
 
@@ -182,6 +185,7 @@ class Ranking:
 
         :return: A string representation of the Ranking instance
         :rtype: str
+
         """
         return str([{elem.value for elem in bucket} for bucket in self._buckets])
 
@@ -193,6 +197,7 @@ class Ranking:
         :type index: int
         :returns: The bucket at the given index.
         :rtype: Set[Element]
+
         """
         return self.buckets[index]
 
@@ -203,6 +208,7 @@ class Ranking:
         :param other: Other Ranking to compare with.
         :returns: True if both Rankings are equal, False otherwise.
         :rtype: bool
+
         """
         if not isinstance(other, Ranking):
             return NotImplemented
@@ -212,10 +218,12 @@ class Ranking:
     @staticmethod
     def uniform_permutations(nb_elem: int, nb_rankings: int) -> List['Ranking']:
         """
-        method to get a List of random uniform Rankings that are complete and without ties.
+        Method to get a List of random uniform Rankings that are complete and without ties.
+
         :param nb_elem: the number of elements in the rankings
         :param nb_rankings: the number of rankings to generate
         :return: a list of random complete rankings without ties on {0, ..., n-1}
+
         """
         rankings: List[Ranking] = []
         for i in range(nb_rankings):
@@ -225,6 +233,7 @@ class Ranking:
             rankings.append(Ranking(ranking))
         return rankings
 
+    @staticmethod
     @staticmethod
     def generate_rankings(nb_elements: int, nb_rankings: int, steps: int, complete=False) -> List['Ranking']:
         """
@@ -246,6 +255,7 @@ class Ranking:
         :param steps: the number of steps in the markov chain
         :param complete: does the final rankings need to be complete ? Default = False
         :return: a List of Ranking generated as described in the above description
+
         """
         # the list of rankings to return, as a raw list
         rankings_list: List[Ranking] = []

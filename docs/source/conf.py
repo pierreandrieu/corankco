@@ -14,17 +14,24 @@ sys.path.insert(0, os.path.abspath('../'))
 project = 'corankco'
 copyright = '2023, Pierre Andrieu'
 author = 'Pierre Andrieu'
+
+# The short X.Y version
+version = '6.0.0'
+# The full version, including alpha/beta/rc tags
 release = '6.0.0'
+
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.autodoc']
+
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',  # Add this line if your docstrings are in Google style
+]
 
 templates_path = ['_templates']
 exclude_patterns = []
-
-
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

@@ -51,6 +51,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.from_file"><code class="docutils literal notranslate"><span class="pre">Ranking.from_file()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.from_list"><code class="docutils literal notranslate"><span class="pre">Ranking.from_list()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.from_string"><code class="docutils literal notranslate"><span class="pre">Ranking.from_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.generate_rankings"><code class="docutils literal notranslate"><span class="pre">Ranking.generate_rankings()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.nb_elements"><code class="docutils literal notranslate"><span class="pre">Ranking.nb_elements</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.positions"><code class="docutils literal notranslate"><span class="pre">Ranking.positions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#corankco.ranking.Ranking.uniform_permutations"><code class="docutils literal notranslate"><span class="pre">Ranking.uniform_permutations()</span></code></a></li>
@@ -176,6 +177,39 @@
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#corankco.ranking.Ranking" title="corankco.ranking.Ranking">Ranking</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.ranking.Ranking.generate_rankings">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate_rankings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nb_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_rankings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">complete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#corankco.ranking.Ranking" title="corankco.ranking.Ranking"><span class="pre">Ranking</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#corankco.ranking.Ranking.generate_rankings" title="Permalink to this definition"></a></dt>
+<dd><p>Method to generate a List of nb_rankings rankings of nb_elements elements, possibly incomplete with ties.
+Each ranking is initially [{0}, {1}, …, {n-1}], then modifications are done using a Markov chain.
+For each step from range 1 … step parameter: an element is uniformly selected and may uniformly:
+- be added in the ranking if the element is currently non-ranked
+- be removed in the ranking if the element is currently ranked
+- be in a new bucket at the left of the current left neighbor bucket
+- be in a new bucket at the right of the current right neighbor bucket
+- be added in the current left neighbor bucket
+- be added in the current right neighbor bucket</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nb_elements</strong> – number of elements of the universe. Note that according to the steps of the Markov chain,</p>
+</dd>
+</dl>
+<p>the final list of rankings may have less than the given number of elements (if an element has been removed from</p>
+<p>all the input ranking)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nb_rankings</strong> – the number of rankings to generate</p></li>
+<li><p><strong>steps</strong> – the number of steps in the markov chain</p></li>
+<li><p><strong>complete</strong> – does the final rankings need to be complete ? Default = False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a List of Ranking generated as described in the above description</p>
 </dd>
 </dl>
 </dd></dl>

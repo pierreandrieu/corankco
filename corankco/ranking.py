@@ -248,8 +248,11 @@ class Ranking:
         - be added in the current right neighbor bucket
 
         :param nb_elements: number of elements of the universe. Note that according to the steps of the Markov chain,
+
         the final list of rankings may have less than the given number of elements (if an element has been removed from
+
         all the input ranking)
+
         :param nb_rankings: the number of rankings to generate
         :param steps: the number of steps in the markov chain
         :param complete: does the final rankings need to be complete ? Default = False

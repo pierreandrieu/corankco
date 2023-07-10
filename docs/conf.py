@@ -1,7 +1,7 @@
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath('../corankco'))
+sys.path.insert(0, os.path.abspath('../../corankco'))
 
 # Configuration file for the Sphinx documentation builder.
 #

@@ -130,7 +130,7 @@ class Consensus:
         """
 
         :return: True if we know that the consensus is necessarily a Kemeny optimal consensus regarding the scoring
-        scheme associated with the consensus. If false, the consensus might be optimal or not.
+                 scheme associated with the consensus. If false, the consensus might be optimal or not.
         """
         return self._att[ConsensusFeature.IsNecessarilyOptimal]
 
@@ -139,7 +139,7 @@ class Consensus:
         """
 
         :return: the number of consensus ranking objects. Several algorithm can return more than one equivalent
-        consensus ranking in a same Consensus object.
+                 consensus ranking in a same Consensus object.
         """
         return len(self.consensus_rankings)
 
@@ -204,8 +204,8 @@ class Consensus:
     def associated_scoring_scheme(self) -> ScoringScheme:
         """
 
-        :return: the ScoringScheme associated to the Consensus object. Can be None if the Consensus object has not been
-        created during a rank aggregation process
+        :return: The ScoringScheme associated to the Consensus object. Can be None if the Consensus object has not been
+                 created during a rank aggregation process
         """
         return self._scoring_scheme
 
@@ -214,7 +214,7 @@ class Consensus:
         """
 
         :return: The features of the Consensus object. The features can vary according to the
-        rank aggregation algorithm that computed the Consensus object.
+                 rank aggregation algorithm that computed the Consensus object.
         """
         return self._att
 

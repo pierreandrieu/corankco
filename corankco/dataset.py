@@ -354,7 +354,7 @@ class Dataset:
         """
 
         :return: A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the position of element i in ranking j
-        position = -1 if element i is non-ranked in ranking j
+                 position = -1 if element i is non-ranked in ranking j
         """
         positions: np.ndarray = np.zeros((self.nb_elements, self.nb_rankings)) - 1
         id_ranking: int = 0

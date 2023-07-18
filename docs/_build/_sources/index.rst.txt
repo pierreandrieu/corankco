@@ -11,6 +11,10 @@ Welcome to corankco's documentation!
    :caption: Contents:
 
    ranking
+   dataset
+   element
+   consensus
+   scoring_scheme
 
 Indices and tables
 ==================

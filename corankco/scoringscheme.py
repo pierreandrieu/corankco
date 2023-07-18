@@ -36,33 +36,24 @@ class ScoringScheme:
 
     The ScoringScheme class represents a scoring scheme for comparing rankings.
 
-    :param penalties: A list of 2 penalty vectors i.e. rwo lists of size 6.
+    :param penalties: A list of 2 penalty vectors i.e. two lists of size 6.
+                      Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and
+                      r be a ranking. B: costs to pay for each elements x,y such that x < y in the consensus, more
+                      precisely: B[0] if x < y in r, B[1] if x > y in r, B[2] if x is tied with y in r, B[3] if x is
+                      ranked and y is not, B[4] if y is ranked and x is not, B[5] if x and y are non-ranked.
+                      T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
+                      T[0] if x < y in r, T[1] if x > y in r, T[2] if x is tied with y in r, T[3] if x is ranked and y
+                      is not, T[4] if y is ranked and x is not, T[5] if x and y are non-ranked
 
-    Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and r be a ranking.
-     - B: costs to pay for each elements x,y such that x < y in the consensus, more precisely:
-      - B[0] if x < y in r
-      - B[1] if x > y in r
-      - B[2] if x is tied with y in r
-      - B[3] if x is ranked and y is not
-      - B[4] if y is ranked and x is not
-      - B[5] if x and y are non-ranked
-     - T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
-      - T[0] if x < y in r
-      - T[1] if x > y in r
-      - T[2] if x is tied with y in r
-      - T[3] if x is ranked and y is not
-      - T[4] if y is ranked and x is not
-      - T[5] if x and y are non-ranked
-
-    :raises InvalidScoringScheme: If penalties is not of a correct format
-    :raises NonRealPositiveValuesScoringScheme if one penalty is not a real value>= 0
-    :raises ForbiddenAssociationPenaltiesScoringScheme if one of the following is not respected:
-    - first value of first list must be 0
-    - second value of the first List must be > 0"
-    - fourth value of the first List must be <= the fifth value of the second List"
-    - third value of second list must be > 0
-    - first and second values of the second List must be equal
-    - fourth and fifth values of the second List must be equal
+    :raises InvalidScoringScheme: If penalties is not of a correct format.
+    :raises NonRealPositiveValuesScoringScheme: If one penalty is not a real value>= 0.
+    :raises ForbiddenAssociationPenaltiesScoringScheme: If one of the following is not respected:
+            - first value of first list must be 0
+            - second value of the first List must be > 0
+            - fourth value of the first List must be <= the fifth value of the second List
+            - third value of second list must be > 0
+            - first and second values of the second List must be equal
+            - fourth and fifth values of the second List must be equal
 
     """
 
@@ -208,8 +199,9 @@ class ScoringScheme:
     def penalty_vectors(self) -> List[List[float]]:
         """
         Returns the List of two penalty vectors (each one is a List of 6 floats) of the ScoringScheme
+
         :return: List of two penalty vectors (each one is a List of 6 floats) of the ScoringScheme.
-        For instance, [[0., 1., 0.5, 0., 1., 0.], [0.5, 0.5, 0., 0.5, 0.5, 0.]]
+                 For instance, [[0., 1., 0.5, 0., 1., 0.], [0.5, 0.5, 0., 0.5, 0.5, 0.]]
         :rtype: List[List[float]]
         """
         return self._penalty_vectors

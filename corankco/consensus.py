@@ -137,9 +137,7 @@ class Consensus:
     @property
     def nb_consensus(self) -> int:
         """
-
-        :return: the number of consensus ranking objects. Several algorithm can return more than one equivalent
-                 consensus ranking in a same Consensus object.
+        :return: the number of consensus ranking objects. Several algorithm can return more than one equivalent consensus ranking in a same Consensus object.
         """
         return len(self.consensus_rankings)
 
@@ -202,10 +200,9 @@ class Consensus:
 
     @property
     def associated_scoring_scheme(self) -> ScoringScheme:
-        """
+        """ Returns the ScoringScheme related to the Consensus object
 
-        :return: The ScoringScheme associated to the Consensus object. Can be None if the Consensus object has not been
-                 created during a rank aggregation process
+        :return: The ScoringScheme associated to the Consensus object. Can be None if the Consensus object has not been created during a rank aggregation process.
         """
         return self._scoring_scheme
 

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scoring scheme &mdash; corankco 6.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="consensus" href="consensus.html" />
+    <link rel="prev" title="dataset" href="dataset.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            corankco
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="ranking.html">ranking</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">dataset</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">scoring scheme</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.scoringscheme.ForbiddenAssociationPenaltiesScoringScheme"><code class="docutils literal notranslate"><span class="pre">ForbiddenAssociationPenaltiesScoringScheme</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.scoringscheme.InvalidScoringScheme"><code class="docutils literal notranslate"><span class="pre">InvalidScoringScheme</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.scoringscheme.NonRealPositiveValuesScoringScheme"><code class="docutils literal notranslate"><span class="pre">NonRealPositiveValuesScoringScheme</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme"><code class="docutils literal notranslate"><span class="pre">ScoringScheme</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b1"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b1</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b2"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b3"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b4"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b5"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b5</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b6"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.b_vector"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.b_vector</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.description"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.description()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_extended_measure_scoring_scheme"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_extended_measure_scoring_scheme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_induced_measure_scoring_scheme_p"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_induced_measure_scoring_scheme_p()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_nickname"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_nickname()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_pseudodistance_scoring_scheme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme_p"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_pseudodistance_scoring_scheme_p()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_unifying_scoring_scheme()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme_p"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.get_unifying_scoring_scheme_p()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.is_equivalent_to"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.is_equivalent_to()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.is_equivalent_to_on_complete_rankings_only"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.is_equivalent_to_on_complete_rankings_only()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.penalty_vectors"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.penalty_vectors</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.t1_and_t2"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.t1_and_t2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.t3"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.t3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.t4_and_t5"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.t4_and_t5</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.t6"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.t6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme.t_vector"><code class="docutils literal notranslate"><span class="pre">ScoringScheme.t_vector</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="consensus.html">consensus</a></li>
+<li class="toctree-l1"><a class="reference internal" href="element.html">element</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">corankco</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scoring scheme</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scoring_scheme.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-corankco.scoringscheme">
+<span id="scoring-scheme"></span><h1>scoring scheme<a class="headerlink" href="#module-corankco.scoringscheme" title="Permalink to this heading">¶</a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ForbiddenAssociationPenaltiesScoringScheme">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.scoringscheme.</span></span><span class="sig-name descname"><span class="pre">ForbiddenAssociationPenaltiesScoringScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'The</span> <span class="pre">first</span> <span class="pre">value</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">0.</span> <span class="pre">The</span> <span class="pre">second</span> <span class="pre">value</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">&gt;</span> <span class="pre">0The</span> <span class="pre">fourth</span> <span class="pre">value</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">first</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">&lt;=</span> <span class="pre">the</span> <span class="pre">fifth</span> <span class="pre">value</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">second</span> <span class="pre">ListThe</span> <span class="pre">first</span> <span class="pre">and</span> <span class="pre">second</span> <span class="pre">values</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">second</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">equal.</span> <span class="pre">The</span> <span class="pre">fourth</span> <span class="pre">and</span> <span class="pre">the</span> <span class="pre">fifth</span> <span class="pre">values</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">second</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">equalThe</span> <span class="pre">third</span> <span class="pre">value</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">second</span> <span class="pre">List</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">&gt;</span> <span class="pre">0For</span> <span class="pre">instance,</span> <span class="pre">[[0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">[1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.]]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ForbiddenAssociationPenaltiesScoringScheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="corankco.scoringscheme.InvalidScoringScheme">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.scoringscheme.</span></span><span class="sig-name descname"><span class="pre">InvalidScoringScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Scoring</span> <span class="pre">scheme</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">2</span> <span class="pre">Lists.</span> <span class="pre">Each</span> <span class="pre">list</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">6</span> <span class="pre">real</span> <span class="pre">&gt;=</span> <span class="pre">0</span> <span class="pre">values.</span> <span class="pre">For</span> <span class="pre">instance,</span> <span class="pre">[[0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">[1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.]]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.InvalidScoringScheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="corankco.scoringscheme.NonRealPositiveValuesScoringScheme">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.scoringscheme.</span></span><span class="sig-name descname"><span class="pre">NonRealPositiveValuesScoringScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Each</span> <span class="pre">list</span> <span class="pre">must</span> <span class="pre">be</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">of</span> <span class="pre">6</span> <span class="pre">real</span> <span class="pre">&gt;=</span> <span class="pre">0</span> <span class="pre">values.</span> <span class="pre">For</span> <span class="pre">instance,</span> <span class="pre">[[0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">0.,</span> <span class="pre">0.],</span> <span class="pre">[1.,</span> <span class="pre">1.,</span> <span class="pre">0.,</span> <span class="pre">1.,</span> <span class="pre">1.,</span> <span class="pre">0.]]'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.NonRealPositiveValuesScoringScheme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">corankco.scoringscheme.</span></span><span class="sig-name descname"><span class="pre">ScoringScheme</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">penalties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ScoringScheme class represents a scoring scheme for comparing rankings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>penalties</strong> – A list of 2 penalty vectors i.e. two lists of size 6.
+Let B be the first penalty vector and T be the second one, c be a consensus ranking (complete) and
+r be a ranking. B: costs to pay for each elements x,y such that x &lt; y in the consensus, more
+precisely: B[0] if x &lt; y in r, B[1] if x &gt; y in r, B[2] if x is tied with y in r, B[3] if x is
+ranked and y is not, B[4] if y is ranked and x is not, B[5] if x and y are non-ranked.
+T: costs to pay for each elements x,y such that x is tied with y in the consensus, more precisely:
+T[0] if x &lt; y in r, T[1] if x &gt; y in r, T[2] if x is tied with y in r, T[3] if x is ranked and y
+is not, T[4] if y is ranked and x is not, T[5] if x and y are non-ranked</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="#corankco.scoringscheme.InvalidScoringScheme" title="corankco.scoringscheme.InvalidScoringScheme"><strong>InvalidScoringScheme</strong></a> – If penalties is not of a correct format.</p></li>
+<li><p><a class="reference internal" href="#corankco.scoringscheme.NonRealPositiveValuesScoringScheme" title="corankco.scoringscheme.NonRealPositiveValuesScoringScheme"><strong>NonRealPositiveValuesScoringScheme</strong></a> – If one penalty is not a real value&gt;= 0.</p></li>
+<li><p><a class="reference internal" href="#corankco.scoringscheme.ForbiddenAssociationPenaltiesScoringScheme" title="corankco.scoringscheme.ForbiddenAssociationPenaltiesScoringScheme"><strong>ForbiddenAssociationPenaltiesScoringScheme</strong></a> – If one of the following is not respected:
+- first value of first list must be 0
+- second value of the first List must be &gt; 0
+- fourth value of the first List must be &lt;= the fifth value of the second List
+- third value of second list must be &gt; 0
+- first and second values of the second List must be equal
+- fourth and fifth values of the second List must be equal</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that x is before y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The first element of the first penalty vector B.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that y is before x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The second element of the first penalty vector B.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b3">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that x is tied with y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The third element of the first penalty vector B.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b4">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that x is ranked whereas y is not.
+:return: The fourth element of the first penalty vector B.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b5">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that y is ranked whereas x is not.
+:return: The fifth element of the first penalty vector B.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b6">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b6</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x &lt; y in the consensus for each input ranking such that x and y are both non-ranked.
+:return: The sixth element of the first penalty vector B.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.b_vector">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">b_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.b_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the List of 6 floats that corresponds to vector B according to Andrieu et al., IJAR 2022
+:return: vector B of the Scoring Scheme as a List of 6 floats.
+:rtype: List[float]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.description">
+<span class="sig-name descname"><span class="pre">description</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string that gives details on the ScoringScheme
+:return: a string that gives details on the ScoringScheme
+:rtype: str</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_extended_measure_scoring_scheme">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_extended_measure_scoring_scheme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_extended_measure_scoring_scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ScoringScheme defined in []
+:return: The ScoringScheme</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_induced_measure_scoring_scheme_p">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_induced_measure_scoring_scheme_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_induced_measure_scoring_scheme_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ScoringScheme that imitates the unification process, that is
+the non-ranked elements can be virtually considered as tied at the last position or the ranking
+:param p: the cost to create / break ties
+:return: The ScoringScheme [[0., 1., p, 0., 1., p], [p, p, 0., p, p, 0.]]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_nickname">
+<span class="sig-name descname"><span class="pre">get_nickname</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_nickname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a nickname of the scoring scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A string representing a nickname of the scoring scheme.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_pseudodistance_scoring_scheme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#corankco.scoringscheme.ScoringScheme" title="corankco.scoringscheme.ScoringScheme"><span class="pre">ScoringScheme</span></a></span></span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the pseudo-distance defined in:
+Brancotte, Bryan &amp; Rance, Bastien &amp; Denise, Alain &amp; Cohen-Boulakia, Sarah. (2014). ConQuR-Bio: Consensus Ranking
+with Query Reformulation for Biological Data. 10.1007/978-3-319-08590-6_13. .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The ScoringScheme [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme_p">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_pseudodistance_scoring_scheme_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_pseudodistance_scoring_scheme_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the pseudo-distance defined in:
+Brancotte, Bryan &amp; Rance, Bastien &amp; Denise, Alain &amp; Cohen-Boulakia, Sarah. (2014).
+ConQuR-Bio: Consensus Ranking with Query Reformulation for Biological Data. 10.1007/978-3-319-08590-6_13
+with reap parameter p = cost of creating / breaking ties
+:param p: the cost to create / break ties
+:return: The ScoringScheme [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_unifying_scoring_scheme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ScoringScheme that imitates the unification process, that is
+the non-ranked elements can be virtually considered as tied at the last position or the ranking
+:return: The ScoringScheme [[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme_p">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_unifying_scoring_scheme_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.get_unifying_scoring_scheme_p" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the ScoringScheme that imitates the unification process, that is
+the non-ranked elements can be virtually considered as tied at the last position or the ranking
+:param p: the cost to create / break ties
+:return: The ScoringScheme [[0., 1., p, 0., 1., p], [p, p, 0., p, p, 0.]]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.is_equivalent_to">
+<span class="sig-name descname"><span class="pre">is_equivalent_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.is_equivalent_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the current scoring scheme is equivalent to the given scoring scheme.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – A ScoringScheme object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the scoring schemes are equivalent, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.is_equivalent_to_on_complete_rankings_only">
+<span class="sig-name descname"><span class="pre">is_equivalent_to_on_complete_rankings_only</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.is_equivalent_to_on_complete_rankings_only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the current scoring scheme is equivalent to the given scoring scheme on complete rankings</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>other</strong> – A ScoringScheme object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the scoring schemes are equivalent, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.penalty_vectors">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">penalty_vectors</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.penalty_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the List of two penalty vectors (each one is a List of 6 floats) of the ScoringScheme</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of two penalty vectors (each one is a List of 6 floats) of the ScoringScheme.
+For instance, [[0., 1., 0.5, 0., 1., 0.], [0.5, 0.5, 0., 0.5, 0.5, 0.]]</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>List[List[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.t1_and_t2">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t1_and_t2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.t1_and_t2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x  tied with y in the consensus for each input ranking such that x &lt; y or y &lt; x
+:return: The first/second element of the first penalty vector T.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.t3">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.t3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x  tied with y in the consensus for each input ranking such that x is tied with y
+:return: The third element of the first penalty vector T.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.t4_and_t5">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t4_and_t5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.t4_and_t5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x  tied with y in the consensus for each input ranking such that x XOR y is ranked
+:return: The fourth/fifth element of the first penalty vector T.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.t6">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t6</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.t6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the cost to have x  tied with y in the consensus for each input ranking such that x and y are non-ranked
+:return: The sixth element of the first penalty vector T.
+:rtype: float</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="corankco.scoringscheme.ScoringScheme.t_vector">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">t_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#corankco.scoringscheme.ScoringScheme.t_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the List of 6 floats that corresponds to vector T according to Andrieu et al., IJAR 2022
+:return: penalty vector T of the Scoring Scheme as a List of 6 floats.
+:rtype: List[float]</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dataset.html" class="btn btn-neutral float-left" title="dataset" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="consensus.html" class="btn btn-neutral float-right" title="consensus" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Pierre Andrieu.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

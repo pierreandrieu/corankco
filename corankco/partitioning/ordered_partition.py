@@ -6,7 +6,7 @@ More precisely, this module defines an ordered partition, and gives two static m
 partitions of the above article.
 """
 
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Iterator
 from numpy import ndarray
 from corankco.consensus import Consensus
 from corankco.element import Element
@@ -151,6 +151,17 @@ class OrderedPartition:
         """
         return str(self)
 
+    def __iter__(self) -> Iterator[Set[Element]]:
+        """
+        Returns an iterator over the groups of elements in the OrderedPartition object.
+        This allows the OrderedPartition to be iterated over using a for loop,
+        yielding each part of the partition in turn.
+
+        return: An iterator over the groups of elements in the OrderedPartition.
+
+        """
+        return iter(self._partition)
+
     @staticmethod
     def parfront_partition(dataset: Dataset, scoring_scheme: ScoringScheme) -> 'OrderedPartition':
         """
@@ -205,7 +216,7 @@ class OrderedPartition:
         return OrderedPartition([set(id_elements[elem] for elem in group) for group in partition])
 
     @staticmethod
-    def compute_partition(dataset: Dataset, scoring_scheme: ScoringScheme) -> 'OrderedPartition':
+    def parcons_partition(dataset: Dataset, scoring_scheme: ScoringScheme) -> 'OrderedPartition':
         """
         :param dataset: A dataset containing the rankings to aggregate
         :type dataset: Dataset (class Dataset in package 'datasets')

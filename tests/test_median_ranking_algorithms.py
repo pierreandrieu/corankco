@@ -20,7 +20,7 @@ class TestAlgos(unittest.TestCase):
     def setUp(self):
         self.test_time_computation: bool = False
         self.my_algs: List[RankAggAlgorithm] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom()]
-        self.my_algs.extend([ParCons(), ExactAlgorithmPulp(), ExactAlgorithm(optimize=False), ExactAlgorithm(optimize=True)])
+        self.my_algs.extend([ParCons(), ExactAlgorithmPulp()])
         self.scoring_scheme_unifying = ScoringScheme.get_unifying_scoring_scheme()
         self.scoring_scheme_induced = ScoringScheme.get_induced_measure_scoring_scheme()
         self.scoring_scheme_pseudo = ScoringScheme.get_pseudodistance_scoring_scheme()

@@ -9,13 +9,13 @@ class TestDataset(unittest.TestCase):
 
     def setUp(self):
         # This method will be called before each test, it sets up the objects we'll use
-        self.dataset_1 = Dataset([Ranking.from_list([{1}, {2, 3}, {4}]), Ranking.from_list([{1, 2}, {3}, {4}])])
-        self.dataset_2 = Dataset([Ranking.from_list([{1, 2}, {3, 4}]), Ranking.from_list([{1}, {2}, {3}, {4}])])
+        self.dataset_1 = Dataset([Ranking([{1}, {2, 3}, {4}]), Ranking([{1, 2}, {3}, {4}])])
+        self.dataset_2 = Dataset([Ranking([{1, 2}, {3, 4}]), Ranking([{1}, {2}, {3}, {4}])])
 
     def test_init(self):
         # Test __init__ method
         self.assertEqual(len(self.dataset_1.rankings), 2)
-        self.assertEqual(self.dataset_1.name, "")
+        self.assertEqual(self.dataset_1.name, "None")
         self.assertEqual(self.dataset_2.nb_elements, 4)
 
     def test_from_file(self):
@@ -24,9 +24,9 @@ class TestDataset(unittest.TestCase):
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
         # Construct the full path to the dataset file
-        dataset_file = os.path.join(script_dir, "dataset_example")
+        dataset_file = os.path.join(script_dir, "dataset_examples/dataset_example")
         dataset = Dataset.from_file(dataset_file)
-        self.assertEqual(len(dataset.rankings), 2)
+        self.assertEqual(len(dataset.rankings), 3)
         # Add other assertions based on the expected content of the file
 
     def test_from_raw_list(self):
@@ -47,7 +47,7 @@ class TestDataset(unittest.TestCase):
     # Add more methods to test the other methods in your Dataset class
 
     def test_remove_empty_rankings(self):
-        dataset = Dataset([Ranking.from_list([{1}, {2, 3}, {4}]), Ranking.from_list([{1, 2}, {3}, {4}])])
+        dataset = Dataset([Ranking([{1}, {2, 3}, {4}]), Ranking([{1, 2}, {3}, {4}])])
         self.assertEqual(dataset.nb_elements, 4)
         self.assertEqual(dataset.nb_rankings, 2)
         self.assertTrue(dataset.is_complete)
@@ -73,18 +73,18 @@ class TestDataset(unittest.TestCase):
             self.assertNotEqual(len(ranking), 0, "Empty ranking found in dataset.")
 
     def test_dataset_getitem(self):
-        ranking1 = Ranking.from_list([{1, 2, 3}])
-        ranking2 = Ranking.from_list([{4, 5, 6}])
-        ranking3 = Ranking.from_list([{7, 8, 9}])
+        ranking1 = Ranking([{1, 2, 3}])
+        ranking2 = Ranking([{4, 5, 6}])
+        ranking3 = Ranking([{7, 8, 9}])
         dataset = Dataset([ranking1, ranking2, ranking3])
         self.assertEqual(dataset[0], ranking1)
         self.assertEqual(dataset[1], ranking2)
         self.assertEqual(dataset[2], ranking3)
 
     def test_dataset_contains(self):
-        ranking1 = Ranking.from_list([{1, 2, 3}, {4, 5}])
-        ranking2 = Ranking.from_list([{9, 5, 6}])
-        ranking3 = Ranking.from_list([{7, 8, 9}])
+        ranking1 = Ranking([{1, 2, 3}, {4, 5}])
+        ranking2 = Ranking([{9, 5, 6}])
+        ranking3 = Ranking([{7, 8, 9}])
         dataset = Dataset([ranking1, ranking2, ranking3])
         self.assertTrue(dataset.contains_element(1))
         self.assertTrue(dataset.contains_element(5))
@@ -95,12 +95,12 @@ class TestDataset(unittest.TestCase):
         self.assertFalse(dataset.contains_element(45))
 
     def test_dataset_projection(self):
-        ranking1 = Ranking.from_list([{1, 2, 3, 9}, {4, 5}])
-        ranking2 = Ranking.from_list([{9, 5, 6}, {2}, {1}])
-        ranking3 = Ranking.from_list([{7, 8, 9}])
+        ranking1 = Ranking([{1, 2, 3, 9}, {4, 5}])
+        ranking2 = Ranking([{9, 5, 6}, {2}, {1}])
+        ranking3 = Ranking([{7, 8, 9}])
         dataset = Dataset([ranking1, ranking2, ranking3])
         dataset2 = dataset.sub_problem_from_elements({Element(1), Element(2)})
-        dataset3 = Dataset([Ranking.from_list([{1, 2}]), Ranking.from_list([{2}, {1}])])
+        dataset3 = Dataset([Ranking([{1, 2}]), Ranking([{2}, {1}])])
         self.assertEqual(dataset2, dataset3)
 
     def test_generation(self):

@@ -1,15 +1,22 @@
+"""
+Module containing an abstract class for Exact Algorithm.
+"""
+
 from abc import ABC, abstractmethod
 from corankco.dataset import Dataset
 from corankco.consensus import Consensus
 from corankco.scoringscheme import ScoringScheme
-from corankco.algorithms.median_ranking import MedianRanking
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 
 
 class IncompatibleArgumentsException(Exception):
-    pass
+    """
+    Custom exception, to warn the user that the "optimize" parameter can not be True
+    if the user wants all the optimal consensuses.
+    """
 
 
-class ExactAlgorithmBase(ABC, MedianRanking):
+class ExactAlgorithmBase(ABC, RankAggAlgorithm):
     """
     An abstract base class for exact algorithms. This class outlines the interface that all exact algorithms must
     implement.
@@ -41,7 +48,6 @@ class ExactAlgorithmBase(ABC, MedianRanking):
         :param bench_mode: Is bench mode activated. If False, the algorithm may return more information.
         :return: One or more consensus rankings.
         """
-        pass
 
     @abstractmethod
     def get_full_name(self) -> str:
@@ -50,7 +56,6 @@ class ExactAlgorithmBase(ABC, MedianRanking):
 
         :return: The full name of the algorithm as a string.
         """
-        pass
 
     @abstractmethod
     def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
@@ -60,4 +65,3 @@ class ExactAlgorithmBase(ABC, MedianRanking):
         :param scoring_scheme: The scoring scheme to check.
         :return: True if the scoring scheme is relevant, False otherwise.
         """
-        pass

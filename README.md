@@ -1,85 +1,115 @@
-corankco
-===============
+[![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/downloads/release/python-380/)
+[![PyPI version](https://badge.fury.io/py/corankco.svg)](https://badge.fury.io/py/corankco)
 
-This package implements methods for rank aggregation of incomplete rankings with ties 
+# corankco
 
-Installation
-------------
+`corankco` (COnsensus RANKing COmputation) is a Python package dedicated to the aggregation of incomplete rankings with ties. Users can choose the Kemeny-Young method (exact algorithm and several heuristics available), the Copeland method, and in some cases, the Borda method. The formalism to handle ties and/or incompleteness is detailed in the preprint: P. Andrieu, S. Cohen-Boulakia, M. Couceiro, A. Denise, A. Pierrot. *A Unifying Rank Aggregation Model to Suitably and Efficiently Aggregate Any Kind of Rankings*. Available at SSRN: [https://ssrn.com/abstract=4353494](https://ssrn.com/abstract=4353494).
 
-Install from PyPI:
+## Installation
 
-.. code-block:: bash
+Before installing `corankco`, make sure your system meets the following requirements:
 
-    pip3 install --user corankco
+- Python >= 3.8
+- For the usage of the exact algorithm on big datasets (with many elements to rank), the installation of IBM ILOG CPLEX Optimization Studio is recommended. A free academic version can be downloaded from the [IBM website](https://www.ibm.com/products/ilog-cplex-optimization-studio). After downloading, follow the [instructions to install CPLEX](https://www.ibm.com/docs/en/icos/20.1.0?topic=studio-setting-up-python).
 
-Example usage
--------------
+To install `corankco` from PyPI, you can use pip:
 
-.. code-block:: python
+```bash
+pip3 install corankco
+```
 
-    from corankco.ranking import Ranking
-    from corankco.dataset import Dataset
-    from corankco.scoringscheme import ScoringScheme
-    from corankco.algorithms.algorithmChoice import get_algorithm
-    from corankco.algorithms.algorithmChoice import Algorithm
+## Documentation
+Visit our [official documentation](https://corankco.readthedocs.io/en/latest).
+For examples of use, you can jump directly to our [Usage section below](#usage).
 
-    # create a ranking from a list of sets
-    ranking1 = Ranking.from_list([{1}, {2, 3}])
+## Contact/Support
 
-    # or from a string
-    ranking2 = Ranking.from_string("[{3, 1}, {4}]")
+For any queries or support related to corankco, feel free to reach us at [pierre.andrieu@lilo.org](mailto:pierre.andrieu@lilo.org).
 
-    # also in this format
-    ranking3 = Ranking.from_string("[[1], [5], [3], [2]]")
+## Contributing
 
-    # now, create a Dataset object. A Dataset is a list of rankings
-    dataset = Dataset([ranking1, ranking2, ranking3])
+We welcome contributions to `corankco`. If you'd like to contribute, feel free to fork the repository and submit your changes via a pull request.
 
-    # or, create a Dataset object from a file where your rankings are stored
-    # format file: each line is a list of either set, or list of int / str.
-    d = Dataset.from_file(path="dataset_example")
+## License
 
-    # print information about the dataset
-    print(dataset.description())
+`corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](./LICENSE).
 
-    # get all datasets in a folder
-    # list_datasets = Dataset.get_datasets_from_folder(path_folder="folder_path")
+## Example usage <a class="anchor" id="usage"></a>
 
-    # choose your scoring scheme
-    sc = ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+```python
 
-    print("scoring scheme : " + str(sc))
-    # scoring scheme description
-    print(sc.description())
+import corankco as crc
 
-    print("\n### Consensus computation ###\n")
+# create a ranking from a list of sets
+ranking1: crc.Ranking = crc.Ranking([{1}, {2, 3}])
 
-    # list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom,
-    # PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
+# or from a string
+ranking2: crc.Ranking = crc.Ranking.from_string("[{3, 1}, {4}]")
 
-    algorithms_to_execute = [
-        get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True}),
-        get_algorithm(alg=Algorithm.KwikSortRandom),
-        get_algorithm(alg=Algorithm.BioConsert, parameters={"starting_algorithms": []}),
-        get_algorithm(alg=Algorithm.ParCons,
-                      parameters={"bound_for_exact": 90,
-                                  "auxiliary_algorithm": get_algorithm(alg=Algorithm.KwikSortRandom)}),
-        get_algorithm(alg=Algorithm.Exact, parameters={"optimize": True}),
-        get_algorithm(alg=Algorithm.CopelandMethod),
-        get_algorithm(alg=Algorithm.BioCo),
-        get_algorithm(alg=Algorithm.BordaCount)
-    ]
+# also in this format
+ranking3: crc.Ranking = crc.Ranking.from_string("[[1], [5], [3], [2]]")
 
-    for alg in algorithms_to_execute:
-        print(alg.get_full_name())
-        consensus = alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=sc, return_at_most_one_ranking=True)
+# now, create a Dataset object. A Dataset is a list of rankings
+dataset: crc.Dataset = crc.Dataset([ranking1, ranking2, ranking3])
 
-        # to get the consensus rankings: consensus.consensus_rankings
-        # description() will display supplementary information
+# or, from raw rankings that is a list of list of sets of either ints,or strs
+dataset2: crc.Dataset = crc.Dataset.from_raw_list([[{2, 1}, {4}], [{3, 1, 2}, {4}, {5}], [{1}, {2}, {3}, {4}]])
 
-        print(consensus.description())
-        # if you want the consensus ranking only: print(consensus)
+# or, create a Dataset object from a file where your rankings are stored
+# format file: each line is a list of either set, or list of int / str.
+dataset3: crc.Dataset = crc.Dataset.from_file(path="./dataset_example")
 
-        # get the Kemeny score associated with the consensus:
-        print(consensus.kemeny_score)
+# print information about the dataset
+print(dataset.description())
 
+# get all datasets in a folder
+# list_datasets = Dataset.get_datasets_from_folder(path_folder="folder_path")
+
+# choose your scoring scheme
+sc: crc.ScoringScheme = crc.ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
+
+print("scoring scheme : " + str(sc))
+# scoring scheme description
+print(sc.description())
+
+print("\n### Consensus computation ###\n")
+
+# list of rank aggregation algorithms to use among  BioConsert, ParCons, ExactAlgorithm, KwikSortRandom,
+# RepeatChoice, PickAPerm, MedRank, BordaCount, BioCo, CopelandMethod
+
+algorithms_to_execute = [crc.ExactAlgorithm(optimize=False),
+                         crc.KwikSortRandom(),
+                         crc.BioConsert(starting_algorithms=None),
+                         crc.BioConsert(starting_algorithms=[crc.CopelandMethod()]),
+                         crc.ParCons(bound_for_exact=90, auxiliary_algorithm=crc.BioConsert()),
+                         crc.CopelandMethod(),
+                         crc.BioCo(),
+                         crc.BordaCount(),
+                         ]
+
+for alg in algorithms_to_execute:
+    print(alg.get_full_name())
+    consensus = alg.compute_consensus_rankings(dataset=dataset,
+                                               scoring_scheme=sc,
+                                               return_at_most_one_ranking=False)
+    # to get the consensus rankings : consensus.consensus_rankings
+    # description() will display supplementary information
+    print(consensus.description())
+    # if you want the consensus ranking only : print(consensus)
+
+    # get the Kemeny score associated with the consensus:
+    print(consensus.kemeny_score)
+
+# compute a Kemeny score between a ranking and a list of rankings (dataset object):
+ranking_test: crc.Ranking = crc.Ranking([{1, 2}, {4}, {3}])
+dataset_test: crc.Dataset = crc.Dataset.from_raw_list([[{1}, {2}, {3}, {4}], [{1, 4}, {3}]])
+scoring_scheme: crc.ScoringScheme = crc.ScoringScheme([[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]])
+kemeny_obj: crc.KemenyComputingFactory = crc.KemenyComputingFactory(scoring_scheme)
+score: float = kemeny_obj.get_kemeny_score(ranking=ranking_test, dataset=dataset_test)
+print("\nscore = ", score)
+
+ ```
+
+ ## Jupiter Notebook for code execution and more examples
+
+ More detailed examples and use cases, please refer to our [Jupyter Notebook](./corankco_notebook).

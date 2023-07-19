@@ -6,6 +6,12 @@
       <sourceFolder url="file://$MODULE_DIR$/corankco/partitioning" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/corankco/algorithms" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/corankco.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/build/doctrees" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/build/html/_sources" />
+      <excludeFolder url="file://$MODULE_DIR$/docs/build/html/_static" />
+      <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
     <content url="file:///opt/ibm/ILOG/CPLEX_Studio2211/cplex/python/3.8/x86-64_linux" />
     <orderEntry type="inheritedJdk" />

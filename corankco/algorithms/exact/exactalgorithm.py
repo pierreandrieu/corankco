@@ -1,6 +1,11 @@
+"""
+Module that contains the class ExactAlgorithm, which consists in choosing Cplex or PuLP version of the exact algorithm
+according to the possibility to import cplex.
+"""
+
 from corankco.algorithms.exact.exactalgorithmbase import ExactAlgorithmBase
 from corankco.algorithms.exact.exactalgorithmcplex import ExactAlgorithmCplex
-from corankco.algorithms.exact.exactalgorithmgeneric import ExactAlgorithmGeneric
+from corankco.algorithms.exact.exactalgorithmpulp import ExactAlgorithmPulp
 from corankco.scoringscheme import ScoringScheme
 from corankco.dataset import Dataset
 from corankco.consensus import Consensus
@@ -31,12 +36,11 @@ class ExactAlgorithm(ExactAlgorithmBase):
         """
         super().__init__(optimize)
         try:
-            import cplex
             self._alg = ExactAlgorithmCplex(optimize=optimize)
         except ModuleNotFoundError:
-            self._alg = ExactAlgorithmGeneric()
+            self._alg = ExactAlgorithmPulp()
         except ImportError:
-            self._alg = ExactAlgorithmGeneric()
+            self._alg = ExactAlgorithmPulp()
 
     def compute_consensus_rankings(self, dataset: Dataset, scoring_scheme: ScoringScheme,
                                    return_at_most_one_ranking: bool = True, bench_mode: bool = False) -> Consensus:

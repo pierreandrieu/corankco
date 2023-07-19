@@ -20,11 +20,11 @@ class TestKemenyComputation(unittest.TestCase):
 
     def test_kemeny_score(self):
         dataset = Dataset.from_raw_list(([[{1}], [{1}], [{1}]]))
-        consensus: Ranking = Ranking.from_list([{1}])
+        consensus: Ranking = Ranking([{1}])
         score: float = self._kemeny1.get_kemeny_score(consensus, dataset)
         self.assertEqual(score, 0.)
         dataset: Dataset = Dataset.from_raw_list(([[{2}, {1}], [{1}, {2}], [{2}, {1}]]))
-        consensus: Ranking = Ranking.from_list([{1}, {2}])
+        consensus: Ranking = Ranking([{1}, {2}])
         score: float = self._kemeny1.get_kemeny_score(consensus, dataset)
         self.assertEqual(score, 2.)
         self.assertEqual(TestKemenyComputation.naive_score_implementation(consensus, dataset, self._sc1), 2.)
@@ -87,18 +87,18 @@ class TestKemenyComputation(unittest.TestCase):
 
                             # add to score_ri the appropriated value
                             if pos_i_r_input == -1 and pos_j_r_input == -1:
-                                score_ri += sc.b6
+                                score_ri += sc.b_vector[5]
 
                             elif pos_i_r_input == -1:
-                                score_ri += sc.b5
+                                score_ri += sc.b_vector[4]
                             elif pos_j_r_input == -1:
-                                score_ri += sc.b4
+                                score_ri += sc.b_vector[3]
                             elif pos_i_r_input < pos_j_r_input:
-                                score_ri += sc.b1
+                                score_ri += sc.b_vector[0]
                             elif pos_i_r_input == pos_j_r_input:
-                                score_ri += sc.b3
+                                score_ri += sc.b_vector[2]
                             else:
-                                score_ri += sc.b2
+                                score_ri += sc.b_vector[1]
 
                 # now, for each bucket i, we should consider the pairs of elements in bucket i (tied in the consensus)
                 for elem_i_cons in bucket_i_cons:
@@ -115,14 +115,14 @@ class TestKemenyComputation(unittest.TestCase):
                                 pos_j_r_input = -1
 
                             if pos_i_r_input == -1 and pos_j_r_input == -1:
-                                score_ri += sc.t6
+                                score_ri += sc.t_vector[5]
 
                             elif pos_i_r_input == -1 or pos_j_r_input == -1:
-                                score_ri += sc.t4_and_t5
+                                score_ri += sc.t_vector[3]
                             elif pos_i_r_input == pos_j_r_input:
-                                score_ri += sc.t3
+                                score_ri += sc.t_vector[2]
                             else:
-                                score_ri += sc.t1_and_t2
+                                score_ri += sc.t_vector[0]
             score += score_ri
         return score
 

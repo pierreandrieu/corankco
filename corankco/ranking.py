@@ -1,8 +1,13 @@
+"""
+Module Ranking, containing one class (Ranking). A Ranking is defined as List of buckets, more formally a List of
+disjoint sets of elements.
+"""
+
 from typing import List, Set, Union, Dict, Iterator
+from random import shuffle, randint
+import numpy as np
 from corankco.element import Element
 from corankco.utils import parse_ranking_with_ties_of_str
-import numpy as np
-from random import shuffle, randint
 
 
 class Ranking:
@@ -11,7 +16,7 @@ class Ranking:
 
     """
 
-    def __init__(self, buckets: List[Set[Element]]):
+    def __init__(self, buckets: Union[List[Set[int]], List[Set[str]], List[Set[Element]]]):
         """
         Constructs a Ranking instance with the given buckets.
 
@@ -20,18 +25,19 @@ class Ranking:
         :raises ValueError: If buckets are not disjoint
 
         """
-        self._buckets: List[Set[Element]] = buckets
+        self._buckets: List[Set[Element]] = [{Element(x) for x in bucket} for bucket in buckets]
 
         # Initialize element_positions
-        self._positions: Dict[Element, int] = dict()
+        self._positions: Dict[Element, int] = {}
 
         # Check if buckets are disjoint and populate element_positions
         position: int = 1
         for bucket in buckets:
             for element in bucket:
-                if element in self._positions:
+                element_enc: Element = Element(element)
+                if element_enc in self._positions:
                     raise ValueError(f"Element {element} found in multiple buckets. Buckets must be disjoint.")
-                self._positions[element] = position
+                self._positions[element_enc] = position
             position += len(bucket)
 
     @classmethod
@@ -58,21 +64,7 @@ class Ranking:
             buckets_final: List[Set[Element]] = []
             for bucket in buckets:
                 buckets_final.append({Element(int(str(elem))) for elem in bucket})
-                return cls(buckets_final)
-        return cls(buckets)
-
-    @classmethod
-    def from_list(cls, ranking_list: List[Set[Union[int, str]]]) -> 'Ranking':
-        """
-        Constructs a Ranking instance from a list of elements.
-
-        :param ranking_list: A list of elements representing a ranking
-        :type ranking_list: List[Union[int, str]]
-        :return: A Ranking instance
-        :rtype: Ranking
-
-        """
-        buckets: List[Set[Element]] = [set([Element(elem) for elem in bucket]) for bucket in ranking_list]
+            return cls(buckets_final)
         return cls(buckets)
 
     @classmethod
@@ -80,14 +72,11 @@ class Ranking:
         """
         Constructs a Ranking instance from a file.
 
-        :param file_path: The path to a file containing a ranking representation
-        :type file_path: str
-        :return: A Ranking instance
-        :rtype: Ranking
-
+        :param file_path: The path to a file containing a ranking representation.
+        :return: A Ranking instance.
         """
-        with open(file_path, 'r') as f:
-            ranking_str: str = f.read()
+        with open(file_path, 'r', encoding='utf-8') as file:
+            ranking_str: str = file.read()
         return cls.from_string(ranking_str)
 
     @property
@@ -177,7 +166,7 @@ class Ranking:
         :rtype: str
 
         """
-        return str([{elem.value for elem in bucket} for bucket in self._buckets])
+        return str([set(bucket) for bucket in self._buckets])
 
     def __repr__(self) -> str:
         """
@@ -187,7 +176,7 @@ class Ranking:
         :rtype: str
 
         """
-        return str([{elem.value for elem in bucket} for bucket in self._buckets])
+        return str([set(bucket) for bucket in self._buckets])
 
     def __getitem__(self, index: int) -> Set[Element]:
         """
@@ -226,7 +215,7 @@ class Ranking:
 
         """
         rankings: List[Ranking] = []
-        for i in range(nb_rankings):
+        for _ in range(nb_rankings):
             ranking_random: List[int] = list(range(1, nb_elem + 1))
             shuffle(ranking_random)
             ranking: List[Set[Element]] = [{Element(x)} for x in ranking_random]
@@ -314,7 +303,7 @@ class Ranking:
     @staticmethod
     def __change_left(ranking: np.ndarray, elem: int):
         bucket_elem: int = ranking[elem]
-        size_bucket_elem: int = np.sum(ranking == bucket_elem)
+        size_bucket_elem: int = int(np.sum(ranking == bucket_elem))
         if bucket_elem != 0:
             if size_bucket_elem == 1:
                 ranking[ranking > bucket_elem] -= 1
@@ -323,8 +312,8 @@ class Ranking:
     @staticmethod
     def __change_right(ranking: np.ndarray, elem: int):
         bucket_elem: int = ranking[elem]
-        size_bucket_elem: int = np.sum(ranking == bucket_elem)
-        size_bucket_following: int = np.sum(ranking == bucket_elem + 1)
+        size_bucket_elem: int = int(np.sum(ranking == bucket_elem))
+        size_bucket_following: int = int(np.sum(ranking == bucket_elem + 1))
         id_last_bucket: int = np.max(ranking)
         if bucket_elem != id_last_bucket and (size_bucket_elem > 1 or size_bucket_following > 1):
             ranking[elem] += 1
@@ -335,7 +324,7 @@ class Ranking:
     def __remove_element(ranking: np.ndarray, elem: int):
         # id of bucket of elem
         bucket_elem: int = ranking[elem]
-        size_bucket_elem: int = np.sum(ranking == bucket_elem)
+        size_bucket_elem: int = int(np.sum(ranking == bucket_elem))
         if size_bucket_elem == 1:
             ranking[ranking > bucket_elem] -= 1
 
@@ -371,7 +360,7 @@ class Ranking:
 
     @staticmethod
     def __change_ranking_complete(ranking: np.ndarray, steps: int, nb_elements: int):
-        for step in range(steps):
+        for _ in range(steps):
             Ranking.__step_element_complete(ranking, randint(0, nb_elements - 1))
 
     @staticmethod
@@ -390,5 +379,5 @@ class Ranking:
 
     @staticmethod
     def __change_ranking_incomplete(ranking: np.ndarray, steps: int, nb_elements: int, missing_elements: Set):
-        for step in range(steps):
+        for _ in range(steps):
             Ranking.__step_element_incomplete(ranking, randint(0, nb_elements - 1), missing_elements)

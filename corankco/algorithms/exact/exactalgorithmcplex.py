@@ -1,12 +1,17 @@
+"""
+Module that contains a class as an Exact Algorithm, ILP based, for Kemeny-Young rank aggregation. This algorithm uses
+Cplex.
+"""
+
 from typing import List, Dict, Set, Tuple, Union
+from itertools import combinations
+from operator import itemgetter
+from numpy import ndarray
 from corankco.algorithms.exact.exactalgorithmbase import ExactAlgorithmBase, IncompatibleArgumentsException
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
-from numpy import ndarray, asarray
-from itertools import combinations
-from operator import itemgetter
 from corankco.ranking import Ranking
 from corankco.element import Element
 try:
@@ -22,7 +27,8 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
     More information can be found in P.Andrieu, S.Cohen-Boulakia, M.Couceiro, A.Denise, A.Pierrot. A Unifying Rank 
     Aggregation Model to Suitably and Efficiently Aggregate Any Kind of Rankings. 
     https://dx.doi.org/10.2139/ssrn.4353494
-    Note: This implementation uses CPLEX, which is proprietary software. Users must download and install CPLEX separately
+    Note: This implementation uses CPLEX, which is proprietary software. Users must download and install CPLEX
+    separately
     from the IBM website. While CPLEX is not open source, there is a free version available for academic use.
     More information can be found at: https://www.ibm.com/products/ilog-cplex-optimization-studio
 
@@ -72,9 +78,8 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         return Consensus(consensus_rankings=consensus_rankings,
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.IsNecessarilyOptimal: True,
-                              # ConsensusFeature.KemenyScore: my_prob.solution.get_objective_value(),
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                         att={ConsensusFeature.NECESSARILY_OPTIMAL: True,
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()
                               })
 
     def _compute_consensus_rankings_with_optim(
@@ -110,22 +115,19 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         # 2d matrix where positions[i][j] denotes the position of elem with int id i in ranking j (-1 if non-ranked)
         positions: ndarray = dataset.get_positions()
 
-        # numpy version of penalty vectors of scoring scheme
-        numpy_scoring_scheme: ndarray = asarray(scoring_scheme.penalty_vectors)
-
         # get both the graph of elements defined in GraphBasedAlgorithm interface and the cost matrix
         # which is a 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
         # i after j, i tied with j in the consensus according to the scoring scheme.
         if look_for_scc:
             # computes the graph with the cost matrix
-            graph_elements, cost_matrix, _ = ExactAlgorithmCplex.graph_of_elements(positions, numpy_scoring_scheme)
+            graph_elements, cost_matrix = ExactAlgorithmCplex.graph_of_elements(positions, scoring_scheme)
             # computes the scc of the graph
             scc = graph_elements.components()
             # to store the consensus ranking
             ranking: List[Set[Element]] = []
             for scc_i in scc:
                 # for each scc, if the sub-problem is trivial to solve, then we solve it directly (see ParCons)
-                scc_i_set: Set[int] = {x for x in scc_i}
+                scc_i_set: Set[int] = set(scc_i)
                 if ExactAlgorithmCplex.can_be_all_tied(scc_i_set, cost_matrix):
                     ranking.append({id_elements[id_elem] for id_elem in scc_i_set})
                 # otherwise, we use the exact algorithm to get a solution to the sub-problem,
@@ -140,84 +142,84 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
                         ranking.append(bucket)
             return [Ranking(ranking)]
 
-        else:
-            consensus_rankings: List[Ranking] = []
-            cost_matrix = PairwiseBasedAlgorithm.pairwise_cost_matrix(positions, numpy_scoring_scheme)
+        # else, no more recursive calls to do, single problem to solve
+        consensus_rankings: List[Ranking] = []
+        cost_matrix = ExactAlgorithmCplex.pairwise_cost_matrix(positions, scoring_scheme)
         # key: int id of cplex variable. Value: Tuple['x' or 't', element1, element2]. x = before, t = tied
 
-            # Cplex object
-            my_prob: cplex.Cplex = cplex.Cplex()  # initiate
-            my_prob.set_results_stream(None)  # mute
+        # Cplex object
+        my_prob: cplex.Cplex = cplex.Cplex()  # initiate
+        my_prob.set_results_stream(None)  # mute
 
-            my_prob.parameters.timelimit.set(3600)  # temps limité à 3600 secondes (1 heure)
-            my_prob.parameters.workmem.set(16384)  # mémoire de travail limitée à 2048 Mo (2 Go)
-            my_prob.parameters.mip.limits.treememory.set(4096)  # limite de mémoire de l'arbre à 1024 Mo (1 Go
+        my_prob.parameters.timelimit.set(3600)  # temps limité à 3600 secondes (1 heure)
+        my_prob.parameters.workmem.set(16384)  # mémoire de travail limitée à 2048 Mo (2 Go)
+        my_prob.parameters.mip.limits.treememory.set(4096)  # limite de mémoire de l'arbre à 1024 Mo (1 Go
 
-            # Setting the mip-gap parameter. This value represents the relative optimality gap tolerance.
-            # The solver stops searching when the relative difference between the best found solution
-            # and the best bound is within this value. Setting this value to 0 can lead to incorrect results
-            # due to the precision limitations of floating point numbers, hence a small positive value is used.
-            my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
-            my_prob.parameters.mip.pool.absgap.set(0.000001)
+        # Setting the mip-gap parameter. This value represents the relative optimality gap tolerance.
+        # The solver stops searching when the relative difference between the best found solution
+        # and the best bound is within this value. Setting this value to 0 can lead to incorrect results
+        # due to the precision limitations of floating point numbers, hence a small positive value is used.
+        my_prob.parameters.mip.tolerances.mipgap.set(0.000001)
+        my_prob.parameters.mip.pool.absgap.set(0.000001)
 
-            # out problem is a minimization problem
-            my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
+        # out problem is a minimization problem
+        my_prob.objective.set_sense(my_prob.objective.sense.minimize)  # we want to minimize the objective function
 
-            # with 4, all the optimal consensus will be found, within a limit of 10000000
-            if not return_at_most_one_ranking:
-                my_prob.parameters.mip.pool.intensity.set(4)
-                my_prob.parameters.mip.limits.populate.set(10000000)
+        # with 4, all the optimal consensus will be found, within a limit of 10000000
+        if not return_at_most_one_ranking:
+            my_prob.parameters.mip.pool.intensity.set(4)
+            my_prob.parameters.mip.limits.populate.set(10000000)
 
-            my_obj: List[float] = []
-            my_ub: List[float] = []
-            my_lb: List[float] = []
-            my_names: List[str] = []
+        my_obj: List[float] = []
+        my_ub: List[float] = []
+        my_lb: List[float] = []
+        my_names: List[str] = []
 
-            map_elements_cplex: Dict[int, Tuple[str, int, int]] = \
-                ExactAlgorithmCplex._add_cplex_variables(my_obj, my_ub, my_lb, my_names, cost_matrix)
+        map_elements_cplex: Dict[int, Tuple[str, int, int]] = \
+            ExactAlgorithmCplex._add_cplex_variables(my_obj, my_ub, my_lb, my_names, cost_matrix)
 
-            my_prob.variables.add(obj=my_obj, lb=my_lb, ub=my_ub, types="B"*len(map_elements_cplex), names=my_names)
+        my_prob.variables.add(obj=my_obj, lb=my_lb, ub=my_ub, types="B"*len(map_elements_cplex), names=my_names)
 
-            # rhs = right hand side
-            my_rhs: List[int] = []
-            # name of cplex variables
-            my_rownames: List[str] = []
-            # to store the constraints
-            rows: List[List[List[str] | List[float]]] = []
+        # rhs = right hand side
+        my_rhs: List[int] = []
+        # name of cplex variables
+        my_rownames: List[str] = []
+        # to store the constraints
+        rows: List[List[List[str] | List[float]]] = []
 
-            # inequations : E for Equality, G for >=  and L for <=
-            my_sense: str = "E" * int(nb_elem*(nb_elem-1)/2) + "L" * (3*nb_elem * (nb_elem-1) * (nb_elem-2))
+        # inequations : E for Equality, G for >=  and L for <=
+        my_sense: str = "E" * int(nb_elem*(nb_elem-1)/2) + "L" * (3*nb_elem * (nb_elem-1) * (nb_elem-2))
 
-            # add binary constraints
-            ExactAlgorithmCplex._add_binary_constraints(nb_elem, my_rhs, my_rownames, rows)
-            # add transitivity constraints
-            ExactAlgorithmCplex._add_transitivity_constraints(nb_elem, my_rhs, my_rownames, rows)
-            # add personal constraints
-            my_sense += self._add_personal_optimization_constraints(my_rhs, my_rownames, rows, cost_matrix)
-            # give the constraints to cplex
-            my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
+        # add binary constraints
+        ExactAlgorithmCplex._add_binary_constraints(nb_elem, my_rhs, my_rownames, rows)
+        # add transitivity constraints
+        ExactAlgorithmCplex._add_transitivity_constraints(nb_elem, my_rhs, my_rownames, rows)
+        # add personal constraints
+        my_sense += self._add_personal_optimization_constraints(my_rhs, my_rownames, rows, cost_matrix)
+        # give the constraints to cplex
+        my_prob.linear_constraints.add(lin_expr=rows, senses=my_sense, rhs=my_rhs, names=my_rownames)
 
-            # if return[...] = False, then all the optimal rankings will be stored if optimize = False
-            if not return_at_most_one_ranking:
-                my_prob.populate_solution_pool()
+        # if return[...] = False, then all the optimal rankings will be stored if optimize = False
+        if not return_at_most_one_ranking:
+            my_prob.populate_solution_pool()
 
-                nb_optimal_solutions = my_prob.solution.pool.get_num()
-                # for each optimal solutions
-                for i in range(nb_optimal_solutions):
-                    # get the variables results
-                    names = my_prob.solution.pool.get_values(i)
-                    # construct the consensus
-                    consensus_rankings.append(ExactAlgorithmCplex._create_consensus(
-                        nb_elem, names, map_elements_cplex, id_elements))
-            else:
-                # get one optimal solution
-                my_prob.solve()
-                # get the variable results
-                x = my_prob.solution.get_values()
-                # compute the consensus
+            nb_optimal_solutions = my_prob.solution.pool.get_num()
+            # for each optimal solutions
+            for i in range(nb_optimal_solutions):
+                # get the variables results
+                names = my_prob.solution.pool.get_values(i)
+                # construct the consensus
                 consensus_rankings.append(ExactAlgorithmCplex._create_consensus(
-                    nb_elem, x, map_elements_cplex, id_elements))
-            return consensus_rankings
+                    nb_elem, names, map_elements_cplex, id_elements))
+        else:
+            # get one optimal solution
+            my_prob.solve()
+            # get the variable results
+            cplex_res = my_prob.solution.get_values()
+            # compute the consensus
+            consensus_rankings.append(ExactAlgorithmCplex._create_consensus(
+                nb_elem, cplex_res, map_elements_cplex, id_elements))
+        return consensus_rankings
 
     @staticmethod
     def _add_cplex_variables(my_obj, my_ub: List[float], my_lb: [List[float]], my_names: List[str],
@@ -248,13 +250,13 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
                 if not i == j:
 
                     # name of the new cplex variable, x = before whereas t = tied. Here, cost of i before j
-                    s: str = "x_%s_%s" % (i, j)
+                    cplex_var: str = f"x_{i}_{j}"
                     # associated cost in the consensus
                     my_obj.append(mat_score[i][j][0])
                     # the variable is boolean, must be between 0 and 1
                     my_ub.append(1.0)
                     my_lb.append(0.0)
-                    my_names.append(s)
+                    my_names.append(cplex_var)
                     # to reconstruct the consensus given final values of variables by cplex
                     map_elements_cplex[cpt] = ("x", i, j)
                     cpt += 1
@@ -263,13 +265,13 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         for i in range(nb_elements):
             for j in range(i + 1, nb_elements):
                 # t for ties. Variable t_i_j : variable "i tied with j"
-                s = "t_%s_%s" % (i, j)
+                cplex_var: str = f"t_{i}_{j}"
                 # associated cost
                 my_obj.append(mat_score[i][j][2])
                 # boolean variable: 0 or 1 : ub = 1 et lb = 0
                 my_ub.append(1.0)
                 my_lb.append(0.0)
-                my_names.append(s)
+                my_names.append(cplex_var)
                 map_elements_cplex[cpt] = ("t", i, j)
                 cpt += 1
 
@@ -298,15 +300,15 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
             for j in range(i + 1, nb_elements):
                 if not i == j:
                     # unique int id of the new constraint
-                    s: str = "c%s" % count
-                    my_rownames.append(s)
+                    new_constraint_str: str = f"c{count}"
+                    my_rownames.append(new_constraint_str)
                     my_rhs.append(1)
                     # i before j var
-                    first_var = "x_%s_%s" % (i, j)
+                    first_var = f"x_{i}_{j}"
                     # j before i var
-                    second_var = "x_%s_%s" % (j, i)
+                    second_var = f"x_{j}_{i}"
                     # i tied with j var
-                    third_var = "t_%s_%s" % (i, j)
+                    third_var = f"t_{i}_{j}"
                     # sum of the 3 binary variables must be one (exactly 1 of the 3 possible relative ordering)
                     row = [[first_var, second_var, third_var], [1.0, 1.0, 1.0]]
                     rows.append(row)
@@ -337,33 +339,33 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         for i in range(0, nb_elem):
             for j in range(nb_elem):
                 if j != i:
-                    i_bef_j = "x_%s_%s" % (i, j)
+                    i_bef_j = f"x_{i}_{j}"
                     if i < j:
-                        i_tie_j = "t_%s_%s" % (i, j)
+                        i_tie_j = f"t_{i}_{j}"
                     else:
-                        i_tie_j = "t_%s_%s" % (j, i)
+                        i_tie_j = f"t_{j}_{i}"
                     for k in range(nb_elem):
-                        if k != i and k != j:
-                            my_rownames.append("c%s" % count)
+                        if k not in (i, j):
+                            my_rownames.append(f"c{count}")
                             my_rhs.append(1)
                             count += 1
                             if j < k:
-                                j_tie_k = "t_%s_%s" % (j, k)
+                                j_tie_k = f"t_{j}_{k}"
                             else:
-                                j_tie_k = "t_%s_%s" % (k, j)
-                            rows.append([[i_bef_j, "x_%s_%s" % (j, k), j_tie_k, "x_%s_%s" % (i, k)], [1., 1., 1., -1.]])
+                                j_tie_k = f"t_{k}_{j}"
+                            rows.append([[i_bef_j, f"x_{j}_{k}", j_tie_k, f"x_{i}_{k}"], [1., 1., 1., -1.]])
 
-                            my_rownames.append("c%s" % count)
+                            my_rownames.append(f"c{count}")
                             my_rhs.append(1)
                             count += 1
-                            rows.append([[i_bef_j, i_tie_j, "x_%s_%s" % (j, k), "x_%s_%s" % (i, k)], [1., 1., 1., -1.]])
+                            rows.append([[i_bef_j, i_tie_j, f"x_{j}_{k}", f"x_{i}_{k}"], [1., 1., 1., -1.]])
 
                             if i < k:
-                                i_tie_k = "t_%s_%s" % (i, k)
+                                i_tie_k = f"t_{i}_{k}"
                             else:
-                                i_tie_k = "t_%s_%s" % (k, i)
+                                i_tie_k = f"t_{k}_{i}"
 
-                            my_rownames.append("c%s" % count)
+                            my_rownames.append(f"c{count}")
                             my_rhs.append(3)
                             count += 1
                             rows.append([[i_tie_j, j_tie_k, i_tie_k], [2.0, 2.0, -1.0]])
@@ -386,17 +388,16 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
             return ""
 
         initial_nb_constraints: int = len(my_rhs)
-        count: int = len(my_rhs)
 
         # searching for a pair x y of elements such that before(x,y) + before(y,x) > tied(x,y)
         # if no such pair exist, then we can set all tied variables to 0 as we know that at least one optimal consensus
         # is a ranking without ties
         can_have_no_ties: bool = True
         # for e1 in 0 ... nb_elements - 2 and e2 in e1 + 1, nb_elements+1
-        for e1, e2 in combinations(range(len(cost_matrix)), 2):
-            cost_to_tie = cost_matrix[e1][e2][2]
-            cost_to_place_before = cost_matrix[e1][e2][0]
-            cost_to_place_after = cost_matrix[e1][e2][1]
+        for el_1, el_2 in combinations(range(len(cost_matrix)), 2):
+            cost_to_tie = cost_matrix[el_1][el_2][2]
+            cost_to_place_before = cost_matrix[el_1][el_2][0]
+            cost_to_place_after = cost_matrix[el_1][el_2][1]
             calc: float = cost_to_place_before + cost_to_place_after - 2 * cost_to_tie
             # if the test fails, then the optimization cannot be used
             if calc > ExactAlgorithmCplex._PRECISION_THRESHOLD:
@@ -405,18 +406,16 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
 
         # if the optimization can be done, then all tied variables are set to 0
         if can_have_no_ties:
-            for e1, e2 in combinations(range(len(cost_matrix)), 2):
-                if e1 > e2:
-                    tmp = e1
-                    e1 = e2
-                    e2 = tmp
+            for el_1, el_2 in combinations(range(len(cost_matrix)), 2):
+                if el_1 > el_2:
+                    el_1, el_2 = el_2, el_1
+
                 # set id of constraint, add constraint
-                my_rownames.append("c%s" % count)
+                my_rownames.append(f"c{len(my_rhs)}")
                 # constraint: 1. * t_elem1_elem2 == 0
-                i_tie_j = "t_%s_%s" % (e1, e2)
+                i_tie_j = f"t_{el_1}_{el_2}"
                 rows.append([[i_tie_j], [1.]])
                 my_rhs.append(0)
-                count += 1
 
         # all the constraints of this function were equality constraints
         return "E" * (len(my_rhs) - initial_nb_constraints)
@@ -484,9 +483,9 @@ class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):
         :param map_elements_cplex: Mapping between CPLEX variables and pairs of elements
         :param count_after: Dictionary that will be updated with the defeat counts
         """
-        for i in range(len(cplex_variables)):
+        for i, cplex_variable_i in enumerate(cplex_variables):
             # if the value is set to 1 (value is True)
-            if abs(cplex_variables[i] - 1) < 0.001:
+            if abs(cplex_variable_i - 1) < 0.001:
                 # we add +1 to the "loser" element
                 var_type, _, loser_elem = map_elements_cplex[i]
                 # var_type == x ==> variable is type "i before j" with a value of 1 that is j lose

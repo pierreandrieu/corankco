@@ -1,18 +1,21 @@
-from corankco.algorithms.median_ranking import MedianRanking
+"""
+Module for ParCons algorithm. More details in ParCons docstring class.
+"""
+
+from typing import List, Set
+from numpy import ndarray
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
-from typing import List, Set
-from igraph import VertexClustering
 from corankco.element import Element
-from numpy import ndarray, asarray
 from corankco.ranking import Ranking
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.algorithms.exact.exactalgorithmcplexforpaperoptim1 import ExactAlgorithmCplexForPaperOptim1
 
 
-class ParCons(MedianRanking, PairwiseBasedAlgorithm):
+class ParCons(RankAggAlgorithm, PairwiseBasedAlgorithm):
     """
     ParCons is a graph-based heuristics for Kemeny-Young rank aggregation published in P. Andrieu, B. Brancotte,
     L. Bulteau, S. Cohen-Boulakia, A. Denise, A. Pierrot, S. Vialette, Efficient, robust and effective rank aggregation
@@ -28,18 +31,18 @@ class ParCons(MedianRanking, PairwiseBasedAlgorithm):
     """
     DEFAULT_BOUND_FOR_EXACT = 80
 
-    def __init__(self, auxiliary_algorithm: MedianRanking = None, bound_for_exact: int = None):
+    def __init__(self, auxiliary_algorithm: RankAggAlgorithm = None, bound_for_exact: int = None):
         """
         Construct a ParCons instance
-        :param auxiliary_algorithm: the rank aggregation algorithm (MedianRanking instance) to use for
+        :param auxiliary_algorithm: the rank aggregation algorithm (RankAggAlgorithm instance) to use for
         subproblems whose number of elements is greater than the attribute "bound_for_exact". Default is BioConsert
         :param bound_for_exact: the maximal number of elements for a given sub-problem such that the exact algorithm
         will be used to get a consensus of the sub-problem
         """
-        if isinstance(auxiliary_algorithm, MedianRanking):
-            self._auxiliary_alg: MedianRanking = auxiliary_algorithm
+        if isinstance(auxiliary_algorithm, RankAggAlgorithm):
+            self._auxiliary_alg: RankAggAlgorithm = auxiliary_algorithm
         else:
-            self._auxiliary_alg: MedianRanking = BioConsert(starting_algorithms=None)
+            self._auxiliary_alg: RankAggAlgorithm = BioConsert(starting_algorithms=None)
         self._bound_for_exact: int = bound_for_exact
 
         if bound_for_exact is None:
@@ -74,24 +77,23 @@ class ParCons(MedianRanking, PairwiseBasedAlgorithm):
         # optimal unless a non-exact auxiliary algorithm is used
         optimal: bool = True
 
-        # numpy version of scoring scheme
-        sc: ndarray = asarray(scoring_scheme.penalty_vectors)
-
         res: List[Set[Element]] = []
+        weak_partition: List[Set[Element]] = []
 
         # positions[i][j] = position of element of id i in ranking j, -1 if non-ranked
         positions: ndarray = dataset.get_positions()
 
         # get the graph of elements and the cost matrix
-        gr1, mat_score, _ = ParCons.graph_of_elements(positions, sc)
+        gr1, mat_score = ParCons.graph_of_elements(positions, scoring_scheme)
 
         # get the strongly connected components in a topological sort
-        scc: VertexClustering = gr1.components()
+        scc = gr1.components()
         
         # for each SCC (defining a sub-problem)
         for scc_i in scc:
             set_current_scc: Set[int] = set(scc_i)
             set_current_elements: Set[Element] = {dataset.mapping_id_elem[el_scc] for el_scc in set_current_scc}
+            weak_partition.append(set_current_elements)
             if ParCons.can_be_all_tied(set_current_scc, mat_score):
                 res.append(set_current_elements)
             # if there is at least one pair of elements that cannot be tied with minimal cost,
@@ -110,12 +112,11 @@ class ParCons(MedianRanking, PairwiseBasedAlgorithm):
                         sub_problem, scoring_scheme, True).consensus_rankings[0]
                     res.extend(cons_ext)
 
-        hash_information = {ConsensusFeature.IsNecessarilyOptimal: optimal,
-                            ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
-                            }
-        if not bench_mode:
-            hash_information[ConsensusFeature.WeakPartitioning] = [set(scc_i) for scc_i in scc]
-
+        hash_information = {
+            ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name(),
+            ConsensusFeature.NECESSARILY_OPTIMAL: optimal,
+            ConsensusFeature.WEAK_PARTITIONING: weak_partition,
+        }
         return Consensus(consensus_rankings=[Ranking(res)],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,

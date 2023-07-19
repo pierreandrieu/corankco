@@ -1,19 +1,23 @@
+"""
+Module for an Exact Algorithm, ILP based, using PuLP
+"""
+
 from typing import List, Dict, Set
 from itertools import combinations
-from corankco.algorithms.median_ranking import MedianRanking
+from operator import itemgetter
+from numpy import ndarray
+import pulp
+from igraph import Graph
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.ranking import Ranking
 from corankco.element import Element
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
-from numpy import ndarray, asarray
-from operator import itemgetter
-import pulp
-from igraph import Graph
 
 
-class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
+class ExactAlgorithmPulp(RankAggAlgorithm, PairwiseBasedAlgorithm):
     """
 
     Exact algorithm using free libraries
@@ -50,11 +54,9 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
         nb_elem: int = dataset.nb_elements
         # 2d matrix where positions[i][j] = position of element whose int id is i in ranking j, -1 if non-ranked
         positions: ndarray = dataset.get_positions()
-        # ndarray view of scoring scheme penalty vectors
-        sc: ndarray = asarray(scoring_scheme.penalty_vectors)
 
         # get the graph of elements and the score matrix
-        graph, cost_matrix, _ = ExactAlgorithmGeneric.graph_of_elements(positions, sc)
+        graph, cost_matrix = ExactAlgorithmPulp.graph_of_elements(positions, scoring_scheme)
 
         # values of penalty associated to each true pulp variable
         my_values: List[float] = []
@@ -62,32 +64,29 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
         my_vars: List[pulp.LpVariable] = []
 
         # get the variables of the problem and get a dict to store given the name of a pulp variable its int unique id
-        h_vars: Dict[str, int] = ExactAlgorithmGeneric._add_pulp_variables(nb_elem, my_values, my_vars, cost_matrix)
+        h_vars: Dict[str, int] = ExactAlgorithmPulp._add_pulp_variables(nb_elem, my_values, my_vars, cost_matrix)
 
         # minimization problem
         prob: pulp.LpProblem = pulp.LpProblem("myProblem", pulp.LpMinimize)
 
         # add the binary constraints of the problem
-        ExactAlgorithmGeneric._add_binary_constraints(nb_elem, prob, my_vars, h_vars)
-        ExactAlgorithmGeneric._add_transitivity_constraints(nb_elem, prob, my_vars, h_vars)
-        ExactAlgorithmGeneric._add_personal_optimization_constraints(prob, my_vars, h_vars, graph, cost_matrix)
+        ExactAlgorithmPulp._add_binary_constraints(nb_elem, prob, my_vars, h_vars)
+        ExactAlgorithmPulp._add_transitivity_constraints(nb_elem, prob, my_vars, h_vars)
+        ExactAlgorithmPulp._add_personal_optimization_constraints(prob, my_vars, h_vars, graph, cost_matrix)
         # objective function
         prob += pulp.lpSum(my_vars[cpt] * my_values[cpt] for cpt in range(len(my_vars)))
 
-        try:
-            prob.solve(pulp.CPLEX(msg=False))
-        except:
-            prob.solve(pulp.PULP_CBC_CMD(msg=False))
+        prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
-        h_def = {i: 0 for i in range(nb_elem)}
+        h_def: Dict[int, int] = {i: 0 for i in range(nb_elem)}
 
         for var in my_vars:
             if abs(var.value() - 1) < 0.01 and var.name[0] == "x":
                 h_def[int(var.name.split("_")[2])] += 1
 
-        ranking = []
-        current_nb_def = 0
-        bucket: Set = set()
+        ranking: List[Set[Element]] = []
+        current_nb_def: int = 0
+        bucket: Set[Element] = set()
 
         for elem, nb_defeats in (sorted(h_def.items(), key=itemgetter(1))):
             if nb_defeats == current_nb_def:
@@ -100,9 +99,9 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
         return Consensus(consensus_rankings=[Ranking(ranking)],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.IsNecessarilyOptimal: True,
-                              ConsensusFeature.KemenyScore: prob.objective.value(),
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                         att={ConsensusFeature.NECESSARILY_OPTIMAL: True,
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name(),
+                              ConsensusFeature.KEMENY_SCORE: prob.objective.value(),
                               })
 
     @staticmethod
@@ -132,7 +131,7 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
             for j in range(nb_elem):
                 # for each pair of integers (unique IDs of elements) with i != j, define variable x_i_j as i before j
                 if not i == j:
-                    name_var = "x_%s_%s" % (i, j)
+                    name_var = f"x_{i}_{j}"
                     # associate the cost to place i before j in the consensus
                     my_values.append(cost_matrix[i][j][0])
                     # variable is binary
@@ -142,7 +141,7 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
                     cpt += 1
                     # variable t_i_j = tie i with j in the consensus. Defined only for i < j
                     if i < j:
-                        name_var = "t_%s_%s" % (i, j)
+                        name_var = f"t_{i}_{j}"
                         my_values.append(cost_matrix[i][j][2])
                         my_vars.append(pulp.LpVariable(name_var, 0, 1, cat="Binary"))
                         map_variables_int_id[name_var] = cpt
@@ -172,9 +171,9 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
                 if not i == j:
                     # for each (i,j) with i < j, we must have exactly one true variable among
                     # i before j, j before i, i tied with j
-                    prob += my_vars[h_vars["x_%s_%s" % (i, j)]] \
-                            + my_vars[h_vars["x_%s_%s" % (j, i)]] \
-                            + my_vars[h_vars["t_%s_%s" % (i, j)]] == 1
+                    prob += my_vars[h_vars[f"x_{i}_{j}"]] \
+                            + my_vars[h_vars[f"x_{j}_{i}"]] \
+                            + my_vars[h_vars[f"t_{i}_{j}"]] == 1
 
     @staticmethod
     def _add_transitivity_constraints(nb_elem: int, prob: pulp.LpProblem, my_vars: List[pulp.LpVariable],
@@ -203,30 +202,30 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
             for j in range(nb_elem):
                 if j != i:
                     # variable i before j
-                    i_bef_j = "x_%s_%s" % (i, j)
+                    i_bef_j = f"x_{i}_{j}"
                     if i < j:
                         # variable i tied with j, defined only if i < j
-                        i_tie_j = "t_%s_%s" % (i, j)
+                        i_tie_j = f"t_{i}_{j}"
                     else:
                         # variable i tied with j
-                        i_tie_j = "t_%s_%s" % (j, i)
+                        i_tie_j = f"t_{j}_{i}"
                     for k in range(nb_elem):
-                        if k != i and k != j:
+                        if k not in (i, j):
                             # variable j before k
-                            j_bef_k = "x_%s_%s" % (j, k)
+                            j_bef_k = f"x_{j}_{k}"
                             # variable i before k
-                            i_bef_k = "x_%s_%s" % (i, k)
+                            i_bef_k = f"x_{i}_{k}"
                             if j < k:
                                 # variable j tied with k
-                                j_tie_k = "t_%s_%s" % (j, k)
+                                j_tie_k = f"t_{j}_{k}"
                             else:
-                                j_tie_k = "t_%s_%s" % (k, j)
+                                j_tie_k = f"t_{k}_{j}"
 
                             if i < k:
                                 # variable i tied with k
-                                i_tie_k = "t_%s_%s" % (i, k)
+                                i_tie_k = f"t_{i}_{k}"
                             else:
-                                i_tie_k = "t_%s_%s" % (k, i)
+                                i_tie_k = f"t_{k}_{i}"
 
                             # i < j && j <= k => i < k
                             prob += my_vars[h_vars[i_bef_j]] + my_vars[h_vars[j_bef_k]] \
@@ -266,36 +265,36 @@ class ExactAlgorithmGeneric(MedianRanking, PairwiseBasedAlgorithm):
         """
         # computes the scc of the graph
         cfc = graph_of_elements.components()
-        for id_scc in range(len(cfc)):
+        for id_scc, cfc_i in enumerate(cfc):
             # for each scc, check if for all pairs of elements, the below condition is respected
-            group_i: Set[int] = {x for x in cfc[id_scc]}
+            group_i: Set[int] = set(cfc_i)
             ties_must_be_checked: bool = False
             pairs: combinations = combinations(group_i, 2)
-            for e1, e2 in pairs:
-                cost_e1_before_e2 = cost_matrix[e1][e2][0]
-                cost_e1_after_e2 = cost_matrix[e1][e2][1]
-                cost_e1_tied_e2 = cost_matrix[e1][e2][2]
+            for el_1, el_2 in pairs:
+                cost_e1_before_e2 = cost_matrix[el_1][el_2][0]
+                cost_e1_after_e2 = cost_matrix[el_1][el_2][1]
+                cost_e1_tied_e2 = cost_matrix[el_1][el_2][2]
                 if 2 * cost_e1_tied_e2 < cost_e1_before_e2 + cost_e1_after_e2:
                     ties_must_be_checked = True
                     break
             # if valu of ties[...] is False, then there exists an optimal consensus ranking
             # which has no ties elements within his group
             if not ties_must_be_checked:
-                for e1, e2 in pairs:
-                    if e1 < e2:
-                        prob += my_vars[h_vars["t_%s_%s" % (e1, e2)]] == 0
+                for el_1, el_2 in pairs:
+                    if el_1 < el_2:
+                        prob += my_vars[h_vars[f"t_{el_1}_{el_2}"]] == 0
                     else:
-                        prob += my_vars[h_vars["t_%s_%s" % (e2, e1)]] == 0
+                        prob += my_vars[h_vars[f"t_{el_2}_{el_1}"]] == 0
             # for all the elements of all the scc after scc[i], they should be placed after
             for j in range(id_scc + 1, len(cfc)):
                 for elem_i in group_i:
                     for elem_j in cfc[j]:
-                        prob += my_vars[h_vars["x_%s_%s" % (elem_i, elem_j)]] == 1
-                        prob += my_vars[h_vars["x_%s_%s" % (elem_j, elem_i)]] == 0
+                        prob += my_vars[h_vars[f"x_{elem_i}_{elem_j}"]] == 1
+                        prob += my_vars[h_vars[f"x_{elem_j}_{elem_i}"]] == 0
                         if elem_i < elem_j:
-                            prob += my_vars[h_vars["t_%s_%s" % (elem_i, elem_j)]] == 0
+                            prob += my_vars[h_vars[f"t_{elem_i}_{elem_j}"]] == 0
                         else:
-                            prob += my_vars[h_vars["t_%s_%s" % (elem_j, elem_i)]] == 0
+                            prob += my_vars[h_vars[f"x_{elem_j}_{elem_i}"]] == 0
 
     def get_full_name(self) -> str:
         """

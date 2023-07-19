@@ -1,3 +1,8 @@
+"""
+This module contains the Element class used to encapsulate an element to be ranked.
+An element is defined as an int or a string.
+"""
+
 from typing import Union, Type
 
 
@@ -9,7 +14,7 @@ class Element:
     :type value: Union[int, str]
     """
 
-    def __init__(self, value: Union[int, str]):
+    def __init__(self, value: Union[int, str, 'Element']):
         """
         Constructs an Element instance with the given value.
 
@@ -19,13 +24,18 @@ class Element:
         """
         if isinstance(value, int):
             self._type = int
+            self._value = value
         elif isinstance(value, str):
             self._type = str
+            self._value = value
+        elif isinstance(value, Element):
+            self._type = value.type
+            self._value = value.value
         else:
-            raise TypeError("Value must be int or str, ", type(value), " found")
-        self._value = value
+            raise TypeError("Value must be int, str or Element ", type(value), " found")
 
-    def _get_value(self) -> Union[int, str]:
+    @property
+    def value(self) -> Union[int, str]:
         """
         returns the value of the instance
         :return: value of the instance
@@ -33,7 +43,8 @@ class Element:
         """
         return self._value
 
-    def _get_type(self) -> Type:
+    @property
+    def type(self) -> Type:
         """
         returns the type of the instance
         :return: type of the instance
@@ -41,10 +52,11 @@ class Element:
         """
         return self._type
 
-    value = property(_get_value)
-    type = property(_get_type)
-
     def can_be_int(self):
+        """
+
+        :return: True iif the value of Element object is an int or a str that can be converted to int
+        """
         return self._type == int or self._value.isdigit()
 
     def __eq__(self, other: Union['Element', str, int]) -> bool:
@@ -58,12 +70,11 @@ class Element:
         """
         if isinstance(other, Element):
             return self.type == other.type and self.value == other.value
-        elif isinstance(other, str):
+        if isinstance(other, str):
             return self.type == str and self.value == other
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._type == int and self._value == other
-        else:
-            return False
+        return False
 
     def __ne__(self, other: 'Element') -> bool:
         """
@@ -85,7 +96,7 @@ class Element:
         :return: True if this element is less than the other element, False otherwise.
         :rtype: bool
         """
-        assert(self._type == other._type)
+        assert self._type == other._type
         return self._value < other._value
 
     def __le__(self, other: 'Element') -> bool:
@@ -97,7 +108,7 @@ class Element:
         :return: True if this element is less than or equal to the other element, False otherwise.
         :rtype: bool
         """
-        assert(self._type == other._type)
+        assert self._type == other._type
         return self._value <= other._value
 
     def __gt__(self, other: 'Element') -> bool:
@@ -109,7 +120,7 @@ class Element:
         :return: True if this element is greater than the other element, False otherwise.
         :rtype: bool
         """
-        assert(self._type == other._type)
+        assert self._type == other._type
         return self._value > other._value
 
     def __ge__(self, other: 'Element') -> bool:
@@ -121,10 +132,14 @@ class Element:
         :return: True if this element is greater than or equal to the other element, False otherwise.
         :rtype: bool
         """
-        assert(self._type == other._type)
+        assert self._type == other._type
         return self._value >= other._value
 
-    def __hash__(self):
+    def __hash__(self) -> int:
+        """
+
+        :return: The hash of the value of the element
+        """
         return hash(self._value)
 
     def __str__(self) -> str:
@@ -136,8 +151,7 @@ class Element:
         """
         if self._type is int:
             return f"{self._value}"
-        else:
-            return f"{self._value}"
+        return f"{self._value}"
 
     def __repr__(self) -> str:
         """
@@ -147,76 +161,3 @@ class Element:
         :rtype: str
         """
         return f"{self._value}"
-
-
-class PairwiseElementComparison:
-    """
-    Class to encapsulate the cost of the different relative orders for two elements in a consensus ranking within a
-    Kemeny prism
-    """
-    def __init__(self, x: Element, y: Element, x_before_y: float, x_after_y: float, x_tied_y: float):
-        if x <= y:
-            self._x: Element = x
-            self._y: Element = y
-            self._x_before_y: float = x_before_y
-            self._x_after_y: float = x_after_y
-            self._x_tied_y: float = x_tied_y
-        else:
-            self._x: Element = y
-            self._y: Element = x
-            self._x_before_y: float = x_after_y
-            self._x_after_y: float = x_before_y
-            self._x_tied_y: float = x_tied_y
-
-    @property
-    def x(self) -> Element:
-        """
-        Property to get the x element
-        :return: x
-        """
-        return self._x
-
-    @property
-    def y(self) -> Element:
-        """
-        Property to get the y element
-        :return: y
-        """
-        return self._y
-
-    @property
-    def x_before_y(self) -> float:
-        """
-        Property to get the cost to place x before y in a consensus in a Kemeny prism
-        :return: cost to place x before y in the consensus in a Kemeny prism
-        """
-        return self._x_before_y
-
-    @property
-    def x_after_y(self) -> float:
-        """
-        Property to get the cost to place x after y in a consensus in a Kemeny prism
-        :return: cost to place x after y in a consensus in a Kemeny prism
-        """
-        return self._x_after_y
-
-    @property
-    def x_tied_y(self) -> float:
-        """
-        Property to get the cost to tie x and y in a consensus in a Kemeny prism
-        :return: cost to tie x and y in a consensus in a Kemeny prism
-        """
-        return self._x_tied_y
-
-    def x_before_y_is_minimal(self) -> bool:
-        return self.x_before_y <= self.x_after_y and self.x_before_y <= self._x_tied_y
-
-    def y_before_x_is_minimal(self) -> bool:
-        return self.x_after_y <= self.x_before_y and self.x_after_y <= self.x_tied_y
-
-    def x_tied_y_is_minimal(self) -> bool:
-        return self.x_tied_y <= self.x_before_y and self.x_tied_y <= self.x_after_y
-
-    def __hash__(self):
-        return hash((self._x, self._y))
-

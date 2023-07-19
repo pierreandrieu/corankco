@@ -63,16 +63,6 @@ class TestScoringScheme(unittest.TestCase):
 
     def test_properties(self):
         sc = ScoringScheme([[0., 1., 2., 3., 4., 5.], [6., 6., 0., 7., 7., 8.]])
-        self.assertEqual(sc.b1, 0.)
-        self.assertEqual(sc.b2, 1.)
-        self.assertEqual(sc.b3, 2.)
-        self.assertEqual(sc.b4, 3.)
-        self.assertEqual(sc.b5, 4.)
-        self.assertEqual(sc.b6, 5.)
-        self.assertEqual(sc.t1_and_t2, 6.)
-        self.assertEqual(sc.t3, 0.)
-        self.assertEqual(sc.t4_and_t5, 7.)
-        self.assertEqual(sc.t6, 8.)
         self.assertEqual(sc.b_vector, [0., 1., 2., 3., 4., 5.])
         self.assertEqual(sc.t_vector, [6., 6., 0., 7., 7., 8.])
 

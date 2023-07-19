@@ -1,16 +1,20 @@
+"""
+Module for BioConsert algorithm. More details in BioConsert docstring class.
+"""
+
 from typing import List, Dict, Tuple, Collection, Set
-from corankco.algorithms.median_ranking import MedianRanking
+from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
+import bioconsertinc
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.ranking import Ranking
 from corankco.element import Element
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.kemeny_score_computation import KemenyComputingFactory
-from numpy import zeros, array, ndarray, amin, amax, where, asarray, int32, float64
-import bioconsertinc
 
 
-class BioConsert(MedianRanking):
+class BioConsert(RankAggAlgorithm):
     """
 
     BioConsert is a heuristics for Kemeny-Young rank aggregation published in
@@ -22,11 +26,11 @@ class BioConsert(MedianRanking):
     For time computation reasons, a part of this algorithm is written in C
 
     """
-    def __init__(self, starting_algorithms: Collection[MedianRanking] = None):
+    def __init__(self, starting_algorithms: Collection[RankAggAlgorithm] = None):
         if starting_algorithms is None:
-            self._starting_algorithms: List[MedianRanking] = []
+            self._starting_algorithms: List[RankAggAlgorithm] = []
         else:
-            self._starting_algorithms: List[MedianRanking] = [alg for alg in starting_algorithms]
+            self._starting_algorithms: List[RankAggAlgorithm] = list(starting_algorithms)
 
     def compute_consensus_rankings(
             self,
@@ -116,19 +120,19 @@ class BioConsert(MedianRanking):
                 ranking_dict.clear()
 
                 # target element
-                el: int = 0
+                elt: int = 0
 
                 # iterate over the ndarray, i.e. the id_buckets representing the resulting ranking
                 for id_bucket in ranking_result:
                     # if the id of bucket is seen for the first time, associate id_bucket with {el}
                     if id_bucket not in ranking_dict:
-                        ranking_dict[id_bucket]: Set[Element] = {id_elements.get(el)}
+                        ranking_dict[id_bucket]: Set[Element] = {id_elements.get(elt)}
                     # else, tie el with the elements already associated with the id_bucket
                     else:
-                        ranking_dict[id_bucket].add(id_elements.get(el))
+                        ranking_dict[id_bucket].add(id_elements.get(elt))
 
                     # next element
-                    el += 1
+                    elt += 1
 
                 ranking_list: List[Set[Element]] = []
                 nb_buckets_ranking_i: int = len(ranking_dict)
@@ -139,8 +143,8 @@ class BioConsert(MedianRanking):
         return Consensus(consensus_rankings=res,
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.KemenyScore: lowest_distance,
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                         att={ConsensusFeature.KEMENY_SCORE: lowest_distance,
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()
                               }
                          )
 
@@ -154,11 +158,9 @@ class BioConsert(MedianRanking):
         dataset_unified: Dataset = dataset.unified_dataset()
         rankings_unified = dataset_unified.rankings
 
-        """"
-        if user did not set some starting algorithms, the departure rankings are the rankings (unified) of the dataset, 
-        + the ranking where all elements are tied.
-        Otherwise, the departure rankings are the consensus computed by the selected algorithms
-        """
+        # if user did not set some starting algorithms, the departure rankings are the rankings (unified) of the
+        # dataset, + the ranking where all elements are tied.
+        # Otherwise, the departure rankings are the consensus computed by the selected algorithms
 
         # first, case when departure rankings = unified input rankings + all tied
         if len(self._starting_algorithms) == 0:
@@ -200,9 +202,9 @@ class BioConsert(MedianRanking):
             # finally, all the input rankings selected to be departure rankings are now in departure
             departure[:-1] = real_pos[asarray(list_distinct_id_rankings)]
         else:
-            m: int = len(self._starting_algorithms)
-            n: int = len(elements_id)
-            departure: ndarray = zeros((m, n), dtype=int32) - 1
+            nb_rankings_init: int = len(self._starting_algorithms)
+            nb_elements: int = len(elements_id)
+            departure: ndarray = zeros((nb_rankings_init, nb_elements), dtype=int32) - 1
             id_ranking: int = 0
 
             # for each selected algorithm

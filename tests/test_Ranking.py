@@ -6,7 +6,7 @@ import unittest
 
 class TestRanking(unittest.TestCase):
     def setUp(self):
-        self.ranking = Ranking.from_list([{'3', '2'}, {'1'}])
+        self.ranking = Ranking([{'3', '2'}, {'1'}])
 
     def test_init(self):
         # Test with disjoint sets
@@ -25,28 +25,28 @@ class TestRanking(unittest.TestCase):
     def test_str_init(self):
         # Test with disjoint sets
         buckets: List[Set[str]] = [{'A', 'B'}, {'C'}]
-        ranking = Ranking.from_list(buckets)
+        ranking = Ranking(buckets)
         self.assertEqual(ranking._buckets, [{Element('A'), Element('B')}, {Element('C')}])
         self.assertEqual(ranking.positions, {Element('A'): 1, Element('B'): 1, Element('C'): 3})
 
         # Test with overlapping sets
         buckets = [{'A', 'B'}, {'B', 'C'}]
         with self.assertRaises(ValueError):
-            ranking = Ranking.from_list(buckets)
+            ranking = Ranking(buckets)
             if ranking:
                 pass
 
     def test_int_init(self):
         # Test with disjoint sets
         buckets: List[Set[int]] = [{1, 2}, {3}]
-        ranking = Ranking.from_list(buckets)
+        ranking = Ranking(buckets)
         self.assertEqual(ranking._buckets, [{1, 2}, {3}])
         self.assertEqual(ranking.positions, {1: 1, 2: 1, 3: 3})
 
         # Test with overlapping sets
         buckets = [{1, 2}, {2, 3}]
         with self.assertRaises(ValueError):
-            ranking = Ranking.from_list(buckets)
+            ranking = Ranking(buckets)
             if ranking:
                 pass
 
@@ -64,7 +64,7 @@ class TestRanking(unittest.TestCase):
         # Test with str elements
         buckets = [{Element('Bob')}]
         ranking = Ranking(buckets)
-        self.assertEqual(str(ranking), "[{'Bob'}]")
+        self.assertEqual(str(ranking), "[{Bob}]")
 
     def test_iter(self):
         # Test for the __iter__ method
@@ -86,7 +86,7 @@ class TestRanking(unittest.TestCase):
         bucket1 = {1, 2, 3}
         bucket2 = {4, 5, 6}
         bucket3 = {7, 8, 9}
-        ranking = Ranking.from_list([bucket1, bucket2, bucket3])
+        ranking = Ranking([bucket1, bucket2, bucket3])
         assert ranking[0] == bucket1
         assert ranking[1] == bucket2
         assert ranking[2] == bucket3

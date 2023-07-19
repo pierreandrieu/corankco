@@ -1,17 +1,24 @@
-from corankco.algorithms.median_ranking import MedianRanking
+"""
+Module for PickAPerm algorithm. More details in PickAPerm docstring class.
+"""
+
+from typing import List, Dict
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.kemeny_score_computation import KemenyComputingFactory
 from corankco.ranking import Ranking
-from typing import List, Dict
 
 
 class InompleteRankingsIncompatibleWithScoringSchemeException(Exception):
-    pass
+    """
+    Exception if the input rankings are incomplete, and the chosen scoring scheme does not make understand that the
+    rankings can be unified.
+    """
 
 
-class PickAPerm(MedianRanking):
+class PickAPerm(RankAggAlgorithm):
     """
     Algorithm for rank aggregation initially defined in N.Ailon, M.Charikar, A.Newman. Aggregating inconsistent
     information : ranking and clustering. Journal of the ACM (JACM) 55.5 (2008), p. 23.
@@ -50,8 +57,7 @@ class PickAPerm(MedianRanking):
         if not dataset.is_complete:
             if not scoring_scheme.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme()):
                 raise InompleteRankingsIncompatibleWithScoringSchemeException
-            else:
-                rankings_to_use = dataset.unified_rankings()
+            rankings_to_use = dataset.unified_rankings()
         else:
             rankings_to_use = dataset.rankings
 
@@ -61,7 +67,7 @@ class PickAPerm(MedianRanking):
         dst_min = float('inf')
         consensus: List[Ranking] = []
         for ranking in rankings_to_use:
-            ranking_str = str(ranking)
+            ranking_str: str = str(ranking)
             if ranking_str not in mapping_ranking_score:
                 dist: float = kemeny_computation.get_kemeny_score(ranking, dataset)
             else:
@@ -76,8 +82,8 @@ class PickAPerm(MedianRanking):
         return Consensus(consensus_rankings=consensus,
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
-                         att={ConsensusFeature.KemenyScore: dst_min,
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                         att={ConsensusFeature.KEMENY_SCORE: dst_min,
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()
                               }
                          )
 

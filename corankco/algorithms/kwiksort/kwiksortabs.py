@@ -1,14 +1,22 @@
+"""
+Module for KwikSortAbs. This module contains an abstract class about KwikSort algorithm for rank aggregation. This
+algorithm is based on QuickSort: a pivot is chosen, and the elements that should be placed before (resp. tied with,
+resp. after) the pivot are placed before (resp. tied with, resp. after) the pivot, and this process is done recursively.
+Complexity (mean): m * n * log(n) with n = nb of elements, m = nb of rankings.
+A class that implements the abstract class must implement the choice of the pivot.
+"""
+
 from typing import List, Dict
 from numpy import ndarray, asarray
-from corankco.algorithms.median_ranking import MedianRanking
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import ConsensusSingleRanking, ConsensusFeature
+from corankco.consensus import Consensus, ConsensusFeature
 from corankco.element import Element
 from corankco.ranking import Ranking
 
 
-class KwikSortAbs(MedianRanking):
+class KwikSortAbs(RankAggAlgorithm):
     """
     Interface for KwikSort algorithms. KwikSort is a heuristics designed for Kemeny-Young method.
     QuickSort based algorithm: pick a pivot, find the set of elements shat should be ranked after pivot,
@@ -23,7 +31,7 @@ class KwikSortAbs(MedianRanking):
             scoring_scheme: ScoringScheme,
             return_at_most_one_ranking: bool = True,
             bench_mode: bool = False
-    ) -> ConsensusSingleRanking:
+    ) -> Consensus:
         """
         Calculate and return the consensus rankings based on the given dataset and scoring scheme.
 
@@ -48,12 +56,12 @@ class KwikSortAbs(MedianRanking):
         positions = dataset.get_positions()
 
         self._kwik_sort(consensus_list, list(dataset.universe), mapping_elements_id, positions, scoring_scheme_numpy)
-        return ConsensusSingleRanking(
-            consensus_ranking=Ranking([set(bucket) for bucket in consensus_list]), dataset=dataset,
-            scoring_scheme=scoring_scheme, att={ConsensusFeature.AssociatedAlgorithm: self.get_full_name()})
+        return Consensus(
+            consensus_rankings=[Ranking([set(bucket) for bucket in consensus_list])], dataset=dataset,
+            scoring_scheme=scoring_scheme, att={ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()})
 
     def _get_pivot(self, mapping_elements_id: Dict[Element, int], elements: List[Element], positions: ndarray,
-                   scoring_scheme: ScoringScheme) -> Element:
+                   scoring_scheme: ndarray) -> Element:
         """
         Private function, returns the pivot. The choice of the pivot is set by the programmer in daughter classes
         :param mapping_elements_id: the dictionary whose keys are the elements and the values their unique int ID
@@ -66,20 +74,19 @@ class KwikSortAbs(MedianRanking):
 
     # public abstract V getPivot(List < V > elements, U var);
 
-    def _where_should_it_be(self, pos_pivot_rankings: ndarray, pos_other_element_rankings: ndarray, sc: ndarray) -> int:
+    def _where_should_it_be(self, pos_pivot_rankings: ndarray, pos_other_element_rankings: ndarray,
+                            scoring_scheme_numpy: ndarray) -> int:
         """
         Private method. Given the pivot defined by its ranks in the input rankings as a ndarray and another element
         defined by the same way, returns -1, 1, 0 if the element should be respectively before, after or tied with
         the pivot in the consensus
         :param pos_pivot_rankings: the nb_rankings positions of the pivot in a ndarray
         :param pos_other_element_rankings: the nb_rankings positions of the target element in a ndarray
-        :param sc: the ScoringScheme
+        :param scoring_scheme_numpy: the ScoringScheme
         :return: returns -1, 1, 0 if the element should be respectively before, after or tied with the pivot
         in the consensus
         """
         raise NotImplementedError("The method not implemented")
-
-    # public abstract int whereShouldItBe(V element, V pivot, List < V > elements, U var);
 
     def _kwik_sort(self, consensus: List[List[Element]], remaining_elements: List[Element],
                    mapping_element_id: Dict[Element, int], positions: ndarray, scoring_scheme: ndarray):
@@ -91,6 +98,7 @@ class KwikSortAbs(MedianRanking):
         same: List[Element] = [pivot]
         positions_pivot = positions[mapping_element_id.get(pivot)]
 
+        # compare pivot with all remaining elements to separate between "left", "center", "right"
         for element in remaining_elements:
             if element != pivot:
                 positions_element = positions[mapping_element_id.get(element)]
@@ -122,7 +130,7 @@ class KwikSortAbs(MedianRanking):
         """
         raise NotImplementedError("The method not implemented")
 
-    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ScoringScheme) -> bool:
+    def is_scoring_scheme_relevant_when_incomplete_rankings(self, scoring_scheme: ndarray) -> bool:
         """
         Check if the scoring scheme is relevant when the rankings are incomplete.
 

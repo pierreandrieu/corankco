@@ -1,3 +1,7 @@
+"""
+Module for BioCo algorithm. More details in BioCo docstring class.
+"""
+
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.borda.borda import BordaCount
 

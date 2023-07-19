@@ -1,17 +1,24 @@
+"""
+Module that contains an abstract class to define the functions to be implemented for a rank aggregation algorithm.
+"""
+
+from time import time
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus
-from time import time
 
 
 class ScoringSchemeNotHandledException(Exception):
-    pass
+    """
+    Custom exception, when the scoring scheme cannot be used with the chosen algorithm given the dataset.
+    Note that this exception cannot be raised if the dataset is complete.
+    """
 
 
-class MedianRanking:
+class RankAggAlgorithm:
 
     """
-    The MedianRanking class serves as an interface for implementing consensus ranking algorithms. It defines
+    The RankAggAlgorithm class serves as an interface for implementing consensus ranking algorithms. It defines
     several methods that each consensus ranking algorithm should implement, including the computation of
     consensus rankings, determining whether a given scoring scheme is relevant for incomplete rankings,
     and benchmarking the consensus computation time. An algorithm implemented using this interface should

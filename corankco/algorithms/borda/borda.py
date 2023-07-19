@@ -1,14 +1,18 @@
-from corankco.algorithms.median_ranking import MedianRanking, ScoringSchemeNotHandledException
+"""
+Module for Borda algorithm. More details in Borda docstring class.
+"""
+
+from typing import Dict, List, Tuple, Set
+from itertools import groupby
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm, ScoringSchemeNotHandledException
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.element import Element
-from typing import Dict, List, Tuple
 from corankco.ranking import Ranking
-from itertools import groupby
 
 
-class BordaCount(MedianRanking):
+class BordaCount(RankAggAlgorithm):
     """
     Borda is a rank aggregation method defined by Borda in J. C. de Borda, Mémoire sur les élections au scrutin,
     Histoire de l’académie royale des sciences, Paris, France, 1781, Ch. 1, pp. 657–664.
@@ -31,7 +35,7 @@ class BordaCount(MedianRanking):
                               otherwise it gets a score based on the number of elements ranked strictly before e.
         :type use_bucket_id: bool
         """
-        self._useBucketIdAndNotBucketSize = use_bucket_id
+        self._use_bucket_id_not_bucket_size = use_bucket_id
 
     def compute_consensus_rankings(
             self,
@@ -80,27 +84,26 @@ class BordaCount(MedianRanking):
                         points[elem]: List[int] = [0, 0]
                     points[elem][0] += id_bucket
                     points[elem][1] += 1
-                if self._useBucketIdAndNotBucketSize:
+                if self._use_bucket_id_not_bucket_size:
                     id_bucket += 1
                 else:
                     id_bucket += len(bucket)
 
         elements_scores: List[Tuple[Element, float]] = \
-            [(elem, points[elem][0] * 1.0 / points[elem][1]) for elem in points.keys()]
+            [(elem, scores[0] * 1.0 / scores[1]) for elem, scores in points.items()]
         # now, sort the elements by increasing order of score
         sorted_elements_scores_by_score = sorted(elements_scores, key=lambda col: col[1])
 
         # construct the consensus bucket by bucket
-        consensus_list = []
-        for score, group in groupby(sorted_elements_scores_by_score, lambda x: x[1]):
-            bucket = {elem for elem, _ in group}
-            consensus_list.append(bucket)
+        consensus_list: List[Set[Element]] = []
+        for _, group in groupby(sorted_elements_scores_by_score, lambda x: x[1]):
+            consensus_list.append({elem for elem, _ in group})
 
         return Consensus(consensus_rankings=[Ranking(consensus_list)],
                          dataset=dataset,
                          scoring_scheme=scoring_scheme,
                          att={
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name()
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()
                               }
                          )
 

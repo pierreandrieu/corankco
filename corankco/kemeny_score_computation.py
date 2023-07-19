@@ -1,3 +1,8 @@
+"""
+Module for computation of Kemeny scores. The algorithme of score computation is m * n * log(n) where n is the number of
+elements and m the number of rankings. The algorithm is based on the number of inversion counting.
+"""
+
 from typing import Dict, List, Tuple, Set
 from numpy import zeros, vdot, ndarray, sort, asarray, cumsum, concatenate
 from corankco.scoringscheme import ScoringScheme
@@ -7,7 +12,9 @@ from corankco.dataset import Dataset
 
 
 class InvalidRankingsForComputingDistance(Exception):
-    pass
+    """
+    Exception if the ranking used as consensus is not complete towards the dataset.
+    """
 
 
 class KemenyComputingFactory:
@@ -17,8 +24,8 @@ class KemenyComputingFactory:
     Aggregate Any Kind of Rankings. https://dx.doi.org/10.2139/ssrn.4353494
     The Kemeny score is generalized within a framework to handle incomplete rankings with ties
     """
-    def __init__(self, sc: ScoringScheme):
-        self.__scoring_scheme: ScoringScheme = sc
+    def __init__(self, scoring_scheme: ScoringScheme):
+        self.__scoring_scheme: ScoringScheme = scoring_scheme
 
     @property
     def scoring_scheme(self):
@@ -35,9 +42,6 @@ class KemenyComputingFactory:
         to compute the score. All consensus rankings of a Consensus object should be equivalent in quality
         """
         # dict : keys = elements of dom(consensus) and values = bucket id of associated element
-        b_vector: ndarray = asarray(self.__scoring_scheme.b_vector)
-        t_vector: ndarray = asarray(self.__scoring_scheme.t_vector)
-
         mapping_elem_consensus_id_bucket: Dict[Element, int] = {}
         id_bucket: int = 0
 
@@ -54,21 +58,17 @@ class KemenyComputingFactory:
                                                                   "Elem " + str(element) + "found in Dataset and "
                                                                                            "not in consensus")
 
-        """"
-        initialisation of sums s_1 and s_2.
-        s_1 is the cost due to pairs x, y of elements such that x < y in the target consensus
-        s_2 is the cost due to pairs x, y of elements such that x and y are tied in the consensus
-        """
-        """
-        s_1 (resp. s_2) must contain the number of pairs of elements (x,y) such that x < y 
-        (resp. x is tied with y) in the consensus and 
-        rank 0: x < y in input rankings 
-        rank 1: x > y in input rankings 
-        rank 2: x is tied with y in input rankings 
-        rank 3: x is present and y is missing in input rankings 
-        rank 4: x is missing and y is present in input rankings 
-        rank 5: x and y are missing in input rankings 
-        """
+        # initialisation of sums s_1 and s_2.
+        # s_1 is the cost due to pairs x, y of elements such that x < y in the target consensus
+        # s_2 is the cost due to pairs x, y of elements such that x and y are tied in the consensus
+        # s_1 (resp. s_2) must contain the number of pairs of elements (x,y) such that x < y
+        # (resp. x is tied with y) in the consensus and
+        # rank 0: x < y in input rankings
+        # rank 1: x > y in input rankings
+        # rank 2: x is tied with y in input rankings
+        # rank 3: x is present and y is missing in input rankings
+        # rank 4: x is missing and y is present in input rankings
+        # rank 5: x and y are missing in input rankings
 
         s_1: ndarray = zeros(6, dtype=int)
         s_2: ndarray = zeros(6, dtype=int)
@@ -80,7 +80,7 @@ class KemenyComputingFactory:
             s_1 += cost_ranking[0]
             s_2 += cost_ranking[1]
 
-        return vdot(s_1, b_vector) + vdot(s_2, t_vector)
+        return vdot(s_1, asarray(self.__scoring_scheme.b_vector)) + vdot(s_2, asarray(self.__scoring_scheme.t_vector))
 
     @staticmethod
     def __cost_by_ranking(ranking_consensus: Ranking,
@@ -121,21 +121,20 @@ class KemenyComputingFactory:
         # t_2[i] = nb of missing elements in r - sum on j < i (t_3[j])
         t_2 = len(missing_elements) - cumsum(t_3)
 
-        """ 
-        computation of s_1[3] 
-        To get the number of pairs of elements (x,y) such that x < y in consensus and x is 
-        present and y missing in r, we use t_2 : each integer k of r_prime is the bucket id 
-        of a present element x in ranking. As the number of missing elements of r placed 
-        after x in consensus is t_2[k], we increment the value of s_1[3] by t_2[k] for each 
-        k of r_prime.
+        # computation of s_1[3]
+        # To get the number of pairs of elements (x,y) such that x < y in consensus and x is
+        # present and y missing in r, we use t_2 : each integer k of r_prime is the bucket id
+        # of a present element x in ranking. As the number of missing elements of r placed
+        # after x in consensus is t_2[k], we increment the value of s_1[3] by t_2[k] for each
+        # k of r_prime.
 
-        computation of s_1[4] 
-        To get the number of pairs of elements (x,y) such that x < y in consensus and x is 
-        missing and y present in r, we use t_1 : each integer k of r_prime is the bucket 
-        id of a present element x in ranking. As the number of missing elements of ranking 
-        placed before x in consensus is t_1[k], we increment the value of s_1[4] by t_1[k] 
-        for each k of r_prime.
-        """
+        # computation of s_1[4]
+        # To get the number of pairs of elements (x,y) such that x < y in consensus and x is
+        # missing and y present in r, we use t_1 : each integer k of r_prime is the bucket
+        # id of a present element x in ranking. As the number of missing elements of ranking
+        # placed before x in consensus is t_1[k], we increment the value of s_1[4] by t_1[k]
+        # for each k of r_prime.
+
         for bucket in r_prime:
             for elem_r_prime in bucket:
                 s_1[3] += t_2[elem_r_prime]
@@ -143,19 +142,17 @@ class KemenyComputingFactory:
 
         nb_missing_remaining: int = len(missing_elements)
 
-        """ 
-        computation of s_1[2] 
-        To get the number of pairs of elements (x,y) such that x < y in consensus and x is tied 
-        with y in r, we use r_prime. The value of s_1[2] is the number of distinct pairs of 
-        r_prime that is the sum of the product ( cardinal of each distinct value x in r_prime * 
-        the number of elements higher than x in r_prime).
-        """
+        # computation of s_1[2]
+        # To get the number of pairs of elements (x,y) such that x < y in consensus and x is tied
+        # with y in r, we use r_prime. The value of s_1[2] is the number of distinct pairs of
+        # r_prime that is the sum of the product ( cardinal of each distinct value x in r_prime *
+        # the number of elements higher than x in r_prime).
 
-        for i in range(len(r_prime)):
+        for _, r_prime_i in enumerate(r_prime):
             # increments s_1[2]
             s_1_2: int = 0
             cursor: int = 0
-            bucket_i_r: ndarray = r_prime[i]
+            bucket_i_r: ndarray = r_prime_i
             bucket_size_r: int = len(bucket_i_r)
             while cursor < bucket_size_r - 1:
                 repetition: int = 1
@@ -166,25 +163,23 @@ class KemenyComputingFactory:
                 s_1_2 += repetition * (bucket_size_r - cursor)
             s_1[2] += s_1_2
 
-        """ 
-        computation of s_1[5] induced by ranking
-        To get the number of pairs of elements (x,y) such that x < y in consensus and x and y are 
-        both missing in r, we use t_3 : t_3[i] gives the number of elements in bucket i of 
-        consensus that are not in r. This number must be multiplied by the sum of t_3[j], j > i
+        # computation of s_1[5] induced by ranking
+        # To get the number of pairs of elements (x,y) such that x < y in consensus and x and y are
+        # both missing in r, we use t_3 : t_3[i] gives the number of elements in bucket i of
+        # consensus that are not in r. This number must be multiplied by the sum of t_3[j], j > i
+        ###
+        # computation of s_2[5] induced by ranking
+        # To get the number of pairs of elements (x,y) such that x is tied with y in consensus and
+        # x and y are both missing in r, we use t_3 again. This number is the sum on i of the number
+        # of pairs of t_3[i] elements
 
-        computation of s_2[5] induced by ranking
-        To get the number of pairs of elements (x,y) such that x is tied with y in consensus and 
-        x and y are both missing in r, we use t_3 again. This number is the sum on i of the number 
-        of pairs of t_3[i] elements
+        # computation of s_2[3] + s_2[4] induced by ranking (s_2[3] and s_2[4] induce same costs).
+        # To get the number of pairs of elements (x,y) such that x is tied with y in consensus
+        # and (x is present whereas y is missing or x is missing whereas y is present in r),
+        # we use t_3 again. This number is the sum on i of the number of pairs (x,y) of elements
+        # in the bucket i of consensus such that x is present and y is missing.
 
-        computation of s_2[3] + s_2[4] induced by ranking (s_2[3] and s_2[4] induce same costs).
-        To get the number of pairs of elements (x,y) such that x is tied with y in consensus 
-        and (x is present whereas y is missing or x is missing whereas y is present in r), 
-        we use t_3 again. This number is the sum on i of the number of pairs (x,y) of elements 
-        in the bucket i of consensus such that x is present and y is missing.
-        """
-
-        for i in range(len(ranking_consensus)):
+        for i, consensus_i in enumerate(ranking_consensus):
             # increments s_1[5], s_2[3] + s_2[4], s_2[5]
             nb_missing_elements_in_bucket_i_consensus: int = t_3[i]
             if nb_missing_elements_in_bucket_i_consensus > 0:
@@ -196,7 +191,7 @@ class KemenyComputingFactory:
                 # increments s_2[3] (could be s_2[4] as well, they represent the same
                 # cases / same penalty)
 
-                s_2[3] += (len(ranking_consensus[i]) -
+                s_2[3] += (len(consensus_i) -
                            nb_missing_elements_in_bucket_i_consensus) * nb_missing_elements_in_bucket_i_consensus
                 if nb_missing_elements_in_bucket_i_consensus > 1:
                     # increments s_2[5]
@@ -217,67 +212,66 @@ class KemenyComputingFactory:
         if right <= left:
             return r_prime[right]
         # divide problem into two sub-problems of same size and merge
-        else:
-            middle: int = (right - left) // 2
-            begin: int = middle + left + 1
-            return KemenyComputingFactory.__merge(KemenyComputingFactory.__mergesortlike(
-                r_prime, left, middle + left, s_1, s_2),
-                KemenyComputingFactory.__mergesortlike(
-                    r_prime, begin, right, s_1, s_2),
-                s_1, s_2)
+        middle: int = (right - left) // 2
+        begin: int = middle + left + 1
+        return KemenyComputingFactory.__merge(KemenyComputingFactory.__mergesortlike(
+            r_prime, left, middle + left, s_1, s_2),
+            KemenyComputingFactory.__mergesortlike(
+                r_prime, begin, right, s_1, s_2),
+            s_1, s_2)
 
     @staticmethod
     def __merge(left: ndarray, right: ndarray, s_1: ndarray, s_2: ndarray):
         res = zeros(len(left) + len(right), dtype=int)
-        n: int = len(left)
-        m: int = len(right)
-        i: int = 0
-        j: int = 0
-        k: int = 0
-        while i < n and j < m:
-            nb: int = left[i]
-            nb2: int = right[j]
+        nb_elem_left: int = len(left)
+        nb_elem_right: int = len(right)
+        cursor_left: int = 0
+        cursor_right: int = 0
+        cursor_merge: int = 0
+        while cursor_left < nb_elem_left and cursor_right < nb_elem_right:
+            nb1: int = left[cursor_left]
+            nb2: int = right[cursor_right]
 
             # no inversion
-            if nb < nb2:
-                res[k] = nb
-                k += 1
-                i += 1
+            if nb1 < nb2:
+                res[cursor_merge] = nb1
+                cursor_merge += 1
+                cursor_left += 1
             # inversion
-            elif nb > nb2:
-                s_1[1] += n - i
-                res[k] = nb2
-                k += 1
-                j += 1
+            elif nb1 > nb2:
+                s_1[1] += nb_elem_left - cursor_left
+                res[cursor_merge] = nb2
+                cursor_merge += 1
+                cursor_right += 1
 
             # here, case where two elements were tied in the consensus and not tied in r
             else:
                 cpt1: int = 0
                 cpt2: int = 0
-                while i < n and left[i] == nb:
-                    res[k] = nb
-                    k += 1
-                    i += 1
+                while cursor_left < nb_elem_left and left[cursor_left] == nb1:
+                    res[cursor_merge] = nb1
+                    cursor_merge += 1
+                    cursor_left += 1
                     cpt1 += 1
-                while j < m and right[j] == nb:
-                    res[k] = nb
-                    k += 1
-                    j += 1
+                while cursor_right < nb_elem_right and right[cursor_right] == nb1:
+                    res[cursor_merge] = nb1
+                    cursor_merge += 1
+                    cursor_right += 1
                     cpt2 += 1
                 # cpt1 repetitions of nb and cpt2 repetitions of nb2 with nb1 = nb2 :
                 # nb1 * nb2 number of pairs of elements (x,y) such that x tied with y in
                 # consensus and not tied in r
                 s_2[0] += cpt1 * cpt2
                 # number of added inversions
-                s_1[1] += cpt2 * (n - i)
+                s_1[1] += cpt2 * (nb_elem_left - cursor_left)
 
-        while i < n:
-            res[k] = left[i]
-            k += 1
-            i += 1
-        while j < m:
-            res[k] = right[j]
-            k += 1
-            j += 1
+        while cursor_left < nb_elem_left:
+            res[cursor_merge] = left[cursor_left]
+            cursor_merge += 1
+            cursor_left += 1
+        while cursor_right < nb_elem_right:
+            res[cursor_merge] = right[cursor_right]
+            cursor_merge += 1
+            cursor_right += 1
 
         return res

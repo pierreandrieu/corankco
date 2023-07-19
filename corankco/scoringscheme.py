@@ -1,8 +1,16 @@
+"""
+Module to manage Scoring Schemes. The scoring schemes are two penalty vectors of 6 real values each. The details can be
+found in the docstring of the ScoringScheme class
+"""
+
 from typing import List
 from math import isnan
 
 
 class InvalidScoringScheme(Exception):
+    """
+    Customized exception when the ScoringScheme is invalid because of the structure.
+    """
     def __init__(self,
                  message="Scoring scheme must be 2 Lists. " +
                          "Each list must be a list of 6 real >= 0 values. " +
@@ -12,6 +20,9 @@ class InvalidScoringScheme(Exception):
 
 
 class NonRealPositiveValuesScoringScheme(Exception):
+    """
+    Customized exception when the ScoringScheme is invalid because of a value found, not real positive.
+    """
     def __init__(self, message="Each list must be a list of 6 real >= 0 values. "
                                "For instance, [[0., 1., 1., 0., 0., 0.], [1., 1., 0., 1., 1., 0.]]"):
         self.message = message
@@ -19,6 +30,9 @@ class NonRealPositiveValuesScoringScheme(Exception):
 
 
 class ForbiddenAssociationPenaltiesScoringScheme(Exception):
+    """
+    Customized exception when the ScoringScheme is invalid because wring association of penalties.
+    """
     def __init__(self,
                  message="The first value of the first List must be 0. "
                          "The second value of the first List must be > 0"
@@ -68,9 +82,9 @@ class ScoringScheme:
 
         """
         # check types and lengths
-        if type(penalties) is not list or len(penalties) != 2:
+        if not isinstance(penalties, list) or len(penalties) != 2:
             raise InvalidScoringScheme()
-        if type(penalties[0]) is not list or type(penalties[1]) is not list:
+        if not isinstance(penalties[0], list) or not isinstance(penalties[1], list):
             raise InvalidScoringScheme()
         if len(penalties[0]) != 6 or len(penalties[1]) != 6:
             raise InvalidScoringScheme()
@@ -97,103 +111,6 @@ class ScoringScheme:
         if penalties_copy[0][1] == 0:
             raise ForbiddenAssociationPenaltiesScoringScheme()
         self._penalty_vectors = penalties_copy
-
-    @property
-    def b1(self) -> float:
-        """
-
-        Returns the cost to have x < y in the consensus for each input ranking such that x is before y
-
-        :return: The first element of the first penalty vector B.
-        :rtype: float
-
-        """
-        return self._penalty_vectors[0][0]
-
-    @property
-    def b2(self) -> float:
-        """
-
-        Returns the cost to have x < y in the consensus for each input ranking such that y is before x
-
-        :return: The second element of the first penalty vector B.
-        :rtype: float
-
-        """
-        return self._penalty_vectors[0][1]
-
-    @property
-    def b3(self) -> float:
-        """
-        Returns the cost to have x < y in the consensus for each input ranking such that x is tied with y
-
-        :return: The third element of the first penalty vector B.
-        :rtype: float
-        """
-        return self._penalty_vectors[0][2]
-
-    @property
-    def b4(self) -> float:
-        """
-        Returns the cost to have x < y in the consensus for each input ranking such that x is ranked whereas y is not.
-        :return: The fourth element of the first penalty vector B.
-        :rtype: float
-        """
-        return self._penalty_vectors[0][3]
-
-    @property
-    def b5(self) -> float:
-        """
-        Returns the cost to have x < y in the consensus for each input ranking such that y is ranked whereas x is not.
-        :return: The fifth element of the first penalty vector B.
-        :rtype: float
-        """
-        return self._penalty_vectors[0][4]
-
-    @property
-    def b6(self) -> float:
-        """
-        Returns the cost to have x < y in the consensus for each input ranking such that x and y are both non-ranked.
-        :return: The sixth element of the first penalty vector B.
-        :rtype: float
-        """
-        return self._penalty_vectors[0][5]
-
-    @property
-    def t1_and_t2(self) -> float:
-        """
-        Returns the cost to have x  tied with y in the consensus for each input ranking such that x < y or y < x
-        :return: The first/second element of the first penalty vector T.
-        :rtype: float
-        """
-        return self._penalty_vectors[1][0]
-
-    @property
-    def t3(self) -> float:
-        """
-        Returns the cost to have x  tied with y in the consensus for each input ranking such that x is tied with y
-        :return: The third element of the first penalty vector T.
-        :rtype: float
-        """
-        return self._penalty_vectors[1][2]
-
-    @property
-    def t4_and_t5(self) -> float:
-        """
-        Returns the cost to have x  tied with y in the consensus for each input ranking such that x XOR y is ranked
-        :return: The fourth/fifth element of the first penalty vector T.
-        :rtype: float
-        """
-        return self._penalty_vectors[1][3]
-
-    @property
-    def t6(self) -> float:
-        """
-        Returns the cost to have x  tied with y in the consensus for each input ranking such that x and y are non-ranked
-        :return: The sixth element of the first penalty vector T.
-        :rtype: float
-        """
-        return self._penalty_vectors[1][5]
 
     @property
     def penalty_vectors(self) -> List[List[float]]:
@@ -277,19 +194,19 @@ class ScoringScheme:
         desc = (
             "\nScoring scheme description\n"
             f"\tx before y in consensus\n"
-            f"\t\tx before y in input ranking: {self.b1}\n"
-            f"\t\ty before x in input ranking: {self.b2}\n"
-            f"\t\tx and y tied in input ranking: {self.b3}\n"
-            f"\t\tx present y missing in input ranking: {self.b4}\n"
-            f"\t\tx missing y present ranking: {self.b5}\n"
-            f"\t\tx and y missing in input ranking: {self.b6}\n"
-            f"\t\tx and y tied in consensus\n"
-            f"\t\tx before y in input ranking: {self.t1_and_t2}\n"
-            f"\t\ty before x in input ranking: {self.t1_and_t2}\n"
-            f"\t\tx and y tied in input ranking: {self.t3}\n"
-            f"\t\tx present y missing in input ranking: {self.t4_and_t5}\n"
-            f"\t\tx missing y present ranking: {self.t4_and_t5}\n"
-            f"\t\tx and y missing in input ranking: {self.t6}\n"
+            f"\t\tx before y in input ranking: {self.b_vector[0]}\n"
+            f"\t\ty before x in input ranking: {self.b_vector[1]}\n"
+            f"\t\tx and y tied in input ranking: {self.b_vector[2]}\n"
+            f"\t\tx present y missing in input ranking: {self.b_vector[3]}\n"
+            f"\t\tx missing y present ranking: {self.b_vector[4]}\n"
+            f"\t\tx and y missing in input ranking: {self.b_vector[5]}\n"
+            f"\tx and y tied in consensus\n"
+            f"\t\tx before y in input ranking: {self.t_vector[0]}\n"
+            f"\t\ty before x in input ranking: {self.t_vector[1]}\n"
+            f"\t\tx and y tied in input ranking: {self.t_vector[2]}\n"
+            f"\t\tx present y missing in input ranking: {self.t_vector[3]}\n"
+            f"\t\tx missing y present ranking: {self.t_vector[4]}\n"
+            f"\t\tx and y missing in input ranking: {self.t_vector[5]}\n"
         )
         return desc
 
@@ -302,7 +219,6 @@ class ScoringScheme:
 
         :return: The ScoringScheme [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]
         """
-        ...
         return ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)
 
     @staticmethod
@@ -316,39 +232,50 @@ class ScoringScheme:
 
     @staticmethod
     def get_induced_measure_scoring_scheme():
+        """
+        Get the induced mesure scoring scheme defined in "Bryan Brancotte, Agrégation de classements avec égalités :
+        algorithmes, guides à l'utilisateur et applications aux données biologiques. University of Paris-Sud, Orsay,
+        France, 2015". This measure is a fusion between the measure to handle incomplete rankings defined in:
+        C. Dwork, R. Kumar, M. Naor, and D. Sivakumar. 2001. Rank aggregation methods for the Web. In Proceedings of the
+        10th international conference on World Wide Web (WWW '01),
+        and the distance to handle ties proposed by R. Fagin, R. Kumar, M. Mahdian, D. Sivakumar, and Erik Vee. 2004.
+        Comparing and aggregating rankings with ties. In Proceedings of the twenty-third ACM SIGMOD-SIGACT-SIGART
+        symposium on Principles of database systems (PODS '04).
+        :return: The ScoringScheme [[0., 1., 1., 0., 0., 0.], [1., 1., 0., 0., 0., 0.]]
+        """
         return ScoringScheme.get_induced_measure_scoring_scheme_p(1.)
 
     @staticmethod
-    def get_pseudodistance_scoring_scheme_p(p: float):
+    def get_pseudodistance_scoring_scheme_p(p_cost: float):
         """
-        Get the pseudo-distance defined in:
+        Get the pseudo-distance scoring scheme defined in:
         Brancotte, Bryan & Rance, Bastien & Denise, Alain & Cohen-Boulakia, Sarah. (2014).
         ConQuR-Bio: Consensus Ranking with Query Reformulation for Biological Data. 10.1007/978-3-319-08590-6_13
         with reap parameter p = cost of creating / breaking ties
-        :param p: the cost to create / break ties
+        :param p_cost: the cost to create / break ties
         :return: The ScoringScheme [[0., 1., 1., 0., 1., 0.], [1., 1., 0., 1., 1., 0.]]
         """
-        return ScoringScheme(penalties=[[0., 1., p, 0., 1., 0.], [p, p, 0., p, p, 0.]])
+        return ScoringScheme(penalties=[[0., 1., p_cost, 0., 1., 0.], [p_cost, p_cost, 0., p_cost, p_cost, 0.]])
 
     @staticmethod
-    def get_unifying_scoring_scheme_p(p: float):
+    def get_unifying_scoring_scheme_p(p_cost: float):
         """
         Get the ScoringScheme that imitates the unification process, that is
         the non-ranked elements can be virtually considered as tied at the last position or the ranking
-        :param p: the cost to create / break ties
+        :param p_cost: the cost to create / break ties
         :return: The ScoringScheme [[0., 1., p, 0., 1., p], [p, p, 0., p, p, 0.]]
         """
-        return ScoringScheme(penalties=[[0., 1., p, 0., 1., p], [p, p, 0., p, p, 0.]])
+        return ScoringScheme(penalties=[[0., 1., p_cost, 0., 1., p_cost], [p_cost, p_cost, 0., p_cost, p_cost, 0.]])
 
     @staticmethod
-    def get_induced_measure_scoring_scheme_p(p: float):
+    def get_induced_measure_scoring_scheme_p(p_cost: float):
         """
         Get the ScoringScheme that imitates the unification process, that is
         the non-ranked elements can be virtually considered as tied at the last position or the ranking
-        :param p: the cost to create / break ties
+        :param p_cost: the cost to create / break ties
         :return: The ScoringScheme [[0., 1., p, 0., 1., p], [p, p, 0., p, p, 0.]]
         """
-        return ScoringScheme(penalties=[[0., 1., p, 0., 0., 0.], [p, p, 0., 0., 0., 0.]])
+        return ScoringScheme(penalties=[[0., 1., p_cost, 0., 0., 0.], [p_cost, p_cost, 0., 0., 0., 0.]])
 
     @staticmethod
     def get_extended_measure_scoring_scheme():
@@ -394,12 +321,11 @@ class ScoringScheme:
             else:
                 if pen2[0][i] == 0:
                     return False
+                if isnan(coefficient):
+                    coefficient = pen1[0][i] / pen2[0][i]
                 else:
-                    if isnan(coefficient):
-                        coefficient = pen1[0][i] / pen2[0][i]
-                    else:
-                        if pen1[0][i] / pen2[0][i] != coefficient:
-                            return False
+                    if pen1[0][i] / pen2[0][i] != coefficient:
+                        return False
         return True
 
     def get_nickname(self) -> str:
@@ -410,13 +336,13 @@ class ScoringScheme:
         """
         if self.is_equivalent_to(ScoringScheme.get_unifying_scoring_scheme_p(1.)):
             return "UKSP"
-        elif self.is_equivalent_to(ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)):
+        if self.is_equivalent_to(ScoringScheme.get_pseudodistance_scoring_scheme_p(1.)):
             return "GPDP"
-        elif self.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(1.)):
+        if self.is_equivalent_to(ScoringScheme.get_induced_measure_scoring_scheme_p(1.)):
             return "IGKS"
-        elif self.is_equivalent_to(ScoringScheme.get_extended_measure_scoring_scheme()):
+        if self.is_equivalent_to(ScoringScheme.get_extended_measure_scoring_scheme()):
             return "EKS"
-        return self.__str__()
+        return str(self)
 
     def __getitem__(self, item: int) -> List[float]:
         return self._penalty_vectors[item]

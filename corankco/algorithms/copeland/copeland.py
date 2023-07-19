@@ -1,15 +1,21 @@
+"""
+Module for Copeland algorithm. More details in CopelandMethod docstring class.
+"""
+
+from typing import List, Dict, Tuple
 from collections import defaultdict
-from typing import List, Dict
-from corankco.algorithms.median_ranking import MedianRanking
+from numpy import ndarray
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
+from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.dataset import Dataset
 from corankco.ranking import Ranking
 from corankco.consensus import Consensus
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import ConsensusSingleRanking, ConsensusFeature
+from corankco.consensus import ConsensusFeature
 from corankco.element import Element
 
 
-class CopelandMethod(MedianRanking):
+class CopelandMethod(RankAggAlgorithm, PairwiseBasedAlgorithm):
     """
     Copeland's method is one of the most famous electoral system published in :
     A. H. Copeland, A reasonable social welfare function, seminar on Applications of Mathematics to the social
@@ -25,7 +31,7 @@ class CopelandMethod(MedianRanking):
             scoring_scheme: ScoringScheme,
             return_at_most_one_ranking=True,
             bench_mode=False
-    ) -> ConsensusSingleRanking:
+    ) -> Consensus:
         """
         Calculate and return the consensus rankings based on the given dataset and scoring scheme.
 
@@ -45,13 +51,13 @@ class CopelandMethod(MedianRanking):
         """
 
         # associates for each element its generalized Copeland score within the Kemeny prism
-        mapping_elem_score: Dict[Element, float] = {}
+        mapping_elem_score: Dict[int, float] = {}
 
         # associates for each element its number of victories - equality - defeat against other elements
-        mapping_elem_victories: Dict[Element, List[int]] = {}
+        mapping_elem_victories: Dict[int, List[int]] = {}
 
         # iterates on elements to initialize the two dicts
-        for element in dataset.universe:
+        for element in range(dataset.nb_elements):
             # initially, elements have a score of 0.
             mapping_elem_score[element] = 0.
             # and no victories, equalities, defeats
@@ -59,42 +65,35 @@ class CopelandMethod(MedianRanking):
 
         # now, update the two dicts: computes for each element the number of victories, equalities, defeats
         # for each pair of elements
-        for pairwise_comparison in dataset.penalties_relative_positions(scoring_scheme):
-            el1: Element = pairwise_comparison.x
-            el2: Element = pairwise_comparison.y
-
-            put_before: float = pairwise_comparison.x_before_y
-            put_after: float = pairwise_comparison.x_after_y
-
-            if put_before < put_after:
-                mapping_elem_score[el1] += 1
-                mapping_elem_victories[el1][0] += 1
-                mapping_elem_victories[el2][2] += 1
-            elif put_after < put_before:
-                mapping_elem_score[el2] += 1
-                mapping_elem_victories[el1][2] += 1
-                mapping_elem_victories[el2][0] += 1
-            else:
-                mapping_elem_score[el1] += 0.5
-                mapping_elem_score[el2] += 0.5
-                mapping_elem_victories[el1][1] += 1
-                mapping_elem_victories[el2][1] += 1
+        CopelandMethod.pairwise_cost_matrix_generic(
+            dataset.get_positions(),
+            scoring_scheme,
+            CopelandMethod._fill_dicts_copeland,
+            (mapping_elem_score, mapping_elem_victories)
+        )
 
         # construction of Copeland ranking, sorting the elements by decreasing score
-        d: defaultdict = defaultdict(set)
+        dict_to_sort: defaultdict = defaultdict(set)
+        mapping_id_elem: Dict[int, Element] = dataset.mapping_id_elem
         for key, value in mapping_elem_score.items():
-            d[value].add(key)
+            dict_to_sort[value].add(mapping_id_elem[key])
 
-        # Trier par valeurs et convertir les valeurs en ensembles
-        copeland_ranking = [value for key, value in sorted(d.items(), reverse=True)]
-        return ConsensusSingleRanking(Ranking(copeland_ranking),
+        # sort by values and convert values in sets
+        copeland_ranking = [value for key, value in sorted(dict_to_sort.items(), reverse=True)]
+        return Consensus([Ranking(copeland_ranking)],
                                       dataset=dataset,
                                       scoring_scheme=scoring_scheme,
                                       att={
-                              ConsensusFeature.AssociatedAlgorithm: self.get_full_name(),
-                              ConsensusFeature.CopelandScores: mapping_elem_score,
-                              ConsensusFeature.CopelandVictories: mapping_elem_victories
-                              }
+                                          ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name(),
+                                          ConsensusFeature.COPELAND_SCORES: {
+                                              mapping_id_elem[id_elem]: elem
+                                              for id_elem, elem in mapping_elem_score.items()
+                                          },
+                                          ConsensusFeature.COPELAND_VICTORIES: {
+                                              mapping_id_elem[id_elem]: elem
+                                              for id_elem, elem in mapping_elem_victories.items()
+                                          }
+                                      }
                          )
 
     def get_full_name(self) -> str:
@@ -116,3 +115,25 @@ class CopelandMethod(MedianRanking):
         :rtype: bool
         """
         return True
+
+    @staticmethod
+    def _fill_dicts_copeland(cost_positions: ndarray, el1: int, el2: int,
+                             structure: Tuple[Dict[int, float], Dict[int, List[int]]]):
+        mapping_elem_score = structure[0]
+        mapping_elem_victories = structure[1]
+
+        put_before: float = cost_positions[0]
+        put_after: float = cost_positions[1]
+        if put_before < put_after:
+            mapping_elem_score[el1] += 1
+            mapping_elem_victories[el1][0] += 1
+            mapping_elem_victories[el2][2] += 1
+        elif put_after < put_before:
+            mapping_elem_score[el2] += 1
+            mapping_elem_victories[el1][2] += 1
+            mapping_elem_victories[el2][0] += 1
+        else:
+            mapping_elem_score[el1] += 0.5
+            mapping_elem_score[el2] += 0.5
+            mapping_elem_victories[el1][1] += 1
+            mapping_elem_victories[el2][1] += 1

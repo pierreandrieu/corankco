@@ -1,6 +1,10 @@
+"""
+Module that allows to select an algorithm using an enumeration, with the parameters of the algorithm.
+"""
+
 from enum import Enum, unique
 from typing import Dict, List
-from corankco.algorithms.median_ranking import MedianRanking
+from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
 from corankco.algorithms.parcons.parcons import ParCons
 from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
@@ -28,14 +32,14 @@ class AlgorithmEnumeration:
 @unique
 class Algorithm(Enum):
     """Enum representing the available ranking algorithms."""
-    Exact = 0
-    ParCons = 1
-    BioConsert = 2
-    BioCo = 3
-    KwikSortRandom = 4
-    PickAPerm = 5
-    BordaCount = 6
-    CopelandMethod = 7
+    EXACT = 0
+    PARCONS = 1
+    BIOCONSERT = 2
+    BIOCO = 3
+    KWIKSORTRANDOM = 4
+    PICKAPERM = 5
+    BORDACOUNT = 6
+    COPELANDMETHOD = 7
 
     @staticmethod
     def get_all() -> List['Algorithm']:
@@ -45,8 +49,8 @@ class Algorithm(Enum):
         :return: A List of all the available algorithms.
         :rtype: List[Algorithm]
         """
-        return [Algorithm.Exact, Algorithm.ParCons, Algorithm.BioConsert, Algorithm.BioCo, Algorithm.KwikSortRandom,
-                Algorithm.PickAPerm, Algorithm.BordaCount, Algorithm.CopelandMethod]
+        return [Algorithm.EXACT, Algorithm.PARCONS, Algorithm.BIOCONSERT, Algorithm.BIOCO, Algorithm.KWIKSORTRANDOM,
+                Algorithm.PICKAPERM, Algorithm.BORDACOUNT, Algorithm.COPELANDMETHOD]
 
     @staticmethod
     def get_all_compatible_with_any_scoring_scheme() -> List['Algorithm']:
@@ -58,11 +62,11 @@ class Algorithm(Enum):
         :return: A List of all the algorithms compatible with any scoring scheme.
         :rtype: List[Algorithm]
         """
-        return [Algorithm.Exact, Algorithm.ParCons, Algorithm.BioConsert,
-                Algorithm.KwikSortRandom, Algorithm.CopelandMethod]
+        return [Algorithm.EXACT, Algorithm.PARCONS, Algorithm.BIOCONSERT,
+                Algorithm.KWIKSORTRANDOM, Algorithm.COPELANDMETHOD]
 
 
-def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
+def get_algorithm(alg: Algorithm, parameters: Dict = None) -> RankAggAlgorithm:
     """
     Returns an instance of the specified algorithm.
 
@@ -71,7 +75,7 @@ def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
     :param parameters: The parameters to pass to the algorithm's constructor. If None, an empty dict will be used.
     :type parameters: Dict, optional
     :return: An instance of the specified algorithm.
-    :rtype: MedianRanking
+    :rtype: RankAggAlgorithm
     :raises TypeError: If alg is not an instance of Algorithm, or if parameters is not a dict.
     """
     if not isinstance(alg, Algorithm):
@@ -81,5 +85,5 @@ def get_algorithm(alg: Algorithm, parameters: Dict = None) -> MedianRanking:
 
     if parameters is None:
         parameters = {}
-    res = (AlgorithmEnumeration.median_ranking_algorithms[alg.value])(**parameters)
+    res: RankAggAlgorithm = (AlgorithmEnumeration.median_ranking_algorithms[alg.value])(**parameters)
     return res

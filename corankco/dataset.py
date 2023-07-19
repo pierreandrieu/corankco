@@ -1,11 +1,15 @@
+"""
+Module providing the Dataset class, and a DatasetSelector class to filter datasets according to the number of rankings
+and/or elements. A Dataset is basically a list of rankings.
+"""
+
 from typing import List, Dict, Set, Tuple, Union, Iterator
 from collections import Counter
-import numpy as np
 import copy
+import numpy as np
 from corankco.utils import get_rankings_from_file, get_rankings_from_folder, write_rankings, name_file
 from corankco.ranking import Ranking
-from corankco.element import Element, PairwiseElementComparison
-from corankco.scoringscheme import ScoringScheme
+from corankco.element import Element
 
 
 class EmptyDatasetException(Exception):
@@ -22,7 +26,7 @@ class Dataset:
     :type name: str, optional
     """
 
-    def __init__(self, rankings: List[Ranking], name: str = ""):
+    def __init__(self, rankings: List[Ranking], name: str = "None"):
         """
         Constructor for the Dataset class.
 
@@ -53,18 +57,19 @@ class Dataset:
         return dataset
 
     @classmethod
-    def from_raw_list(cls, rankings: List[List[Set[Union[int, str]]]], name: str = "") -> 'Dataset':
+    def from_raw_list(cls, rankings: List[Union[List[Set[int]], List[Set[str]], List[Set[Element]]]],
+                      name: str = "") -> 'Dataset':
         """
         Create a Dataset from a raw list of rankings.
 
         :param rankings: A list of rankings.
-        :type rankings: List[List[Set[Union[int, str]]]]
+        :type rankings: List[Union[List[Set[int]], List[Set[str]], List[Set[Element]]]]
         :param name: The name of the dataset.
         :type name: str, optional
         :return: A new Dataset object.
         :rtype: Dataset
         """
-        dataset = cls([Ranking.from_list(ranking) for ranking in rankings])
+        dataset = cls([Ranking(ranking) for ranking in rankings])
         dataset.name = name
         return dataset
 
@@ -74,11 +79,8 @@ class Dataset:
         Create a Dataset from a raw list of rankings with elements.
 
         :param rankings: A list of rankings.
-        :type rankings: List[List[Set[Element]]]
         :param name: The name of the dataset.
-        :type name: str, optional
         :return: A new Dataset object.
-        :rtype: Dataset
         """
         dataset = cls([Ranking(ranking) for ranking in rankings])
         dataset.name = name
@@ -99,22 +101,8 @@ class Dataset:
 
         # check if all elements are integers. If yes, all str are converted to integers
         rankings_final: List[Ranking] = []
-        all_ints: bool = True
-        for ranking in rankings:
-            if not all_ints:
-                break
-            for bucket in ranking:
-                if not all_ints:
-                    break
-                for element in bucket:
-                    if isinstance(element, int):
-                        continue
-                    elif isinstance(element, str) and not element.isdigit():
-                        all_ints = False
-                    elif not element.can_be_int():
-                        all_ints = False
-                        break
-        if all_ints:
+
+        if Dataset._all_integers(rankings):
             for ranking in rankings:
                 ranking_final: List[Set[Element]] = []
                 for bucket in ranking:
@@ -148,14 +136,30 @@ class Dataset:
         if len(nb_occur_elements_in_rankings) == 0:
             raise EmptyDatasetException("No elements found in input rankings")
 
-        id_element = 0
-        for key in nb_occur_elements_in_rankings.keys():
+        id_element: int = 0
+        for key, _ in nb_occur_elements_in_rankings.items():
             self._mapping_element_id[key] = id_element
             self._mapping_id_element[id_element] = key
             id_element += 1
             if nb_occur_elements_in_rankings[key] != len(rankings_final):
                 complete = False
         return rankings_final, complete, without_ties
+
+    @staticmethod
+    def _all_integers(rankings: List[Ranking]) -> bool:
+        """
+
+        :return: True iif all the elements of the dataset can be integers
+        """
+        for ranking in rankings:
+            for bucket in ranking:
+                for element in bucket:
+                    if isinstance(element, str) and not element.isdigit():
+                        return False
+                    if isinstance(element, Element) and not element.can_be_int():
+                        return False
+        # If we have checked all elements and none have returned False, then we can return True
+        return True
 
     def remove_empty_rankings(self):
         """
@@ -228,9 +232,9 @@ class Dataset:
         :return: A Dataset object containing the read rankings.
         :rtype: Dataset
         """
-        d = Dataset([Ranking(ranking) for ranking in get_rankings_from_file(path)])
-        d.name = name_file(path)
-        return d
+        dataset: Dataset = Dataset([Ranking(ranking) for ranking in get_rankings_from_file(path)])
+        dataset.name = name_file(path)
+        return dataset
 
     @property
     def rankings(self) -> List[Ranking]:
@@ -340,14 +344,20 @@ class Dataset:
 
     def description(self) -> str:
         """
-
         :return: A complete description of the Dataset object containing all the available information
         """
-        return "Dataset description:\n\telements:" + str(self.nb_elements) + "\n\trankings:" + str(self.nb_rankings) \
-            + "\n\tcomplete:" \
-            + str(self.is_complete) + "\n\twithout ties: " + str(self.without_ties) + "\n\t" \
-            + "rankings:\n" \
-            + "\n".join("\t\tr" + str(i + 1) + " = " + str(self.rankings[i]) for i in range(len(self.rankings)))
+        rankings = '\n'.join(f"\t\tr{i + 1} = {ranking}" for i, ranking in enumerate(self.rankings))
+
+        description = (f"Dataset description:\n"
+                       f"\tname: {self.name}\n"
+                       f"\telements: {self.nb_elements}\n"
+                       f"\trankings: {self.nb_rankings}\n"
+                       f"\tcomplete: {self.is_complete}\n"
+                       f"\twithout ties: {self.without_ties}\n"
+                       f"\trankings:\n"
+                       f"{rankings}")
+
+        return description
 
     # returns a numpy ndarray where positions[i][j] is the position of element i in ranking j. Missing: element: -1
     def get_positions(self) -> np.ndarray:
@@ -359,66 +369,10 @@ class Dataset:
         positions: np.ndarray = np.zeros((self.nb_elements, self.nb_rankings)) - 1
         id_ranking: int = 0
         for ranking in self.rankings:
-            id_bucket: int = 0
-            for bucket in ranking:
-                for elem in bucket:
-                    positions[self.mapping_elem_id.get(elem)][id_ranking] = id_bucket
-                id_bucket += 1
+            for elem, pos in ranking.positions.items():
+                positions[self.mapping_elem_id.get(elem)][id_ranking] = pos - 1
             id_ranking += 1
         return positions
-
-    def penalties_relative_positions(self, scoring_scheme: ScoringScheme) -> Set[PairwiseElementComparison]:
-        """
-        Get a set of all pairs of elements with their costs of different relative positions under a Kemeny prism
-        regarding the given ScoringScheme. Complexity: O(nb_elements * nb_elements * nb_rankings)
-        Complexity: O(nb_rankings * nb_elements²)
-        :param scoring_scheme: the ScoringScheme to use for the computation of the different relative costs
-        :return: a Set of ElementComparison objects
-        """
-        res: Set[PairwiseElementComparison] = set()
-        # for each element
-        nb_elements: int = self.nb_elements
-        positions: np.ndarray = self.get_positions()
-
-        b_vector_numpy: np.ndarray = np.asarray(scoring_scheme.b_vector)
-        t_vector_numpy: np.ndarray = np.asarray(scoring_scheme.t_vector)
-        a_vector_numpy: np.ndarray = np.array(
-            [b_vector_numpy[1], b_vector_numpy[0], b_vector_numpy[2], b_vector_numpy[4], b_vector_numpy[3],
-             b_vector_numpy[5]])
-
-        for id_el1 in range(0, nb_elements, 1):
-            # for memoization: pos_el1 = the positions of elem id_el1 in the input rankings
-            pos_el1: np.ndarray = positions[id_el1]
-
-            # d: nb of rankings such that el1 is non-ranked
-            d: int = np.count_nonzero(pos_el1 == -1)
-
-            # for each other element
-            for id_el2 in range(id_el1 + 1, nb_elements, 1):
-                # a = nb of rankings such that el1 and el2 are both missing
-                a: int = np.count_nonzero(pos_el1 + positions[id_el2] == -2)
-                # b = number of rankings such that el1 and el2 have same position or are both missing
-                b: int = np.count_nonzero(pos_el1 == positions[id_el2])
-                # c = number of rankings such that el1 is ranked whereas el2 is non-ranked
-                c: int = np.count_nonzero(positions[id_el2] == -1)
-                # e = number of rankings such that el1 is before el2 or el1 is non-ranked whereas el2 is ranked
-                e: int = np.count_nonzero(pos_el1 < positions[id_el2])
-
-                # vector that contains for the two elements x and y the number of rankings such that respectively:
-                # x < y, x > y, x and y are tied, x is the only ranked, y is the only ranked, x and y are non-ranked
-                relative_positions: np.ndarray = np.array(
-                    [e - d + a, self.nb_rankings - e - b - c + a, b - a, c - a, d - a, a])
-
-                # cost to place el1 before el2 in consensus ranking
-                x_before_y: float = np.vdot(relative_positions, b_vector_numpy)
-                # cost to place el1 after el2 in consensus ranking
-                x_after_y: float = np.vdot(relative_positions, a_vector_numpy)
-                # cost to tie el1 and el2 in consensus ranking
-                x_tied_y: float = np.vdot(relative_positions, t_vector_numpy)
-
-                res.add(PairwiseElementComparison(self._mapping_id_element[id_el1], self._mapping_id_element[id_el2],
-                                                  x_before_y, x_after_y, x_tied_y))
-        return res
 
     def unified_rankings(self) -> List[Ranking]:
         """
@@ -536,6 +490,10 @@ class Dataset:
                 (rankings, name=file_path) for rankings, file_path in get_rankings_from_folder(path_folder)]
 
     def __repr__(self):
+        """
+
+        :return: The string representation of the rankings defining the Dataset object.
+        """
         return str(self.rankings)
 
     def contains_element(self, element: Union[str, int]) -> bool:

@@ -4,6 +4,7 @@
 # corankco
 
 `corankco` (COnsensus RANKing COmputation) is a Python package dedicated to the aggregation of incomplete rankings with ties. Users can choose the Kemeny-Young method (exact algorithm and several heuristics available), the Copeland method, and in some cases, the Borda method. The formalism to handle ties and/or incompleteness is detailed in the preprint: P. Andrieu, S. Cohen-Boulakia, M. Couceiro, A. Denise, A. Pierrot. *A Unifying Rank Aggregation Model to Suitably and Efficiently Aggregate Any Kind of Rankings*. Available at SSRN: [https://ssrn.com/abstract=4353494](https://ssrn.com/abstract=4353494).
+**As of our latest release, the API for `corankco` is now stable and finalized.**
 
 ## Installation
 
@@ -20,7 +21,7 @@ pip3 install corankco
 
 ## Documentation
 Visit our [official documentation](https://corankco.readthedocs.io/en/latest).
-For examples of use, you can jump directly to our [Usage section below](#usage).
+For examples of use, you can jump directly to our [Usage section below]{#usage}.
 
 ## Contact/Support
 
@@ -32,12 +33,12 @@ We welcome contributions to `corankco`. If you'd like to contribute, feel free t
 
 ## License
 
-`corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](./LICENSE).
+`corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](LICENSE).
 
 ## Example usage <a class="anchor" id="usage"></a>
 
 ```python
-
+from typing import List
 import corankco as crc
 
 # create a ranking from a list of sets
@@ -57,13 +58,15 @@ dataset2: crc.Dataset = crc.Dataset.from_raw_list([[{2, 1}, {4}], [{3, 1, 2}, {4
 
 # or, create a Dataset object from a file where your rankings are stored
 # format file: each line is a list of either set, or list of int / str.
-dataset3: crc.Dataset = crc.Dataset.from_file(path="./dataset_example")
+dataset3: crc.Dataset = crc.Dataset.from_file(path="./dataset_examples/dataset_example")
 
 # print information about the dataset
 print(dataset.description())
 
 # get all datasets in a folder
-# list_datasets = Dataset.get_datasets_from_folder(path_folder="folder_path")
+list_datasets: List[crc.Dataset] = crc.Dataset.get_datasets_from_folder(path_folder="./dataset_examples")
+for dataset_folder in list_datasets:
+    print(dataset_folder.description())
 
 # choose your scoring scheme
 sc: crc.ScoringScheme = crc.ScoringScheme([[0., 1., 1., 0., 1., 1.], [1., 1., 0., 1., 1., 0.]])
@@ -108,8 +111,19 @@ kemeny_obj: crc.KemenyComputingFactory = crc.KemenyComputingFactory(scoring_sche
 score: float = kemeny_obj.get_kemeny_score(ranking=ranking_test, dataset=dataset_test)
 print("\nscore = ", score)
 
+# Partitioning
+
+# consistent with at least one optimal consensus
+one_opt: crc.OrderedPartition = crc.OrderedPartition.parcons_partition(dataset_test, scoring_scheme)
+print(one_opt)
+
+# consistent with all the optimal consensus
+all_opt: crc.OrderedPartition = crc.OrderedPartition.parfront_partition(dataset_test, scoring_scheme)
+print(all_opt)
+
+
  ```
 
  ## Jupiter Notebook for code execution and more examples
 
- More detailed examples and use cases, please refer to our [Jupyter Notebook](./corankco_notebook).
+ More detailed examples and use cases, please refer to our [Jupyter Notebook](corankco_notebook.ipynb).

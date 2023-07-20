@@ -15,6 +15,14 @@ Welcome to corankco's documentation!
    scoring_scheme
    consensus
    element
+   bioconsert
+   borda
+   copeland
+   exact
+   kwiksort
+   parcons
+   pickaperm
+   
 
 Indices and tables
 ==================

@@ -15,13 +15,15 @@ Welcome to corankco's documentation!
    scoring_scheme
    consensus
    element
-   bioconsert
-   borda
-   copeland
-   exact
-   kwiksort
-   parcons
-   pickaperm
+   corankco.algorithms.bioconsert
+   corankco.algorithms.borda
+   corankco.algorithms.copeland
+   corankco.algorithms.exact
+   corankco.algorithms.kwiksort
+   corankco.algorithms.parcons
+   corankco.algorithms.pickaperm
+   corankco.algorithms
+   corankco.partitioning
    
 
 Indices and tables

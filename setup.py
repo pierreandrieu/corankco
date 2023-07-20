@@ -17,9 +17,10 @@ setup(name='corankco',
       packages=find_packages(include=['corankco', 'corankco.*']),
       python_requires='>=3.8',
       zip_safe=False,
-      install_requires=['numpy~=1.22.2',
+      install_requires=['numpy~=1.24.4',
                         'python-igraph',
-                        'pulp~=2.3',
+                        'pulp~=2.7',
                         'bioconsertinc>=1.0.2',
+                        'setuptools~=68.0.0',
                         ]
       )

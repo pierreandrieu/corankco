@@ -1,3 +1,4 @@
+from typing import List
 import corankco as crc
 
 # create a ranking from a list of sets
@@ -23,7 +24,7 @@ dataset3: crc.Dataset = crc.Dataset.from_file(path="./dataset_examples/dataset_e
 print(dataset.description())
 
 # get all datasets in a folder
-list_datasets = crc.Dataset.get_datasets_from_folder(path_folder="./dataset_examples")
+list_datasets: List[crc.Dataset] = crc.Dataset.get_datasets_from_folder(path_folder="./dataset_examples")
 for dataset_folder in list_datasets:
     print(dataset_folder.description())
 
@@ -69,3 +70,13 @@ scoring_scheme: crc.ScoringScheme = crc.ScoringScheme([[0., 1., 1., 0., 1., 0.],
 kemeny_obj: crc.KemenyComputingFactory = crc.KemenyComputingFactory(scoring_scheme)
 score: float = kemeny_obj.get_kemeny_score(ranking=ranking_test, dataset=dataset_test)
 print("\nscore = ", score)
+
+# Partitioning
+
+# consistent with at least one optimal consensus
+one_opt: crc.OrderedPartition = crc.OrderedPartition.parcons_partition(dataset_test, scoring_scheme)
+print(one_opt)
+
+# consistent with all the optimal consensus
+all_opt: crc.OrderedPartition = crc.OrderedPartition.parfront_partition(dataset_test, scoring_scheme)
+print(all_opt)

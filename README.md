@@ -12,7 +12,7 @@ Before installing `corankco`, make sure your system meets the following requirem
 
 - Python >= 3.8
 - For the usage of the exact algorithm on big datasets (with many elements to rank), the installation of IBM ILOG CPLEX Optimization Studio is recommended. A free academic version can be downloaded from the [IBM website](https://www.ibm.com/products/ilog-cplex-optimization-studio). After downloading, follow the [instructions to install CPLEX](https://www.ibm.com/docs/en/icos/20.1.0?topic=studio-setting-up-python).
-
+[README.md](README.md)
 To install `corankco` from PyPI, you can use pip:
 
 ```bash
@@ -33,7 +33,7 @@ We welcome contributions to `corankco`. If you'd like to contribute, feel free t
 
 ## License
 
-`corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](LICENSE).
+`corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](https://github.com/pierreandrieu/corankco/blob/master/LICENSE).
 
 ## Example usage <a class="anchor" id="usage"></a>
 
@@ -126,4 +126,4 @@ print(all_opt)
 
  ## Jupiter Notebook for code execution and more examples
 
- More detailed examples and use cases, please refer to our [Jupyter Notebook](corankco_notebook.ipynb).
+ More detailed examples and use cases, please refer to our [Jupyter Notebook](https://github.com/pierreandrieu/corankco/blob/master/corankco_notebook.ipynb).

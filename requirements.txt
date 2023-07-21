@@ -1,5 +1,4 @@
-numpy~=1.24.4
-PuLP~=2.7.0
-bioconsertinc ~= 1.0.2
-setuptools~=68.0.0
+numpy>=1.24
+PuLP
+bioconsertinc ~= 2.0.0
 python-igraph

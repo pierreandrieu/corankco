@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='corankco',
-      version='7.0.1',
+      version='7.1.0',
       description='Kemeny-Young method for rank aggregation of incomplete rankings with ties',
       long_description_content_type='text/markdown',
       long_description=readme(),

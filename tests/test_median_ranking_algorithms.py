@@ -4,6 +4,8 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.algorithms.copeland.copeland import CopelandMethod
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
+from corankco.algorithms.bioconsert.BioConsertPython import BioConsertPython
+from corankco.algorithms.bioconsert.BioConsertPythonFast import BioConsertPythonFast
 from corankco.algorithms.bioconsert.bioco import BioCo
 from corankco.algorithms.kwiksort.kwiksortrandom import KwikSortRandom
 from corankco.algorithms.borda.borda import BordaCount
@@ -19,8 +21,10 @@ class TestAlgos(unittest.TestCase):
 
     def setUp(self):
         self.test_time_computation: bool = False
-        self.my_algs: List[RankAggAlgorithm] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom()]
-        self.my_algs.extend([ParCons(), ExactAlgorithmPulp()])
+        # self.my_algs: List[RankAggAlgorithm] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom(), BioConsertPython(), BioConsertPythonFast()]
+        # self.my_algs.extend([ParCons(), ExactAlgorithmPulp()])
+        self.my_algs: List[RankAggAlgorithm] = [BioConsertPythonFast()]
+
         self.scoring_scheme_unifying = ScoringScheme.get_unifying_scoring_scheme()
         self.scoring_scheme_induced = ScoringScheme.get_induced_measure_scoring_scheme()
         self.scoring_scheme_pseudo = ScoringScheme.get_pseudodistance_scoring_scheme()
@@ -61,13 +65,28 @@ class TestAlgos(unittest.TestCase):
 
     def test_scalability(self):
         if self.test_time_computation:
-            dataset = Dataset.get_random_dataset_markov(2000, 50, 100, True)
-            for alg in self.my_algs:
-                debut = time.time()
-                alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-                fin = time.time()
-                print(str(alg) + " " + str(fin - debut))
+            for nb_elem in range(500, 1001, 100):
+                print("nb_elem = ", nb_elem)
+                dataset = Dataset.get_random_dataset_markov(nb_elem, 20, nb_elem * 10, True)
+                for alg in self.my_algs:
+                    if "onsert" in alg.get_full_name():
+                        debut = time.time()
+                        alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+                        fin = time.time()
+                        print(str(alg) + " " + str(fin - debut))
+
+    def test_debug(self):
+        dataset = Dataset.from_raw_list([[{"A"}, {"B"}, {"C", "D"}], [{"C", "D"}, {"A"}, {"B"}], [{"A"}, {"C"}, {"B"}, {"D"}]])
+        #print("SLOW: ")
+        #BioConsertPython().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+        print("FAST : ")
+        BioConsertPythonFast().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+
 
 
 if __name__ == '__main__':
     unittest.main()
+    from random import seed
+    import numpy as np
+    seed(1)
+    np.random.seed(1)

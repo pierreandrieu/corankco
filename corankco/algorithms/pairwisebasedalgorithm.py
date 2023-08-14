@@ -16,11 +16,11 @@ class PairwiseBasedAlgorithm:
     """
 
     @staticmethod
-    def pairwise_cost_matrix_generic(positions: ndarray,
-                                     scoring_scheme: ScoringScheme,
-                                     callback: Callable[[ndarray, int, int, Any], Any],
-                                     structure: Any
-                                     ) -> ndarray:
+    def _pairwise_cost_matrix_generic(positions: ndarray,
+                                      scoring_scheme: ScoringScheme,
+                                      callback: Callable[[ndarray, int, int, Any], Any],
+                                      structure: Any
+                                      ) -> ndarray:
         """
         Computes the pairwise cost matrix, and allows for calling a function for each pair of elements after computing
         the cost of the different relative positions. Useful for code factorisation.
@@ -108,7 +108,7 @@ class PairwiseBasedAlgorithm:
         for i in range(shape(positions)[0]):
             graph_of_elements.add_vertex(name=str(i))
 
-        matrix: ndarray = PairwiseBasedAlgorithm.pairwise_cost_matrix_generic(
+        matrix: ndarray = PairwiseBasedAlgorithm._pairwise_cost_matrix_generic(
             positions, scoring_scheme, PairwiseBasedAlgorithm._fill_graph_and_robust_arcs, (arcs, robust_arcs)
         )
 
@@ -140,7 +140,7 @@ class PairwiseBasedAlgorithm:
 
         arcs: List[Tuple[int, int]] = []
 
-        matrix: ndarray = PairwiseBasedAlgorithm.pairwise_cost_matrix_generic(
+        matrix: ndarray = PairwiseBasedAlgorithm._pairwise_cost_matrix_generic(
             positions, scoring_scheme, PairwiseBasedAlgorithm._fill_graph, arcs)
 
         # arcs should be added all at once, the impact on performances is clear
@@ -150,20 +150,18 @@ class PairwiseBasedAlgorithm:
     @staticmethod
     def pairwise_cost_matrix(positions: ndarray, scoring_scheme: ScoringScheme) -> ndarray:
         """
-        Compute the graph of elements and the cost of pairwise relative positions.
+        Compute the cost of pairwise relative positions.
 
-        This function generates a graph of elements as defined in the Future Generation Computer Systems article
-        (as mentioned in the Class docstring) and computes the cost of pairwise relative positions.
+        This function computes the cost of pairwise relative positions.
         The latter is a 3D matrix where matrix[i][j][0], then [1], then [2] denote the cost to have i before j,
         i after j, i tied with j in the consensus according to the scoring scheme.
 
         :param positions: a matrix where pos[i][j] denotes the position of element i in ranking j (-1 if non-ranked)
         :param scoring_scheme: the scoring scheme to compute the cost matrix
-        :return: A tuple containing the Graph of elements defined in the FGCS article and the 3D matrix of costs of
-        pairwise relative positions.
+        :return: The 3D matrix of costs of pairwise relative positions.
         """
-        return PairwiseBasedAlgorithm.pairwise_cost_matrix_generic(
-            positions, scoring_scheme, PairwiseBasedAlgorithm._nothing_to_do, None)
+        return PairwiseBasedAlgorithm._pairwise_cost_matrix_generic(
+            positions, scoring_scheme, PairwiseBasedAlgorithm._nothing_to_do, structure=None)
 
     @staticmethod
     def _nothing_to_do(cost_matrix: ndarray, el_1: int, el_2: int, structure: None) -> None:

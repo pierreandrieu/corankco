@@ -65,7 +65,7 @@ class CopelandMethod(RankAggAlgorithm, PairwiseBasedAlgorithm):
 
         # now, update the two dicts: computes for each element the number of victories, equalities, defeats
         # for each pair of elements
-        CopelandMethod.pairwise_cost_matrix_generic(
+        CopelandMethod._pairwise_cost_matrix_generic(
             dataset.get_positions(),
             scoring_scheme,
             CopelandMethod._fill_dicts_copeland,

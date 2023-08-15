@@ -32,7 +32,9 @@ class Dataset:
     :type weights: List[float], optional
 
     Note:
-        If both `repetitions` and `weights` are set, the ranking at index k is repeated `repetitions[k]` times with the same weight `weights[k]`.
+        If both `repetitions` and `weights` are set, the ranking at index k is repeated `repetitions[k]` times with the
+
+        same weight `weights[k]`.
     """
 
     def __init__(self, rankings: List[Ranking], name: str = "None",
@@ -383,13 +385,27 @@ class Dataset:
         :return: A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the position of element i in ranking j
                  position = -1 if element i is non-ranked in ranking j
         """
-        positions: np.ndarray = np.zeros((self.nb_elements, self.nb_rankings)) - 1
+        positions: np.ndarray = np.full((self.nb_elements, self.nb_rankings), -1, dtype=np.int32)
         id_ranking: int = 0
         for ranking in self.rankings:
             for elem, pos in ranking.positions.items():
                 positions[self.mapping_elem_id.get(elem)][id_ranking] = pos - 1
             id_ranking += 1
         return positions
+
+    def get_bucket_ids(self) -> np.ndarray:
+        """
+        :return: A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the bucket id of element i in ranking j
+                 position = -1 if element i is non-ranked in ranking j
+        """
+        bucket_ids: np.ndarray = np.full((self.nb_elements, self.nb_rankings), -1, dtype=np.int32)
+
+        for ranking_idx, ranking in enumerate(self.rankings):
+            for bucket_id, bucket in enumerate(ranking):
+                for elem in bucket:
+                    bucket_ids[self.mapping_elem_id.get(elem)][ranking_idx] = bucket_id
+
+        return bucket_ids
 
     def unified_rankings(self) -> List[Ranking]:
         """

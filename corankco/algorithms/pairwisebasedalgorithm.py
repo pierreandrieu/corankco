@@ -5,7 +5,7 @@ Module that implements generic functions about pairwise based rank aggregation a
 from typing import Tuple, List, Callable, Any, Set
 from itertools import combinations
 from igraph import Graph
-from numpy import vdot, ndarray, count_nonzero, shape, array, zeros, asarray
+from numpy import ndarray, shape, zeros, newaxis, sum as np_sum
 from corankco.scoringscheme import ScoringScheme
 
 
@@ -16,11 +16,9 @@ class PairwiseBasedAlgorithm:
     """
 
     @staticmethod
-    def _pairwise_cost_matrix_generic(positions: ndarray,
-                                      scoring_scheme: ScoringScheme,
-                                      callback: Callable[[ndarray, int, int, Any], Any],
-                                      structure: Any
-                                      ) -> ndarray:
+    def _pairwise_cost_matrix_generic(
+            positions: ndarray, scoring_scheme, callback: Callable[[ndarray, int, int, Any], Any], structure: Any) \
+            -> ndarray:
         """
         Computes the pairwise cost matrix, and allows for calling a function for each pair of elements after computing
         the cost of the different relative positions. Useful for code factorisation.
@@ -32,53 +30,45 @@ class PairwiseBasedAlgorithm:
         :return: The pairwise cost matrix as n * n * 3 ndarray, where n is the number of elements
         """
 
-        cost_before: ndarray = asarray(scoring_scheme.b_vector)
-        cost_tied: ndarray = asarray(scoring_scheme.t_vector)
-        cost_after: ndarray = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
-                                     cost_before[5]])
+        nb_elem, nb_rankings = positions.shape
 
-        # n = nb of elements, m = nb of rankings
-        nb_elem: int = shape(positions)[0]
-        nb_rankings: int = shape(positions)[1]
+        # Create the matrix
+        matrix = zeros((nb_elem, nb_elem, 3))
 
-        # matrix[i][j] contains the costs of the 3 possible relative orderings between i and j
-        # matrix[i][j][0] = cost to place i before j, [1] = cost to place i after j, [2] = cost to tie i and j
-        matrix: ndarray = zeros((nb_elem, nb_elem, 3))
+        # For each pair of elements el_1 and el_2
+        el_1_positions = positions[:, newaxis, :]
+        el_2_positions = positions[newaxis, :, :]
+
+        # Calculate each condition for relative positions
+        e1_before_e2 = np_sum((el_1_positions < el_2_positions) & (el_1_positions != -1) & (el_2_positions != -1),
+                              axis=2)
+        e2_before_e1 = np_sum((el_2_positions < el_1_positions) & (el_1_positions != -1) & (el_2_positions != -1),
+                              axis=2)
+        e1_e2_same_pos = np_sum((el_1_positions == el_2_positions) & (el_1_positions != -1), axis=2)
+        e1_present_e2_absent = np_sum((el_1_positions != -1) & (el_2_positions == -1), axis=2)
+        e2_present_e1_absent = np_sum((el_2_positions != -1) & (el_1_positions == -1), axis=2)
+        e1_e2_both_absent = np_sum((el_1_positions == -1) & (el_2_positions == -1), axis=2)
+
+        relative_positions = zeros((nb_elem, nb_elem, 6))
+        relative_positions[:, :, 0] = e1_before_e2
+        relative_positions[:, :, 1] = e2_before_e1
+        relative_positions[:, :, 2] = e1_e2_same_pos
+        relative_positions[:, :, 3] = e1_present_e2_absent
+        relative_positions[:, :, 4] = e2_present_e1_absent
+        relative_positions[:, :, 5] = e1_e2_both_absent
+
+        # Compute costs
+        cost_before = scoring_scheme.b_vector
+        cost_after = [cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
+                      cost_before[5]]
+        cost_tied = scoring_scheme.t_vector
+
+        matrix[:, :, 0] = np_sum(relative_positions * cost_before, axis=2)
+        matrix[:, :, 1] = np_sum(relative_positions * cost_after, axis=2)
+        matrix[:, :, 2] = np_sum(relative_positions * cost_tied, axis=2)
 
         for el_1 in range(nb_elem):
-            # memoization: the positions of e1 in the input rankings
-            mem: ndarray = positions[el_1]
-
-            # d = number of input rankings such that e1 is non-ranked
-            e1_non_ranked: int = count_nonzero(mem == -1)
-
             for el_2 in range(el_1 + 1, nb_elem):
-                # nb of input rankings such that e1 and e2 both non-ranked
-                e1_e2_non_ranked: int = count_nonzero(mem + positions[el_2] == -2)
-                # nb of input rankings such that e1 and e2 have same position, or both non-ranked
-                e1_e2_same_pos: int = count_nonzero(mem == positions[el_2])
-                # nb of input rankings such that e2 is non-ranked
-                e2_non_ranked: int = count_nonzero(positions[el_2] == -1)
-                # nb of input rankings such that e1 < e2 or e1 is non-ranked
-                e1_bef_e2_or_missing: int = count_nonzero(mem < positions[el_2])
-
-                # vector that contains for the two elements x and y the number of rankings such that respectively:
-                # x < y, x > y, x and y are tied, x is the only ranked, y is the only ranked, x and y are non-ranked
-                relative_positions: ndarray = array([e1_bef_e2_or_missing - e1_non_ranked + e1_e2_non_ranked,
-                                                     nb_rankings - e1_bef_e2_or_missing - e1_e2_same_pos - e2_non_ranked
-                                                     + e1_e2_non_ranked,
-                                                     e1_e2_same_pos - e1_e2_non_ranked,
-                                                     e2_non_ranked - e1_e2_non_ranked,
-                                                     e1_non_ranked - e1_e2_non_ranked,
-                                                     e1_e2_non_ranked])
-
-                # cost to place e1 before, after, or tied with e2 in a consensus ranking within a Kemeny prism
-                put_before: float = float(vdot(relative_positions, cost_before))
-                put_after: float = float(vdot(relative_positions, cost_after))
-                put_tied: float = float(vdot(relative_positions, cost_tied))
-                # save the costs, will be used further
-                matrix[el_1][el_2] = [put_before, put_after, put_tied]
-                matrix[el_2][el_1] = [put_after, put_before, put_tied]
                 callback(matrix[el_1][el_2], el_1, el_2, structure)
 
         return matrix

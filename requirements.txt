@@ -1,4 +1,7 @@
 numpy>=1.24
-PuLP
+PuLP>=2.7.0
 bioconsertinc ~= 2.0.0
 python-igraph
+
+numba>=0.57.1
+setuptools>=68.0.0

@@ -14,10 +14,11 @@ from corankco.scoringscheme import ScoringScheme
 from corankco.consensus import Consensus, ConsensusFeature
 from corankco.ranking import Ranking
 from corankco.element import Element
+
 try:
     import cplex
 except ImportError:
-    print("Cplex must be installed to use this class")
+    pass
 
 
 class ExactAlgorithmCplex(ExactAlgorithmBase, PairwiseBasedAlgorithm):

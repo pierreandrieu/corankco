@@ -1,16 +1,207 @@
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List, Set, Tuple
 from numba import jit
 from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
-from corankco.consensus import Consensus
+from corankco.consensus import Consensus, ConsensusFeature
 from corankco.ranking import Ranking
+from corankco.element import Element
+from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 
-from numpy import zeros, count_nonzero, vdot, array, ndarray, shape, amax, where, nditer, argmax, sum as np_sum, \
-    cumsum, asarray
+from numpy import (zeros, array, ndarray, asarray, int32 as np_int32, float64 as np_float64, max as np_max, amin, where,
+                   vstack)
 
 
-class BioConsertPythonFast(RankAggAlgorithm):
+@jit("void(float64[:], int32, float64)", nopython=True, cache=True)
+def _fill_array_double(arr, size, value):
+    for i in range(size):
+        arr[i] = value
+
+
+@jit("int32(int32, float64[:], int32)", nopython=True, cache=True)
+def _search_to_change_bucket(bucket_elem, change, max_id_bucket):
+    # print("\t\t\tdebut search change bucket elem ", bucket_elem, "change : ", change, " max_id_bucket : ", max_id_bucket)
+    i = bucket_elem + 1
+    res = -1
+
+    if change[i - 1] < -0.001:
+        res = i - 1
+    while res == -1 and i <= max_id_bucket:
+        change[i] += change[i - 1]
+        if change[i] < -0.001:
+            res = i
+        i += 1
+
+    if res == -1:
+        i = bucket_elem - 2
+        if i >= -1 and change[i + 1] < -0.001:
+            res = i + 1
+
+        while res == -1 and i >= 0:
+            change[i] += change[i + 1]
+            if change[i] < -0.001:
+                res = i
+            i -= 1
+    # print("\t\t\tres = ", res)
+    return res
+
+
+@jit("void(int32[:], int32, int32, int32, int32, int32)", nopython=True, cache=True)
+def _change_bucket(r, n, element, old_pos, new_pos, alone_in_old_bucket):
+    # print("\t\t\tdebut change ", element, "  from ", old_pos, " to ", new_pos, " r = ", r)
+    r[element] = new_pos
+    if alone_in_old_bucket == 1:
+        for i in range(n):
+            if r[i] > old_pos:
+                r[i] -= 1
+    # print("\t\t\tend : ", r)
+
+
+@jit("int32(int32, float64[:], int32)", nopython=True, cache=True)
+def _search_to_add_bucket(bucket_elem, add, max_id_bucket):
+    # print("\t\t\tdebut search add bucket elem ", bucket_elem, "add : ", add, " max_id_bucket : ", max_id_bucket)
+
+    i = bucket_elem + 2
+    res = -1
+
+    if add[i - 1] < -0.001:
+        res = i - 1
+
+    while res == -1 and i <= max_id_bucket + 1:
+        add[i] += add[i - 1]
+        if add[i] < -0.001:
+            res = i
+        i += 1
+
+    if res == -1:
+        i = bucket_elem - 1
+        if add[i + 1] < -0.001:
+            res = i + 1
+
+        while res == -1 and i >= 0:
+            add[i] += add[i + 1]
+            if add[i] < -0.001:
+                res = i
+            i -= 1
+    # print("\t\t\t res = ", res)
+    return res
+
+
+@jit("void(int32[:], int32, int32, int32, int32, int32)", nopython=True, cache=True)
+def _add_bucket(r, n, element, old_pos, new_pos, alone_in_old_bucket):
+    # print("\t\t\tdebut add ", element, "  from ", old_pos, " to ", new_pos, " r = ", r)
+
+    if old_pos < new_pos:
+        if alone_in_old_bucket == 1:
+            for i in range(n):
+                if old_pos < r[i] < new_pos:
+                    r[i] -= 1
+            r[element] = new_pos - 1
+        else:
+            for i in range(n):
+                if r[i] >= new_pos:
+                    r[i] += 1
+            r[element] = new_pos
+    else:
+        if alone_in_old_bucket == 1:
+            for i in range(n):
+                if new_pos <= r[i] < old_pos:
+                    r[i] += 1
+            r[element] = new_pos
+        else:
+            for i in range(n):
+                if r[i] >= new_pos:
+                    r[i] += 1
+            r[element] = new_pos
+    # print("\t\t\tend : ", r)
+
+
+@jit("int32(int32[:], int32, float64[:], int32, float64[:], float64[:], int32)", nopython=True, cache=True)
+def _compute_delta_costs(ranking, target_element, cost_matrix, bucket_elem, change, add, n):
+    # print("\t\t\tcosts for ", target_element, " in bucket ", bucket_elem, " r = ", ranking)
+    alone: int = 1
+    pos = 3 * n * target_element
+    tied_to_before = 0.
+    tied_to_after = 0.
+    tied_to_tied = 0.
+
+    for e2 in range(n):
+        bucket_e2 = ranking[e2]
+        # print("\t\t\t\t", e2, bucket_e2, bucket_elem < bucket_e2, change)
+        if bucket_elem < bucket_e2:
+            change[bucket_e2] += cost_matrix[pos + 2] - cost_matrix[pos]
+            change[bucket_e2 + 1] += cost_matrix[pos + 1] - cost_matrix[pos + 2]
+            add[bucket_e2 + 1] += cost_matrix[pos + 1] - cost_matrix[pos]
+        elif bucket_elem > bucket_e2:
+            change[bucket_e2] += cost_matrix[pos + 2] - cost_matrix[pos + 1]
+            if bucket_e2 != 0:
+                change[bucket_e2 - 1] += cost_matrix[pos] - cost_matrix[pos + 2]
+            add[bucket_e2] += cost_matrix[pos] - cost_matrix[pos + 1]
+        else:
+            if target_element != e2:
+                if alone == 1:
+                    alone = 0
+                tied_to_before += cost_matrix[pos]
+                tied_to_after += cost_matrix[pos + 1]
+                tied_to_tied += cost_matrix[pos + 2]
+        pos += 3
+
+    if bucket_elem != 0:
+        change[bucket_elem - 1] += tied_to_before - tied_to_tied
+    change[bucket_elem + 1] += tied_to_after - tied_to_tied
+    add[bucket_elem + 1] += tied_to_after - tied_to_tied
+    add[bucket_elem] += tied_to_before - tied_to_tied
+
+    # print("\t\t\tchange_costs = ", change)
+    # print("\t\t\tadd_costs = ", add)
+    return alone
+
+
+@jit("float64(int32[:], float64[:], int32)", nopython=True, cache=True)
+def _improve_one_ranking(r: ndarray, cost_matrix_1d, n):
+    # print("improve_one_ranking : ", r)
+    max_id_bucket = np_max(r)
+    delta_dist = 0.0
+    change = zeros(n + 2, dtype=np_float64)
+    add = zeros(n + 3, dtype=np_float64)
+
+    terminated = 0
+    alone: int
+
+    while terminated == 0:
+        # print("\tnouveau tour, delta_dist = ", delta_dist)
+        terminated = 1
+        for elem in range(n):
+            # print("\t\ttarget: ", elem)
+            bucket_elem = r[elem]
+
+            change.fill(0.0)
+            add.fill(0.0)
+
+            alone = _compute_delta_costs(r, elem, cost_matrix_1d, bucket_elem, change, add, n)
+
+            to = _search_to_change_bucket(bucket_elem, change, max_id_bucket)
+
+            if to >= 0:
+                terminated = 0
+                delta_dist += change[to]
+                _change_bucket(r, n, elem, bucket_elem, to, alone)
+                if alone == 1:
+                    max_id_bucket -= 1
+            else:
+                to = _search_to_add_bucket(bucket_elem, add, max_id_bucket)
+                if to >= 0:
+                    terminated = 0
+                    delta_dist += add[to]
+                    _add_bucket(r, n, elem, bucket_elem, to, alone)
+                    if alone != 1:
+                        max_id_bucket += 1
+
+    # print("end improve ranking, final = ", r, "\ndelta_dist = ", delta_dist)
+    return delta_dist
+
+
+class BioConsertPythonFast(RankAggAlgorithm, PairwiseBasedAlgorithm):
     def __init__(self, starting_algorithms=None):
         is_valid = True
         if isinstance(starting_algorithms, Iterable):
@@ -18,11 +209,11 @@ class BioConsertPythonFast(RankAggAlgorithm):
                 if not isinstance(obj, RankAggAlgorithm):
                     is_valid = False
             if is_valid:
-                self.starting_algorithms = starting_algorithms
+                self._starting_algorithms = starting_algorithms
             else:
-                self.starting_algorithms = []
+                self._starting_algorithms = []
         else:
-            self.starting_algorithms = []
+            self._starting_algorithms = []
 
     def compute_consensus_rankings(
             self,
@@ -49,336 +240,159 @@ class BioConsertPythonFast(RankAggAlgorithm):
         implementation does not support the given scoring scheme.
 
         """
-        rankings = dataset.rankings
-        sc = asarray(scoring_scheme.penalty_vectors)
+        # print("dataset : " + str(dataset))
 
-        res = []
-        elem_id = {}
-        id_elements = {}
-        id_elem = 0
-        for ranking in rankings:
-            for bucket in ranking:
-                for element in bucket:
-                    if element not in elem_id:
-                        elem_id[element] = id_elem
-                        id_elements[id_elem] = element
-                        id_elem += 1
-        nb_elements = len(elem_id)
+        res: List[Ranking] = []
 
-        departure = self.__departure_rankings(dataset, elem_id, scoring_scheme)
+        # for a given id, gives the associated element
+        id_elements: Dict[int, Element] = dataset.mapping_id_elem
+        nb_elements: int = dataset.nb_elements
 
-        if len(self.starting_algorithms) == 0:
-            # remove last column
-            # if no starting alg, then the departure rankings are each input ranking plus ranking with
-            # all tied. This last one is removed here to compute the cost_matrix
-            matrix = self.__cost_matrix(departure[:, :-1], sc)
-        else:
-            matrix = self.__cost_matrix(departure, sc)
+        departure = self._departure_rankings(dataset, scoring_scheme)
+        dst_res = zeros(len(departure), dtype=np_float64)
+        departure_c: ndarray = array(departure.flatten(), dtype=np_int32)
 
-        result = set()
-        dst_min = float('inf')
+        pairwise_cost_matrix = self.pairwise_cost_matrix(dataset.get_positions(), scoring_scheme)
 
-        memoi = set()
-        id_ranking = 0
+        matrix_1d = pairwise_cost_matrix.flatten()
 
-        while id_ranking < shape(departure)[1]:
-            ranking_array = departure[:, id_ranking]
-            ranking_string = str(ranking_array)
-            if ranking_string not in memoi:
-                memoi.add(ranking_string)
-                dst_ranking = self.__bio_consert(ranking_array, matrix, memoi, len(rankings) > nb_elements)
+        self._bio_consert(departure_c, matrix_1d, nb_elements, len(departure), dst_res)
 
-                if dst_ranking <= dst_min:
-                    if dst_ranking < dst_min or return_at_most_one_ranking:
-                        result.clear()
-                    result.add(id_ranking)
-                    dst_min = dst_ranking
-            id_ranking += 1
-            break
+        departure = departure_c.reshape(-1, nb_elements)
 
-        ranking_dict = {}
-        already_done = set()
-        for id_ranking in result:
-            to_be_translated = departure[:, id_ranking]
-            if str(to_be_translated) not in already_done:
-                already_done.add(str(to_be_translated))
+        # at the end, all the computed rankings do not necessarily have the same score.
+        # now we retain only the rankings with minimal score
+        ranking_dict: Dict[int, Set[Element]] = {}
+
+        # minimal kemeny score
+        lowest_distance: float = amin(dst_res)
+
+        # list containing the rankings that have minimal kemeny score, as ndarray
+        best_rankings: List[ndarray] = departure[where(dst_res == lowest_distance)[0]].tolist()
+
+        # if only one ranking is wanted, we take just one
+        if return_at_most_one_ranking:
+            best_rankings = [best_rankings[-1]]
+
+        # several rankings can actually be the same, use of a set to avoid duplicity
+        distinct_rankings: Set[str] = set()
+
+        # for each best ranking in terms of kemeny score
+        for ranking_result in best_rankings:
+            # get the str view of the ranking to be hashed in the set
+            st_ranking: str = str(ranking_result)
+
+            # the ranking must be added iif not already seen
+            if st_ranking not in distinct_rankings:
+                # target ranking must be added
+                distinct_rankings.add(st_ranking)
+
+                # re-initialize the dict version of the ranking where keys = id of buckets
+                # and values = set of elements in the associated bucket
                 ranking_dict.clear()
-                el = 0
-                for id_bucket_arr in nditer(to_be_translated):
-                    id_bucket = id_bucket_arr.item()
-                    if id_bucket not in ranking_dict:
-                        ranking_dict[id_bucket] = {id_elements.get(el)}
-                    else:
-                        ranking_dict[id_bucket].add(id_elements.get(el))
-                    el += 1
 
-                ranking_list = []
-                nb_buckets_ranking_i = len(ranking_dict)
+                # target element
+                elt: int = 0
+
+                # iterate over the ndarray, i.e. the id_buckets representing the resulting ranking
+                for id_bucket in ranking_result:
+                    # if the id of bucket is seen for the first time, associate id_bucket with {el}
+                    if id_bucket not in ranking_dict:
+                        ranking_dict[id_bucket]: Set[Element] = {id_elements.get(elt)}
+                    # else, tie el with the elements already associated with the id_bucket
+                    else:
+                        ranking_dict[id_bucket].add(id_elements.get(elt))
+
+                    # next element
+                    elt += 1
+
+                ranking_list: List[Set[Element]] = []
+                nb_buckets_ranking_i: int = len(ranking_dict)
                 for id_bucket in range(nb_buckets_ranking_i):
                     ranking_list.append(ranking_dict.get(id_bucket))
-                res.append(ranking_list)
+                res.append(Ranking(ranking_list))
 
-        return Consensus([Ranking(ranking) for ranking in res], dataset, scoring_scheme)
-
-    @staticmethod
-    def __bio_consert(ranking: ndarray, matrix: ndarray, memoi: set, memoisation: False) -> float:
-        # print("new classement : ", ranking)
-        sum_before = 0.0
-        sum_tied = 0.0
-
-        el = 0
-        max_id_bucket = amax(ranking)
-        if count_nonzero(ranking < 0) > 0:
-            max_id_bucket += 1
-            ranking[ranking < 0] = max_id_bucket
-
-        for id_buck_arr in nditer(ranking):
-            mat = matrix[el]
-            # print("mat = ", mat)
-            id_buck = id_buck_arr.item()
-            sum_before += np_sum(mat[where(ranking < id_buck)[0]][:, 1])
-            sum_tied += np_sum(mat[where(ranking == id_buck)[0]][:, 2])
-            el += 1
-        n = ranking.size
-        improvement: bool = True
-        dst = sum_before + sum_tied / 2
-        while improvement:
-            # print("\treparti !! ", dst)
-            improvement = False
-            for element in range(n):
-                # print("\t\tel = ", element)
-                cha = zeros(max_id_bucket + 2, dtype=float)
-                add = zeros(max_id_bucket + 3, dtype=float)
-                bucket_elem = ranking[element]
-                alone = BioConsertPythonFast._compute_delta_costs(ranking, element, matrix, max_id_bucket, cha, add)
-
-                to, diff = BioConsertPythonFast._search_to_change_bucket(bucket_elem, cha, max_id_bucket)
-                # print("\t\t\tto1 : ", to, "diff = ", diff)
-                if to >= 0:
-                    improvement = True
-                    # change
-                    dst += diff
-                    BioConsertPythonFast._change_bucket(ranking, element, bucket_elem, to, alone)
-                    # print("\t\t\tchange : ", ranking)
-                    # print("\t\t\tdst = ", dst)
-
-                    if alone:
-                        max_id_bucket -= 1
-                    if memoisation:
-                        st = str(ranking)
-                        if st in memoi:
-                            return float('inf')
-                        memoi.add(st)
-                else:
-                    to, diff = BioConsertPythonFast._search_to_add_bucket(bucket_elem, add, max_id_bucket)
-                    # print("\t\t\tto2 : ", to, " diff = ", diff)
-                    if to >= 0:
-                        improvement = True
-                        dst += diff
-                        BioConsertPythonFast._add_bucket(ranking, element, bucket_elem, to, alone)
-                        # print("\t\t\tadd : ", ranking)
-                        # print("\t\t\tdst = ", dst)
-                        if not alone:
-                            max_id_bucket += 1
-                        if memoisation:
-                            st = str(ranking)
-                            if st in memoi:
-                                return float('inf')
-                            memoi.add(st)
-        return dst
+        return Consensus(consensus_rankings=res,
+                         dataset=dataset,
+                         scoring_scheme=scoring_scheme,
+                         att={ConsensusFeature.KEMENY_SCORE: lowest_distance,
+                              ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name()
+                              }
+                         )
 
     @staticmethod
-    @jit(nopython=True)
-    def _compute_delta_costs(ranking, element, matrix, max_id_bucket, delta_change, delta_add):
-        costs = matrix[element]
-        id_bucket_element = ranking[element]
+    @jit("void(int32[:], float64[:], int32, int32, float64[:])", nopython=True, cache=False)
+    def _bio_consert(departure_rankings, cost_matrix_1d, n, nb_rankings_departure, dst_min):
+        r = zeros(n, dtype=np_int32)
+        cpt = 0
 
-        # Boucles pour traiter les éléments avant, identiques et après 'element'
-        for el_int in range(ranking.shape[0]):
-            if ranking[el_int] < id_bucket_element:
-                bucket = ranking[el_int]
-                delta_change[bucket] += costs[el_int][2] - costs[el_int][1]
-                delta_change[bucket - 1] += costs[el_int][0] - costs[el_int][2]
-                delta_add[bucket] += costs[el_int][0] - costs[el_int][1]
+        for i in range(nb_rankings_departure):
+            cpt2 = cpt
+            for j in range(n):
+                r[j] = departure_rankings[cpt2]
+                cpt2 += 1
+            dst_init = 0.
+            for id_elem1 in range(n-1):
+                cpt1 = id_elem1 * n * 3
+                for id_elem2 in range(i+1, n):
+                    if r[id_elem1] < r[id_elem2]:
+                        dst_init += cost_matrix_1d[cpt1 + id_elem2 * 3]
+                    elif r[id_elem1] < r[id_elem2]:
+                        dst_init += cost_matrix_1d[cpt1 + id_elem2 * 3 + 1]
+                    else:
+                        dst_init += cost_matrix_1d[cpt1 + id_elem2 * 3 + 2]
 
-            elif ranking[el_int] == id_bucket_element:
-                bucket = ranking[el_int]
-                delta_change[bucket] += costs[el_int][2] - costs[el_int][1]
-                delta_change[bucket - 1] += costs[el_int][0] - costs[el_int][2]
-                delta_add[bucket] += costs[el_int][0] - costs[el_int][1]
+            dst_min[i] = dst_init + _improve_one_ranking(r, cost_matrix_1d, n)
+            # print("dst_min[i] de ", avant, " a ", dst_min[i])
+            cpt2 = cpt
+            for j in range(n):
+                departure_rankings[cpt2] = r[j]
+                cpt2 += 1
+            cpt += n
 
-            elif ranking[el_int] > id_bucket_element:
-                bucket = ranking[el_int]
-                delta_change[bucket] += costs[el_int][2] - costs[el_int][0]
-                delta_change[bucket + 1] += costs[el_int][1] - costs[el_int][2]
-                delta_add[bucket + 1] += costs[el_int][1] - costs[el_int][0]
+    def _departure_rankings(self, dataset: Dataset, scoring_scheme: ScoringScheme, unify: bool = True,
+                            all_tied_as_well: bool = True) -> ndarray:
 
-        # Votre logique cumulative et inverse
-        delta_change[0:id_bucket_element] = cumsum(delta_change[0:id_bucket_element][::-1])
-        delta_change[id_bucket_element:max_id_bucket + 1] = cumsum(delta_change[id_bucket_element:max_id_bucket + 1])
-        delta_add[0:id_bucket_element + 1] = cumsum(delta_add[0:id_bucket_element + 1][::-1])
-        delta_add[id_bucket_element + 1:max_id_bucket + 2] = cumsum(
-            delta_add[id_bucket_element + 1:max_id_bucket + 2])
+        if unify and not dataset.is_complete:
+            dataset_to_consider = dataset.unified_dataset()
+        else:
+            dataset_to_consider = dataset
 
-        delta_change[-1] = -1
-        delta_add[-1] = -1
+        # if user set some starting algorithms,
+        # the departure rankings are the consensus computed by the selected algorithms
 
-        return np_sum(ranking == id_bucket_element) == 1
+        # Otherwise, the departure rankings are the rankings (unified) of the
+        # dataset, + the ranking where all elements are tied.
 
-    @staticmethod
-    def _search_to_change_bucket(buck_elem: int, change_costs: ndarray, max_id_bucket: int) -> tuple:
-        """
-        :param buck_elem: the id of the bucket where the current elem is
-        :type buck_elem: int
-        :param change_costs: The difference of cost for each bucket change of elem
-        :type change_costs: ndarray
-        :param max_id_bucket: the max of id buckets
-        :type max_id_bucket: int
-        :return the id of the future bucket of current element if a change can decrease the score, -1 otherwise
-        and the diff of score as 2nd parameter
-        """
-        # first, search at the right of the current position : the 1s position with negative value
-        arrival = argmax(change_costs[buck_elem:] < -0.01).item() + buck_elem
-        # if arrival is within [current position, max_id_bucket] : elment will change bucket
-        if arrival <= max_id_bucket:
-            # print("DIFF ", change_costs[arrival])
-
-            return arrival, change_costs[arrival]
-        # if no change at right can be done : check left values
-        arrival = argmax(change_costs[:buck_elem + 1] < -0.01).item()
-        if arrival > 0 or change_costs[arrival] < -0.01:
-            return buck_elem - arrival - 1, change_costs[arrival]
-        return -1, 0.0
-
-    @staticmethod
-    def _change_bucket(ranking: ndarray, element: int, old_pos: int, new_pos: int, alone_in_old_bucket: bool):
-
-        """
-        :param ranking: the current ranking in array version
-        :type ranking: ndarray
-        :param element: the element to move
-        :type element: int
-        :param old_pos : the old positon of the element to move
-        :type old_pos: int
-        :param new_pos : the new positon of the element to move
-        :type new_pos: int
-        :param alone_in_old_bucket : is element elone in its current bucket
-        :type old_pos: bool
-        """
-        ranking[element] = new_pos
-        if alone_in_old_bucket:
-            ranking[ranking > old_pos] -= 1
-
-    @staticmethod
-    def _search_to_add_bucket(buck_elem: int, add_costs: ndarray, max_id_bucket: int) -> tuple:
-        """
-        :param buck_elem: the id of the bucket where the current elem is
-        :type buck_elem: int
-        :param add_costs: The difference of cost for each bucket add for elem
-        :type add_costs: ndarray
-        :param max_id_bucket: the max of id buckets
-        :type max_id_bucket: int
-        :return the future position of the element if a change can decrease the score, -1 otherwise and the diff of
-        score as 2nd parameter
-        """
-        new_pos = argmax(add_costs[buck_elem + 1:] < -0.01).item() + buck_elem + 1
-        if new_pos <= max_id_bucket + 1:
-            return new_pos, add_costs[new_pos]
-        new_pos = argmax(add_costs[0:buck_elem + 1] < -0.01).item()
-        if new_pos > 0 or add_costs[0] < -0.01:
-            return buck_elem - new_pos, add_costs[new_pos]
-        return -1, 0.0
-
-    @staticmethod
-    def _add_bucket(ranking: ndarray, element: int, old_pos: int, new_pos: int, alone_in_old_bucket: bool):
-
-        """
-        :param ranking: the current ranking in array version
-        :type ranking: ndarray
-        :param element: the element to move
-        :type element: int
-        :param old_pos : the old positon of the element to move
-        :type old_pos: int
-        :param new_pos : the id of the bucket beside which the element will be put
-        :type new_pos: int
-        :param alone_in_old_bucket : is element elone in its current bucket
-        :type old_pos: bool
-        """
-        if old_pos < new_pos:
-            if alone_in_old_bucket:
-                ranking[(ranking > old_pos) & (ranking < new_pos)] -= 1
-                ranking[element] = new_pos - 1
-            else:
-                ranking[ranking >= new_pos] += 1
-                ranking[element] = new_pos
+        if len(self._starting_algorithms) > 0:
+            # to get one consensus ranking for each algorithm. Note that consensus rankings are complete
+            # and do not need to be unified
+            rankings_cons = [alg.compute_median_rankings(dataset, scoring_scheme, True).consensus_rankings[0] for alg in
+                             self._starting_algorithms]
+            return BioConsertPythonFast()._departure_rankings(Dataset(rankings_cons), scoring_scheme, False, False)
 
         else:
-            if alone_in_old_bucket:
-                ranking[(ranking >= new_pos) & (ranking < old_pos)] += 1
-                ranking[element] = new_pos
 
-            else:
-                ranking[ranking >= new_pos] += 1
-                ranking[element] = new_pos
+            # get for each departure ranking the initial value of kemeny score with the input Dataset
+            bucket_ids: ndarray = dataset_to_consider.get_bucket_ids().transpose()
 
-    def __departure_rankings(self, d: Dataset, elements_id: Dict, scoring_scheme: ScoringScheme) -> ndarray:
-        rankings = d.rankings
-        if len(self.starting_algorithms) == 0:
-            m = d.nb_rankings
-            n = d.nb_elements
-            departure = zeros((n, m + 1), dtype=int) - 1
-            id_ranking = 0
-            for ranking in rankings:
-                id_bucket = 0
-                for bucket in ranking:
-                    for element in bucket:
-                        departure[elements_id.get(element)][id_ranking] = id_bucket
-                    id_bucket += 1
-                id_ranking += 1
-            departure[:, -1] = zeros(n)
-        else:
-            m = len(self.starting_algorithms)
-            n = len(elements_id)
-            departure = zeros((n, m), dtype=int) - 1
-            id_ranking = 0
-            for algo in self.starting_algorithms:
-                if algo.is_scoring_schem_relevant(scoring_scheme):
-                    cons = algo.compute_median_rankings(d, scoring_scheme, True)[0]
-                else:
-                    cons = algo.compute_median_rankings(d.unified_dataset(), scoring_scheme, True)[0]
-                id_bucket = 0
-                for bucket in cons:
-                    for element in bucket:
-                        departure[elements_id.get(element)][id_ranking] = id_bucket
-                    id_bucket += 1
-                id_ranking += 1
-        return departure
+            # to be sure that all the departure rankings are different, use a dct
+            distinct_rankings: Set[Tuple[int, ...]] = set()
+            distinct_rankings_ids: List[int] = []
 
-    @staticmethod
-    def __cost_matrix(positions: ndarray, matrix_scoring_scheme: ndarray) -> ndarray:
-        cost_before = matrix_scoring_scheme[0]
-        cost_tied = matrix_scoring_scheme[1]
-        cost_after = array([cost_before[1], cost_before[0], cost_before[2], cost_before[4], cost_before[3],
-                            cost_before[5]])
-        n = shape(positions)[0]
-        m = shape(positions)[1]
-        matrix = zeros((n, n, 3))
+            # select only distinct input rankings as starters for BioConsert
+            for id_ranking, ranking in enumerate(dataset_to_consider.rankings):
+                ranking_tuple = tuple(bucket_ids[id_ranking])
+                if ranking_tuple not in distinct_rankings:
+                    distinct_rankings.add(ranking_tuple)
+                    distinct_rankings_ids.append(id_ranking)
+                    # the initial kemeny score is computed for the target ranking
 
-        for e1 in range(n):
-            mem = positions[e1]
-            d = count_nonzero(mem == -1)
-            for e2 in range(e1 + 1, n):
-                a = count_nonzero(mem + positions[e2] == -2)
-                b = count_nonzero(mem == positions[e2])
-                c = count_nonzero(positions[e2] == -1)
-                e = count_nonzero(mem < positions[e2])
-                relative_positions = array([e - d + a, m - e - b - c + a, b - a, c - a, d - a, a])
-                put_before = vdot(relative_positions, cost_before)
-                put_after = vdot(relative_positions, cost_after)
-                put_tied = vdot(relative_positions, cost_tied)
-                matrix[e1][e2] = [put_before, put_after, put_tied]
-                matrix[e2][e1] = [put_after, put_before, put_tied]
-        return matrix
+            rankings_departure = bucket_ids[asarray(distinct_rankings_ids)]
+            if all_tied_as_well:
+                # add ranking with all elements at position 0
+                rankings_departure = vstack((rankings_departure, zeros((1, dataset_to_consider.nb_elements))))
+            return rankings_departure
 
     def get_full_name(self) -> str:
         return "BioConsertPythonFast"
@@ -393,7 +407,7 @@ class BioConsertPythonFast(RankAggAlgorithm):
         :rtype: bool
 
         """
-        for alg in self.starting_algorithms:
+        for alg in self._starting_algorithms:
             if not alg.is_scoring_scheme_relevant_when_incomplete_rankings():
                 return False
         return True

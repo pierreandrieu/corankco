@@ -21,7 +21,7 @@ setup(name='corankco',
       install_requires=['numpy>=1.24',
                         'python-igraph',
                         'pulp>=2.7',
-                        'numba>=0.57.1'
+                        'numba>=0.57.1',
                         'setuptools>=68.0.0',
                         ]
       )

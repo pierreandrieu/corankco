@@ -20,21 +20,40 @@ class Dataset:
     """
     Class representing a dataset containing rankings.
 
-    :param rankings: Rankings in the dataset.
-    :type rankings: list of Ranking
-    :param name: Name of the dataset.
+    :param rankings: The rankings in the dataset.
+    :type rankings: List[Ranking]
+    :param name: Name of the dataset. Defaults to "None".
     :type name: str, optional
+    :param repetitions: A list of integers indicating the number of occurrences for each ranking.
+                        If set, its length must match that of `rankings`.
+    :type repetitions: List[int], optional
+    :param weights: A list of floats indicating the weight of each ranking.
+                    If set, its length must match that of `rankings`.
+    :type weights: List[float], optional
+
+    Note:
+        If both `repetitions` and `weights` are set, the ranking at index k is repeated `repetitions[k]` times with the
+
+        same weight `weights[k]`.
     """
 
-    def __init__(self, rankings: List[Ranking], name: str = "None"):
+    def __init__(self, rankings: List[Ranking], name: str = "None",
+                 repetitions: List[int] = None, weights: List[float] = None):
         """
         Constructor for the Dataset class.
 
         :param rankings: Rankings in the dataset.
-        :type rankings: list of Ranking
-        :param name: Name of the dataset.
+        :type rankings: List[Ranking]
+        :param name: Name of the dataset. Defaults to "None".
         :type name: str, optional
+        :param repetitions: A list of integers indicating the number of occurrences for each ranking.
+                            Its length must match that of `rankings` if set.
+        :type repetitions: List[int], optional
+        :param weights: A list of floats indicating the weight of each ranking.
+                        Its length must match that of `rankings` if set.
+        :type weights: List[float], optional
         """
+
         self._mapping_element_id: Dict[Element, int] = {}
         self._mapping_id_element: Dict[int, Element] = {}
 
@@ -366,13 +385,27 @@ class Dataset:
         :return: A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the position of element i in ranking j
                  position = -1 if element i is non-ranked in ranking j
         """
-        positions: np.ndarray = np.zeros((self.nb_elements, self.nb_rankings)) - 1
+        positions: np.ndarray = np.full((self.nb_elements, self.nb_rankings), -1, dtype=np.int32)
         id_ranking: int = 0
         for ranking in self.rankings:
             for elem, pos in ranking.positions.items():
                 positions[self.mapping_elem_id.get(elem)][id_ranking] = pos - 1
             id_ranking += 1
         return positions
+
+    def get_bucket_ids(self) -> np.ndarray:
+        """
+        :return: A (nb_elements, nb_rankings) numpy matrix where m[i][j] denotes the bucket id of element i in ranking j
+                 position = -1 if element i is non-ranked in ranking j
+        """
+        bucket_ids: np.ndarray = np.full((self.nb_elements, self.nb_rankings), -1, dtype=np.int32)
+
+        for ranking_idx, ranking in enumerate(self.rankings):
+            for bucket_id, bucket in enumerate(ranking):
+                for elem in bucket:
+                    bucket_ids[self.mapping_elem_id.get(elem)][ranking_idx] = bucket_id
+
+        return bucket_ids
 
     def unified_rankings(self) -> List[Ranking]:
         """

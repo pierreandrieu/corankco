@@ -7,7 +7,7 @@ def readme():
 
 
 setup(name='corankco',
-      version='7.1.0',
+      version='7.2.0',
       description='Kemeny-Young method for rank aggregation of incomplete rankings with ties',
       long_description_content_type='text/markdown',
       long_description=readme(),
@@ -18,10 +18,10 @@ setup(name='corankco',
       packages=find_packages(include=['corankco', 'corankco.*']),
       python_requires='>=3.8',
       zip_safe=False,
-      install_requires=['numpy~=1.24.4',
+      install_requires=['numpy>=1.24',
                         'python-igraph',
-                        'pulp~=2.7',
-                        'bioconsertinc>=1.0.2',
-                        'setuptools~=68.0.0',
+                        'pulp>=2.7',
+                        'numba>=0.57.1'
+                        'setuptools>=68.0.0',
                         ]
       )

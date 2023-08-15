@@ -35,6 +35,15 @@ We welcome contributions to `corankco`. If you'd like to contribute, feel free t
 
 `corankco` is licensed under the GPL-2.0 License. You can read more about it in the [LICENSE file](https://github.com/pierreandrieu/corankco/blob/master/LICENSE).
 
+## Updates
+
+# New in 7.2.0
+- Several algorithms have been sped up.
+- BioConsert heuristic no longer requires the C extension. As a consequence, corankco is now available for any platform.
+  Note that the computation time of BioConsert has been reduced due to major code improvements.
+- Minor bug fix in BioConsert heuristic.
+- Several tests added 
+
 ## Example usage <a class="anchor" id="usage"></a>
 
 ```python

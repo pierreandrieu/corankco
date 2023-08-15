@@ -4,7 +4,6 @@ from corankco.dataset import Dataset
 from corankco.scoringscheme import ScoringScheme
 from corankco.algorithms.copeland.copeland import CopelandMethod
 from corankco.algorithms.bioconsert.bioconsert import BioConsert
-from corankco.algorithms.bioconsert.BioConsertPythonFast import BioConsertPythonFast
 from corankco.algorithms.bioconsert.bioco import BioCo
 from corankco.algorithms.kwiksort.kwiksortrandom import KwikSortRandom
 from corankco.algorithms.borda.borda import BordaCount
@@ -20,10 +19,8 @@ class TestAlgos(unittest.TestCase):
 
     def setUp(self):
         self.test_time_computation: bool = False
-        # self.my_algs: List[RankAggAlgorithm] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom(), BioConsertPython(), BioConsertPythonFast()]
-        # self.my_algs.extend([ParCons(), ExactAlgorithmPulp()])
-        # self.my_algs: List[RankAggAlgorithm] = [BioConsertPythonFast()]
-        self.my_algs: List[RankAggAlgorithm] = [CopelandMethod()] #, BordaCount(), BioConsert(), BioCo(), KwikSortRandom(), BioConsertPython(), BioConsertPythonFast()]
+        self.my_algs: List[RankAggAlgorithm] = [CopelandMethod(), BordaCount(), BioConsert(), BioCo(), KwikSortRandom()]
+        self.my_algs.extend([ParCons(), ExactAlgorithmPulp()])
 
         self.scoring_scheme_unifying = ScoringScheme.get_unifying_scoring_scheme()
         self.scoring_scheme_induced = ScoringScheme.get_induced_measure_scoring_scheme()
@@ -80,7 +77,7 @@ class TestAlgos(unittest.TestCase):
         #print("SLOW: ")
         #BioConsertPython().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
         print("FAST : ")
-        BioConsertPythonFast().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+        BioConsert().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
 
 
 

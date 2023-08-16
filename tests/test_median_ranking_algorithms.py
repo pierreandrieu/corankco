@@ -10,7 +10,6 @@ from corankco.algorithms.borda.borda import BordaCount
 from corankco.algorithms.parcons.parcons import ParCons
 from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.algorithms.exact.exactalgorithmpulp import ExactAlgorithmPulp
-from corankco.algorithms.exact.exactalgorithm import ExactAlgorithm
 from corankco.ranking import Ranking
 import time
 
@@ -63,27 +62,19 @@ class TestAlgos(unittest.TestCase):
     def test_scalability(self):
         if self.test_time_computation:
             for nb_elem in range(500, 1001, 100):
-                print("nb_elem = ", nb_elem)
                 dataset = Dataset.get_random_dataset_markov(nb_elem, 20, nb_elem * 10, True)
                 for alg in self.my_algs:
-                    if "onsert" in alg.get_full_name():
-                        debut = time.time()
-                        alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-                        fin = time.time()
-                        print(str(alg) + " " + str(fin - debut))
+                    debut = time.time()
+                    alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+                    fin = time.time()
+                    print(str(alg) + " " + str(fin - debut))
 
     def test_debug(self):
-        dataset = Dataset.from_raw_list([[{"A"}, {"B"}, {"C", "D"}], [{"C", "D"}, {"A"}, {"B"}], [{"A"}, {"C"}, {"B"}, {"D"}]])
-        #print("SLOW: ")
-        #BioConsertPython().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-        print("FAST : ")
+        dataset = Dataset.from_raw_list([[{"A"}, {"B"}, {"C", "D"}],
+                                         [{"C", "D"}, {"A"}, {"B"}],
+                                         [{"A"}, {"C"}, {"B"}, {"D"}]])
         BioConsert().compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-
 
 
 if __name__ == '__main__':
     unittest.main()
-    from random import seed
-    import numpy as np
-    seed(1)
-    np.random.seed(1)

@@ -21,6 +21,5 @@ class TestAlgos(unittest.TestCase):
             self.assertEqual(consensus.consensus_rankings[0], Ranking([{3}, {2}, {1}]))
 
 
-
 if __name__ == '__main__':
     unittest.main()

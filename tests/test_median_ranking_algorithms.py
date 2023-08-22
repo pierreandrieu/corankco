@@ -61,13 +61,17 @@ class TestAlgos(unittest.TestCase):
 
     def test_scalability(self):
         if self.test_time_computation:
-            for nb_elem in range(500, 1001, 100):
+            for nb_elem in range(1000, 4001, 1000):
+                print("nb elem = ", nb_elem)
                 dataset = Dataset.get_random_dataset_markov(nb_elem, 20, nb_elem * 10, True)
+                print("\tdataset ok")
                 for alg in self.my_algs:
-                    debut = time.time()
-                    alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
-                    fin = time.time()
-                    print(str(alg) + " " + str(fin - debut))
+                    if "exact algorithm" not in alg.get_full_name().lower():
+                        print("\t\talg = ", alg.get_full_name())
+                        debut = time.time()
+                        alg.compute_consensus_rankings(dataset=dataset, scoring_scheme=self.scoring_scheme_unifying)
+                        fin = time.time()
+                        print("\t\t", str(alg), str(fin - debut))
 
     def test_debug(self):
         dataset = Dataset.from_raw_list([[{"A"}, {"B"}, {"C", "D"}],

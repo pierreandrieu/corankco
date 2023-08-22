@@ -2,9 +2,8 @@
 Module for Copeland algorithm. More details in CopelandMethod docstring class.
 """
 
-from typing import List, Dict, Tuple
-from collections import defaultdict
-from numpy import ndarray
+from typing import List, Dict, Set
+from numpy import ndarray, zeros, argsort
 from corankco.algorithms.rank_aggregation_algorithm import RankAggAlgorithm
 from corankco.algorithms.pairwisebasedalgorithm import PairwiseBasedAlgorithm
 from corankco.dataset import Dataset
@@ -51,48 +50,48 @@ class CopelandMethod(RankAggAlgorithm, PairwiseBasedAlgorithm):
         """
 
         # associates for each element its generalized Copeland score within the Kemeny prism
-        mapping_elem_score: Dict[int, float] = {}
+        mapping_elem_score: ndarray
 
         # associates for each element its number of victories - equality - defeat against other elements
-        mapping_elem_victories: Dict[int, List[int]] = {}
+        mapping_elem_victories: ndarray
 
-        # iterates on elements to initialize the two dicts
-        for element in range(dataset.nb_elements):
-            # initially, elements have a score of 0.
-            mapping_elem_score[element] = 0.
-            # and no victories, equalities, defeats
-            mapping_elem_victories[element] = [0, 0, 0]
+        mapping_id_elem: Dict[int, Element] = dataset.mapping_id_elem
 
-        # now, update the two dicts: computes for each element the number of victories, equalities, defeats
-        # for each pair of elements
-        CopelandMethod._pairwise_cost_matrix_generic(
+        pairwise_cost_matrix: ndarray = CopelandMethod.pairwise_cost_matrix(
             dataset.get_positions(),
-            scoring_scheme,
-            CopelandMethod._fill_dicts_copeland,
-            (mapping_elem_score, mapping_elem_victories)
+            scoring_scheme
         )
 
-        # construction of Copeland ranking, sorting the elements by decreasing score
-        dict_to_sort: defaultdict = defaultdict(set)
-        mapping_id_elem: Dict[int, Element] = dataset.mapping_id_elem
-        for key, value in mapping_elem_score.items():
-            dict_to_sort[value].add(mapping_id_elem[key])
+        # scores: nb_elements 1D ndarray, scores[i] = Copeland score of element with ID = i
+        # results: (nb_elements, 3) 2D ndarray, scores[i] = number of victories, equalities, defeats of element
+        # with ID = i
+        scores_np, results_np = CopelandMethod._fill_dicts_copeland(pairwise_cost_matrix)
 
-        # sort by values and convert values in sets
-        copeland_ranking = [value for key, value in sorted(dict_to_sort.items(), reverse=True)]
+        sorted_indices = argsort(scores_np)[::-1]  # Trie les indices en ordre décroissant de scores.
+        current_score = scores_np[sorted_indices[0]]
+        current_set: Set[Element] = {mapping_id_elem[sorted_indices[0]]}
+
+        # construction of Copeland ranking, sorting the elements by decreasing score
+        copeland_ranking: List[Set[Element]] = []
+
+        for idx in sorted_indices[1:]:
+            if scores_np[idx] == current_score:
+                current_set.add(mapping_id_elem[idx])
+            else:
+                copeland_ranking.append(current_set)
+                current_set = {mapping_id_elem[idx]}
+                current_score = scores_np[idx]
+
+        copeland_ranking.append(current_set)
         return Consensus([Ranking(copeland_ranking)],
                                       dataset=dataset,
                                       scoring_scheme=scoring_scheme,
                                       att={
                                           ConsensusFeature.ASSOCIATED_ALGORITHM: self.get_full_name(),
-                                          ConsensusFeature.COPELAND_SCORES: {
-                                              mapping_id_elem[id_elem]: elem
-                                              for id_elem, elem in mapping_elem_score.items()
-                                          },
-                                          ConsensusFeature.COPELAND_VICTORIES: {
-                                              mapping_id_elem[id_elem]: elem
-                                              for id_elem, elem in mapping_elem_victories.items()
-                                          }
+                                          ConsensusFeature.COPELAND_SCORES: {mapping_id_elem[i]: scores_np[i] for i
+                                                                             in range(len(scores_np))},
+                                          ConsensusFeature.COPELAND_VICTORIES: {mapping_id_elem[i]: list(results_np[i])
+                                                                                for i in range(len(results_np))}
                                       }
                          )
 
@@ -117,23 +116,28 @@ class CopelandMethod(RankAggAlgorithm, PairwiseBasedAlgorithm):
         return True
 
     @staticmethod
-    def _fill_dicts_copeland(cost_positions: ndarray, el1: int, el2: int,
-                             structure: Tuple[Dict[int, float], Dict[int, List[int]]]):
-        mapping_elem_score = structure[0]
-        mapping_elem_victories = structure[1]
+    def _fill_dicts_copeland(pairwise_cost_matrix: ndarray):
+        nb_elements, _, _ = pairwise_cost_matrix.shape
 
-        put_before: float = cost_positions[0]
-        put_after: float = cost_positions[1]
-        if put_before < put_after:
-            mapping_elem_score[el1] += 1
-            mapping_elem_victories[el1][0] += 1
-            mapping_elem_victories[el2][2] += 1
-        elif put_after < put_before:
-            mapping_elem_score[el2] += 1
-            mapping_elem_victories[el1][2] += 1
-            mapping_elem_victories[el2][0] += 1
-        else:
-            mapping_elem_score[el1] += 0.5
-            mapping_elem_score[el2] += 0.5
-            mapping_elem_victories[el1][1] += 1
-            mapping_elem_victories[el2][1] += 1
+        scores = zeros(nb_elements)
+        results = zeros((nb_elements, 3))
+
+        for el1 in range(nb_elements):
+            for el2 in range(el1 + 1, nb_elements):
+                put_before: float = pairwise_cost_matrix[el1][el2][0]
+                put_after: float = pairwise_cost_matrix[el1][el2][1]
+                if put_before < put_after:
+                    scores[el1] += 1
+                    results[el1, 0] += 1
+                    results[el2, 2] += 1
+                elif put_after < put_before:
+                    scores[el2] += 1
+                    results[el1, 2] += 1
+                    results[el2, 0] += 1
+                else:
+                    scores[el1] += 0.5
+                    scores[el2] += 0.5
+                    results[el1, 1] += 1
+                    results[el2, 1] += 1
+
+        return scores, results
